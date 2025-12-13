@@ -149,10 +149,6 @@ permissions:
     required_roles: ["admin", "member", "viewer"]
     resource_scope: "organization"
     description: "All organization members can view projects within their organization"
-  - action: "cross-org:access"
-    required_roles: []
-    resource_scope: "global"
-    description: "No user can access resources from other organizations (enforced at data layer)"
 
 failure_modes:
   - scenario: "User attempts to access project from different organization"
