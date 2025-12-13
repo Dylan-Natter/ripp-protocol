@@ -1,0 +1,111 @@
+ripp_version: "1.0"
+packet_id: "your-feature-id"
+title: "Brief Feature Title"
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+status: "draft"
+level: 1  # Change to 2 or 3 as you add sections
+
+purpose:
+  problem: "What problem does this solve?"
+  solution: "How are you solving it?"
+  value: "What value does it deliver?"
+  # Optional fields:
+  # out_of_scope: "What is explicitly NOT included?"
+  # assumptions: ["List any assumptions"]
+  # references:
+  #   - title: "Related Document"
+  #     url: "https://example.com/doc"
+
+ux_flow:
+  - step: 1
+    actor: "User | System | Service Name"
+    action: "What happens in this step"
+    trigger: "What initiates this step"
+  - step: 2
+    actor: "System"
+    action: "System responds"
+    result: "What the user sees or receives"
+  # Add more steps as needed
+
+data_contracts:
+  inputs:
+    - name: "InputEntityName"
+      description: "What this entity represents"
+      fields:
+        - name: "fieldName"
+          type: "string"  # string | number | integer | boolean | object | array
+          required: true
+          description: "What this field represents"
+          # Optional: format, min, max, pattern, enum
+  outputs:
+    - name: "OutputEntityName"
+      description: "What this entity represents"
+      fields:
+        - name: "fieldName"
+          type: "string"
+          required: true
+          description: "What this field represents"
+
+# === LEVEL 2: Add these sections if level >= 2 ===
+# api_contracts:
+#   - endpoint: "/api/v1/resource"
+#     method: "GET | POST | PUT | DELETE | PATCH"
+#     purpose: "What this endpoint does"
+#     request:
+#       content_type: "application/json"
+#       schema_ref: "InputEntityName"
+#     response:
+#       success:
+#         status: 200
+#         schema_ref: "OutputEntityName"
+#       errors:
+#         - status: 400
+#           description: "Invalid input"
+#         - status: 401
+#           description: "Unauthorized"
+
+# permissions:
+#   - action: "verb:resource"
+#     required_roles: ["admin", "editor"]
+#     resource_scope: "organization | project | global"
+#     description: "When and why this permission is checked"
+
+# failure_modes:
+#   - scenario: "What goes wrong"
+#     impact: "Effect on users or system"
+#     handling: "How the system responds"
+#     user_message: "What users see or are told"
+
+# === LEVEL 3: Add these sections if level = 3 ===
+# audit_events:
+#   - event: "resource.action"
+#     severity: "info | warn | error"
+#     includes:
+#       - "user_id"
+#       - "resource_id"
+#       - "timestamp"
+#     retention: "90 days"
+#     purpose: "Why this event is logged"
+
+# nfrs:
+#   performance:
+#     response_time_p95: "200ms"
+#     throughput: "1000 requests/second"
+#   scalability:
+#     max_concurrent_users: 10000
+#   availability:
+#     uptime_target: "99.9%"
+#   security:
+#     encryption_at_rest: true
+#     encryption_in_transit: true
+
+# acceptance_tests:
+#   - test_id: "TC-001"
+#     title: "What is being tested"
+#     given: "Preconditions"
+#     when: "Action taken"
+#     then: "Expected outcome"
+#     verification:
+#       - "Specific check to perform"
+#       - "Another check"
