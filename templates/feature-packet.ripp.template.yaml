@@ -1,6 +1,7 @@
 ripp_version: "1.0"
 packet_id: "your-feature-id"
 title: "Brief Feature Title"
+# Replace 'YYYY-MM-DD' with an actual ISO 8601 date, e.g., '2024-12-13'
 created: "YYYY-MM-DD"
 updated: "YYYY-MM-DD"
 status: "draft"
