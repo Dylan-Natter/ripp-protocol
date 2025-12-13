@@ -1,0 +1,40 @@
+{
+  "name": "ripp-cli",
+  "version": "1.0.0",
+  "description": "Official CLI validator for Regenerative Intent Prompting Protocol (RIPP)",
+  "main": "index.js",
+  "bin": {
+    "ripp": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "ripp",
+    "validator",
+    "specification",
+    "schema",
+    "yaml",
+    "json"
+  ],
+  "author": "RIPP Protocol Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dylan-Natter/ripp-protocol.git",
+    "directory": "tools/ripp-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/Dylan-Natter/ripp-protocol/issues"
+  },
+  "homepage": "https://dylan-natter.github.io/ripp-protocol",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "glob": "^10.3.10",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
