@@ -7,7 +7,7 @@
     "ripp": "./index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "echo \"Warning: No tests specified\" && exit 0"
   },
   "keywords": [
     "ripp",

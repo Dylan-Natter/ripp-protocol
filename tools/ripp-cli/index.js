@@ -143,8 +143,9 @@ function printResults(results, options) {
 }
 
 function showHelp() {
+  const pkg = require('./package.json');
   console.log(`
-${colors.blue}RIPP CLI Validator v1.0.0${colors.reset}
+${colors.blue}RIPP CLI Validator v${pkg.version}${colors.reset}
 
 ${colors.green}Usage:${colors.reset}
   ripp validate <path>              Validate RIPP packets
@@ -176,7 +177,8 @@ ${colors.gray}Learn more: https://dylan-natter.github.io/ripp-protocol${colors.r
 }
 
 function showVersion() {
-  console.log('ripp-cli v1.0.0');
+  const pkg = require('./package.json');
+  console.log(`ripp-cli v${pkg.version}`);
 }
 
 async function main() {
