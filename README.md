@@ -378,6 +378,22 @@ RIPP defines three conformance levels. Choose the level that matches your featur
 
 ---
 
+## Tooling Extensions (Additive)
+
+RIPP tooling exists to enhance workflows, not redefine the protocol. Extensions like linters, packagers, and analyzers are designed to be **additive**: they build on top of RIPP without changing its core semantics or requiring modifications to existing packets.
+
+All tooling follows strict guardrails:
+- Validators enforce schema conformance (required)
+- Linters provide best-practice guidance (optional)
+- Packagers generate artifacts without mutating source files
+- Analyzers extract observable facts, never invent intent
+
+**Extensions are optional.** RIPP packets remain valid and useful with or without additional tooling.
+
+For detailed rules on extending RIPP, see [docs/EXTENSIONS.md](docs/EXTENSIONS.md).
+
+---
+
 ## Contributing
 
 RIPP is an open standard. Contributions are welcome!
