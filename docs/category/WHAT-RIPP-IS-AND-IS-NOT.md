@@ -9,7 +9,7 @@ title: 'What RIPP Is and Is Not'
 
 ---
 
-## What RIPP Is
+## What RIPP™ Is
 
 ### Core Identity
 

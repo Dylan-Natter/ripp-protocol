@@ -9,7 +9,7 @@ title: 'RIPP vs Existing Paradigms'
 
 ---
 
-## Introduction: RIPP's Place in the Ecosystem
+## Introduction: RIPP™'s Place in the Ecosystem
 
 RIPP does not replace existing tools or paradigms. It occupies a **distinct layer** in the software development stack: **intent specification**.
 

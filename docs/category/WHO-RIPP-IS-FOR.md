@@ -11,7 +11,7 @@ title: 'Who RIPP Is For'
 
 ## Ideal Adopters
 
-RIPP is designed for teams and individuals who need **durable, structured specifications** that prevent intent erosion and enable confident delivery.
+RIPP™ is designed for teams and individuals who need **durable, structured specifications** that prevent intent erosion and enable confident delivery.
 
 ---
 
