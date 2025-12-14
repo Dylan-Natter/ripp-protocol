@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { execFile, spawn } from 'child_process';
+import { execFile } from 'child_process';
 import * as path from 'path';
 import { promisify } from 'util';
 
