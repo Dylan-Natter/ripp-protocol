@@ -293,7 +293,9 @@ async function handleInitCommand(args) {
       console.log('  3. Validate it: ripp validate ripp/features/');
       console.log('  4. Commit the changes to your repository');
       console.log('');
-      console.log(`${colors.gray}Learn more: https://dylan-natter.github.io/ripp-protocol${colors.reset}`);
+      console.log(
+        `${colors.gray}Learn more: https://dylan-natter.github.io/ripp-protocol${colors.reset}`
+      );
       console.log('');
       process.exit(0);
     }

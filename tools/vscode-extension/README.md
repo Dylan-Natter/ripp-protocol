@@ -7,11 +7,13 @@ VS Code integration for the Regenerative Intent Prompting Protocol (RIPP™).
 This extension integrates the official RIPP CLI into VS Code. It is a **thin wrapper** around the CLI—no reimplementation of validation or linting logic. All operations are read-only with respect to RIPP packet files, and no data is transmitted externally. Processing happens locally via the RIPP CLI.
 
 **What RIPP is:**
+
 - A structured specification format for capturing feature requirements
 - A handoff artifact between prototyping and production teams
 - A contract that preserves decisions, constraints, and outcomes
 
 **What RIPP is not:**
+
 - Not a code migration tool or code generator
 - Not a refactoring assistant or production hardening helper
 - See [SPEC.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/SPEC.md) for full details
@@ -37,6 +39,7 @@ npm install -D ripp-cli
 Alternatively, the extension can use `npx ripp` (fetches on demand, slower).
 
 **Recommended setup:**
+
 1. Install RIPP CLI locally: `npm install -D ripp-cli`
 2. Run **RIPP: Initialize Repository** to set up your project structure
 3. Start creating RIPP packets in `ripp/features/`
@@ -44,11 +47,13 @@ Alternatively, the extension can use `npx ripp` (fetches on demand, slower).
 ## Platform Support
 
 This extension works on:
+
 - ✅ **Windows** (uses `ripp.cmd` from node_modules)
 - ✅ **macOS** (uses `ripp` binary)
 - ✅ **Linux** (uses `ripp` binary)
 
 It also works in:
+
 - ✅ **VS Code Desktop**
 - ✅ **GitHub Codespaces** (install `ripp-cli` in your devcontainer or via `npm install -D ripp-cli`)
 - ✅ **VS Code Remote Containers**
@@ -198,6 +203,7 @@ MIT
 ### 0.2.0 (Upcoming)
 
 New features:
+
 - **RIPP: Initialize Repository** command for easy project setup
 - Prefer local `node_modules/.bin/ripp` over `npx` for better performance
 - Improved error messages with install guidance

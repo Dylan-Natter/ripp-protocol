@@ -29,11 +29,13 @@ npm run package  # Creates .vsix file
 ### 3. Install Extension Locally
 
 **Option A: F5 Debug Mode**
+
 - Open `tools/vscode-extension` in VS Code
 - Press F5
 - New VS Code window opens with extension loaded
 
 **Option B: Install from VSIX**
+
 ```bash
 code --install-extension ripp-protocol-0.1.0.vsix
 ```
@@ -96,6 +98,7 @@ data_contracts:
 ### Test 1: RIPP Init Command ✅
 
 **Steps**:
+
 1. Open test workspace in VS Code
 2. Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
 3. Run: **RIPP: Initialize Repository**
@@ -103,6 +106,7 @@ data_contracts:
 5. Check Output panel (RIPP channel)
 
 **Expected Results**:
+
 - [ ] Command appears in palette
 - [ ] Quick pick shows "Standard" and "Force" options
 - [ ] Progress notification appears
@@ -115,11 +119,13 @@ data_contracts:
   - [ ] `.github/workflows/ripp-validate.yml`
 
 **Test Force Mode**:
+
 1. Run **RIPP: Initialize Repository** again
 2. Select "Force"
 3. Verify files are overwritten
 
 **Expected**:
+
 - [ ] Force mode overwrites existing files
 - [ ] Success message shown
 
@@ -128,24 +134,29 @@ data_contracts:
 ### Test 2: Local Binary Detection ✅
 
 **Setup**: Install RIPP CLI locally
+
 ```bash
 npm install -D ripp-cli
 ```
 
 **Steps**:
+
 1. Run **RIPP: Validate Packet(s)**
 2. Check Output panel
 
 **Expected**:
+
 - [ ] Output shows: "Using local RIPP CLI from node_modules"
 - [ ] Does NOT show: "Using npx"
 - [ ] Validation completes successfully
 
 **Test npx Fallback**:
+
 1. Remove local install: `npm uninstall ripp-cli`
 2. Run **RIPP: Validate Packet(s)** again
 
 **Expected**:
+
 - [ ] Output shows: "Using npx (no local RIPP CLI found)"
 - [ ] Validation still works (via npx)
 
@@ -156,10 +167,12 @@ npm install -D ripp-cli
 **Setup**: Ensure test RIPP packet exists
 
 **Steps**:
+
 1. Run **RIPP: Validate Packet(s)**
 2. Check Output panel
 
 **Expected**:
+
 - [ ] Finds test packet
 - [ ] Shows validation progress
 - [ ] Shows: "✓ test-feature.ripp.yaml is valid (Level 1)"
@@ -168,10 +181,12 @@ npm install -D ripp-cli
 - [ ] **CRITICAL**: No files modified (check git status)
 
 **Test Invalid Packet**:
+
 1. Break the RIPP packet (remove required field)
 2. Run validate again
 
 **Expected**:
+
 - [ ] Shows validation errors
 - [ ] Lists specific issues
 - [ ] No success notification
@@ -181,11 +196,13 @@ npm install -D ripp-cli
 ### Test 4: Lint Command ✅
 
 **Steps**:
+
 1. Run **RIPP: Lint Packet(s)**
 2. Check Output panel
 3. Check for `reports/` directory
 
 **Expected**:
+
 - [ ] Linting completes
 - [ ] Shows lint results in output
 - [ ] Creates `reports/lint.json`
@@ -198,12 +215,14 @@ npm install -D ripp-cli
 ### Test 5: Package Command ✅
 
 **Steps**:
+
 1. Run **RIPP: Package Handoff**
 2. Select test packet from quick pick
 3. Choose output location (e.g., `handoff.md`)
 4. Choose format: Markdown
 
 **Expected**:
+
 - [ ] Quick pick shows available packets
 - [ ] Save dialog appears
 - [ ] Output file created at chosen location
@@ -212,6 +231,7 @@ npm install -D ripp-cli
 - [ ] Source packet NOT modified
 
 **Test Other Formats**:
+
 - [ ] Package to JSON works
 - [ ] Package to YAML works
 
@@ -222,11 +242,13 @@ npm install -D ripp-cli
 **Setup**: Create test input file `feature-spec.txt`
 
 **Steps**:
+
 1. Run **RIPP: Analyze Project (Draft Packet)**
 2. Select input file
 3. Choose output location (e.g., `analyzed.ripp.yaml`)
 
 **Expected**:
+
 - [ ] Open dialog appears
 - [ ] Save dialog appears
 - [ ] Draft RIPP packet created
@@ -241,10 +263,12 @@ npm install -D ripp-cli
 **Setup**: Ensure ripp-cli not installed and npx unavailable (mock if needed)
 
 **Steps**:
+
 1. Run any RIPP command
 2. Observe error message
 
 **Expected**:
+
 - [ ] Error message: "RIPP CLI not found. Install it with: npm install -D ripp-cli"
 - [ ] Two buttons: "Install Locally" and "Open Terminal"
 - [ ] Click "Install Locally":
@@ -260,16 +284,19 @@ npm install -D ripp-cli
 ### Windows Testing
 
 **Binary Detection**:
+
 - [ ] Install `ripp-cli` locally
 - [ ] Verify binary at `node_modules/.bin/ripp.cmd` is used
 - [ ] Check Output for "Using local RIPP CLI from node_modules"
 
 **Path Handling**:
+
 - [ ] Test with workspace path containing spaces
 - [ ] Test with backslash paths
 - [ ] All commands work correctly
 
 **Terminals**:
+
 - [ ] Test in PowerShell
 - [ ] Test in Command Prompt
 - [ ] Test in Git Bash
@@ -279,11 +306,13 @@ npm install -D ripp-cli
 ### macOS Testing
 
 **Binary Detection**:
+
 - [ ] Install `ripp-cli` locally
 - [ ] Verify binary at `node_modules/.bin/ripp` is used
 - [ ] Check Output for "Using local RIPP CLI from node_modules"
 
 **All Commands**:
+
 - [ ] Init works
 - [ ] Validate works
 - [ ] Lint works
@@ -295,11 +324,13 @@ npm install -D ripp-cli
 ### Linux Testing
 
 **Binary Detection**:
+
 - [ ] Install `ripp-cli` locally
 - [ ] Verify binary at `node_modules/.bin/ripp` is used
 - [ ] Check Output for "Using local RIPP CLI from node_modules"
 
 **All Commands**:
+
 - [ ] Init works
 - [ ] Validate works
 - [ ] Lint works
@@ -323,11 +354,13 @@ npm install -D ripp-cli
 ### GitHub Codespaces
 
 **Setup**:
+
 1. Open repository in Codespaces
 2. Install extension (if not pre-installed)
 3. Run `npm install -D ripp-cli` in terminal
 
 **Tests**:
+
 - [ ] Extension activates
 - [ ] Init command creates files
 - [ ] Local binary detected and used
@@ -336,6 +369,7 @@ npm install -D ripp-cli
 - [ ] Performance is acceptable
 
 **Without Local Install**:
+
 - [ ] Remove `ripp-cli`: `npm uninstall ripp-cli`
 - [ ] Verify npx fallback works
 - [ ] May be slower (expected)
@@ -347,12 +381,14 @@ npm install -D ripp-cli
 ### Validate Never Writes
 
 **Critical Test**:
+
 1. Create test RIPP packet
 2. Run validate
 3. Check `git status`
 4. Check file modification times
 
 **Expected**:
+
 - [ ] Git status shows NO modifications
 - [ ] File timestamps unchanged
 - [ ] No `.ripp.yaml.formatted` or similar files
@@ -363,11 +399,13 @@ npm install -D ripp-cli
 ### No Secrets Logged
 
 **Test**:
+
 1. Run any command
 2. Check Output panel (RIPP channel)
 3. Check Debug Console (if debugging)
 
 **Expected**:
+
 - [ ] No environment variables logged
 - [ ] No file paths with sensitive info
 - [ ] No credentials or tokens
@@ -380,11 +418,13 @@ npm install -D ripp-cli
 ### CLI Mode: npx (default)
 
 **Test**:
+
 1. Settings → RIPP: Cli Mode → "npx"
 2. Install local `ripp-cli`
 3. Run validate
 
 **Expected**:
+
 - [ ] Uses local binary (not npx)
 - [ ] Falls back to npx if no local install
 
@@ -393,6 +433,7 @@ npm install -D ripp-cli
 ### CLI Mode: npmScript
 
 **Setup**: Add to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -406,10 +447,12 @@ npm install -D ripp-cli
 ```
 
 **Test**:
+
 1. Settings → RIPP: Cli Mode → "npmScript"
 2. Run any command
 
 **Expected**:
+
 - [ ] Uses npm scripts
 - [ ] Commands work correctly
 
@@ -418,11 +461,13 @@ npm install -D ripp-cli
 ### Strict Mode
 
 **Test**:
+
 1. Settings → RIPP: Strict → true
 2. Create packet with warnings (e.g., missing optional fields)
 3. Run lint
 
 **Expected**:
+
 - [ ] Warnings treated as errors
 - [ ] Exit code 1 (failure)
 
@@ -431,11 +476,13 @@ npm install -D ripp-cli
 ### Custom Paths
 
 **Test**:
+
 1. Settings → RIPP: Paths → `["specs/*.ripp.yaml"]`
 2. Create packet in `specs/` directory
 3. Run validate
 
 **Expected**:
+
 - [ ] Only finds packets matching custom pattern
 - [ ] Ignores packets in other locations
 
@@ -446,10 +493,12 @@ npm install -D ripp-cli
 ### No RIPP Packets
 
 **Test**:
+
 1. Empty workspace (no .ripp.yaml files)
 2. Run validate
 
 **Expected**:
+
 - [ ] Warning: "No RIPP packets found in workspace"
 - [ ] No error, clean exit
 
@@ -458,10 +507,12 @@ npm install -D ripp-cli
 ### Invalid RIPP Packet
 
 **Test**:
+
 1. Create malformed YAML file
 2. Run validate
 
 **Expected**:
+
 - [ ] Parse error shown
 - [ ] Error message helpful
 - [ ] No crash
@@ -471,10 +522,12 @@ npm install -D ripp-cli
 ### Multiple Packets
 
 **Test**:
+
 1. Create 5+ RIPP packets
 2. Run validate
 
 **Expected**:
+
 - [ ] All packets discovered
 - [ ] Each validated individually
 - [ ] Summary shows total count
@@ -484,11 +537,13 @@ npm install -D ripp-cli
 ### Monorepo / Multi-Root Workspace
 
 **Test**:
+
 1. Open multi-root workspace
 2. Add RIPP packets in different folders
 3. Run validate
 
 **Expected**:
+
 - [ ] Uses first workspace folder
 - [ ] Finds packets in that folder
 - [ ] Behaves consistently
@@ -500,10 +555,12 @@ npm install -D ripp-cli
 ### Large Workspace
 
 **Test**:
+
 1. Workspace with 1000+ files
 2. Run validate
 
 **Expected**:
+
 - [ ] Discovery completes in <5 seconds
 - [ ] Validation completes reasonably
 - [ ] No UI freezing
@@ -513,10 +570,12 @@ npm install -D ripp-cli
 ### Many RIPP Packets
 
 **Test**:
+
 1. Create 50+ RIPP packets
 2. Run validate
 
 **Expected**:
+
 - [ ] All packets validated
 - [ ] Progress visible
 - [ ] Completes in reasonable time
@@ -540,27 +599,32 @@ rm -rf /tmp/ripp-extension-test
 ## Summary Checklist
 
 **Core Functionality**:
+
 - [ ] All 5 commands work (init, validate, lint, package, analyze)
 - [ ] Local binary detection works
 - [ ] npx fallback works
 - [ ] Error messages are helpful
 
 **Platform Support**:
+
 - [ ] Windows tested and working
 - [ ] macOS tested and working
 - [ ] Linux tested and working
 
 **Environments**:
+
 - [ ] VS Code Desktop works
 - [ ] Codespaces works
 - [ ] Remote containers work (if tested)
 
 **Security**:
+
 - [ ] Validate is read-only
 - [ ] No secrets logged
 - [ ] No hidden file writes
 
 **Documentation**:
+
 - [ ] README is accurate
 - [ ] TESTING.md is helpful
 - [ ] All examples work
@@ -569,10 +633,10 @@ rm -rf /tmp/ripp-extension-test
 
 ## Sign-Off
 
-**Tester**: _________________  
-**Date**: _________________  
-**Version Tested**: _________________  
-**Result**: ☐ PASS  ☐ FAIL  
+**Tester**: **\*\*\*\***\_**\*\*\*\***  
+**Date**: **\*\*\*\***\_**\*\*\*\***  
+**Version Tested**: **\*\*\*\***\_**\*\*\*\***  
+**Result**: ☐ PASS ☐ FAIL  
 **Notes**:
 
 ---
