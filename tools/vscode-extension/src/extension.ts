@@ -46,6 +46,10 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ripp.analyze', () => analyzeProject())
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.init', () => initRepository())
+	);
 }
 
 export function deactivate() {
@@ -414,6 +418,63 @@ async function analyzeProject() {
 				await vscode.window.showTextDocument(doc);
 			} catch (error: any) {
 				handleCommandError(error, 'analysis');
+			}
+		}
+	);
+}
+
+/**
+ * Command: Initialize RIPP in Repository
+ */
+async function initRepository() {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot) {
+		return;
+	}
+
+	// Ask user to confirm initialization
+	const forceOption = await vscode.window.showQuickPick(
+		[
+			{
+				label: 'Standard',
+				description: 'Create RIPP files (skip existing)',
+				force: false
+			},
+			{
+				label: 'Force',
+				description: 'Overwrite existing files',
+				force: true
+			}
+		],
+		{
+			placeHolder: 'Initialize RIPP in this repository?'
+		}
+	);
+
+	if (!forceOption) {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Initializing repository...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const args = ['init'];
+				if (forceOption.force) {
+					args.push('--force');
+				}
+
+				await executeRippCommand(args, workspaceRoot);
+				
+				vscode.window.showInformationMessage(
+					`RIPP initialized successfully! Check the RIPP output for details.`
+				);
+			} catch (error: any) {
+				handleCommandError(error, 'initialization');
 			}
 		}
 	);
