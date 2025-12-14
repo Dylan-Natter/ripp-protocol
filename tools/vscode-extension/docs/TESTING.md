@@ -268,6 +268,121 @@ Extension logs appear in:
 
 ---
 
+## Testing in GitHub Codespaces
+
+### Setup Codespaces Test Environment
+
+1. **Create a test repository** with RIPP packets or use the main RIPP protocol repository
+
+2. **Open in Codespaces:**
+   - Go to repository on GitHub
+   - Click **Code** → **Codespaces** → **Create codespace on main**
+
+3. **Install RIPP CLI** in Codespace:
+   ```bash
+   npm install -D ripp-cli
+   ```
+
+4. **Install the extension** (if not pre-installed):
+   - Open Extensions panel (Ctrl+Shift+X)
+   - Search for "RIPP Protocol"
+   - Click Install
+
+### Test: RIPP Init Command
+
+1. Open Command Palette
+2. Run **RIPP: Initialize Repository**
+3. Select **Standard** initialization
+4. Verify output shows created files:
+   - `ripp/`
+   - `ripp/features/`
+   - `ripp/intent-packages/`
+   - `.github/workflows/ripp-validate.yml`
+
+### Test: Local Binary Detection
+
+1. Verify `node_modules/.bin/ripp` exists (from `npm install -D ripp-cli`)
+2. Open Command Palette
+3. Run **RIPP: Validate Packet(s)**
+4. Check Output panel for "Using local RIPP CLI from node_modules"
+5. Verify it does NOT say "Using npx"
+
+### Test: Validate in Codespaces
+
+1. Create a test RIPP packet in `ripp/features/test.ripp.yaml`
+2. Run **RIPP: Validate Packet(s)**
+3. Verify validation completes successfully
+4. Check Output panel for validation results
+
+### Test: Without Local Install (npx fallback)
+
+1. Remove local RIPP CLI:
+   ```bash
+   npm uninstall ripp-cli
+   rm -rf node_modules/.bin/ripp*
+   ```
+
+2. Run **RIPP: Validate Packet(s)**
+3. Check Output panel for "Using npx (no local RIPP CLI found)"
+4. Verify validation works via npx (may be slower)
+
+### Test: Platform-Specific (Codespaces uses Linux)
+
+1. Verify binary detection uses Unix binary name (`ripp`, not `ripp.cmd`)
+2. Test all commands work correctly in Linux environment
+
+### Expected Results
+
+✅ **All commands should work** in Codespaces  
+✅ **Local binary should be preferred** when installed  
+✅ **npx fallback should work** when no local install  
+✅ **Performance should be good** with local install  
+✅ **No network errors** when using local binary
+
+---
+
+## Platform-Specific Testing
+
+### Windows Testing
+
+**Binary Detection:**
+- Verify uses `ripp.cmd` from `node_modules/.bin/`
+- Test in PowerShell, Command Prompt, and Git Bash
+
+**Path Handling:**
+- Verify backslash paths work correctly
+- Test with spaces in workspace path
+
+**Commands:**
+- [ ] RIPP: Initialize Repository
+- [ ] RIPP: Validate Packet(s)
+- [ ] RIPP: Lint Packet(s)
+- [ ] RIPP: Package Handoff
+- [ ] RIPP: Analyze Project
+
+### macOS Testing
+
+**Binary Detection:**
+- Verify uses `ripp` (Unix binary) from `node_modules/.bin/`
+
+**Commands:**
+- [ ] All commands (same as Windows)
+
+### Linux Testing
+
+**Binary Detection:**
+- Verify uses `ripp` (Unix binary) from `node_modules/.bin/`
+
+**Commands:**
+- [ ] All commands (same as Windows)
+
+**Distribution Testing:**
+- [ ] Ubuntu (common in Codespaces)
+- [ ] Debian
+- [ ] Fedora (optional)
+
+---
+
 ## Automated Testing
 
 Currently, this extension uses manual testing. Future versions may include:
@@ -282,16 +397,21 @@ Currently, this extension uses manual testing. Future versions may include:
 
 Before publishing to the Marketplace, verify:
 
-- [ ] All commands work correctly
+- [ ] All commands work correctly (validate, lint, package, analyze, **init**)
+- [ ] Init command creates proper scaffolding
+- [ ] Local binary detection works on Windows/macOS/Linux
+- [ ] npx fallback works when no local install
 - [ ] Configuration settings apply properly
-- [ ] Error messages are user-friendly
+- [ ] Error messages are user-friendly and include install guidance
 - [ ] Output panel shows helpful information
 - [ ] No secrets or sensitive data logged
-- [ ] Extension respects security constraints
+- [ ] Extension respects security constraints (validate is read-only)
 - [ ] README is accurate and complete
 - [ ] Icon is present (128x128 PNG)
 - [ ] Version is correct in `package.json`
 - [ ] Publisher name is exactly "RIPP"
+- [ ] Tested in Codespaces
+- [ ] Tested on Windows, macOS, and Linux
 
 ---
 
