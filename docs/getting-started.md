@@ -9,6 +9,8 @@ This guide will help you create your first RIPP packet in under 10 minutes.
 
 RIPP is designed to feel familiar if you've worked with user stories, API specs, or technical design documents. The difference is that RIPP brings all of these into one structured, validated format that preserves intent from concept to production.
 
+**New to RIPP?** Start by understanding what RIPP is (and is not): **[RIPP Category Documentation](category/)**
+
 **If you're coming from Agile:** Think of RIPP as the detailed specification that follows your user story. The user story defines "what" and "why" at a high level; RIPP adds "how," "who can," "what if," and "how to verify."
 
 **If you're building with AI assistance:** RIPP is the contract you write before prompting an AI to generate code. It ensures the generated implementation has clear boundaries, security requirements, and failure handling.
