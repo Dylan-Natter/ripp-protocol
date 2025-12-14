@@ -330,12 +330,14 @@ ripp validate feature.ripp.yaml
 ### What Gets Extracted
 
 From your prototype code:
+
 - API endpoints and methods (from route definitions)
 - Data structures (from request/response handling)
 - User flows (from UI components and handlers)
 - Error handling (from try/catch blocks)
 
 From your inputs (README, prompts, notes):
+
 - Purpose and problem statement
 - Intended value and use cases
 - Stated requirements and constraints
@@ -343,6 +345,7 @@ From your inputs (README, prompts, notes):
 ### What You Must Add
 
 Extraction cannot infer:
+
 - **Permissions**: Who can access what, and under which conditions
 - **Multi-tenancy**: Tenant isolation and boundary enforcement
 - **Audit requirements**: What must be logged for compliance
@@ -363,11 +366,13 @@ Review these carefully and resolve before approving.
 ### When to Use Prototype-First
 
 ✅ **Good fit**:
+
 - Rapid idea validation with AI-generated prototypes
 - Exploring feasibility before committing to full spec
 - Converting existing PoC code into formal specifications
 
 ❌ **Not ideal**:
+
 - High-security features (write spec first)
 - Regulated environments requiring upfront compliance review
 - Unclear or experimental ideas (prototype may be too unstable)

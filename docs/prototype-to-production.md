@@ -63,11 +63,13 @@ RIPP performs this transformation by:
 ### Why This Matters
 
 **Traditional flow (high risk)**:
+
 ```
 Idea → Prototype → "Looks good, ship it" → Production incidents
 ```
 
 **RIPP flow (controlled)**:
+
 ```
 Idea → Prototype → RIPP Extraction → Review → Production Implementation
          ↓                                         ↑
@@ -81,6 +83,66 @@ The prototype proves it CAN be done. The RIPP packet defines HOW it SHOULD be do
 ## The Prototype → RIPP Extraction Workflow
 
 ### Standard 4-Step Process
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                    RIPP Prototype → Production Flow                │
+└────────────────────────────────────────────────────────────────────┘
+
+  STEP 1: BUILD PROTOTYPE
+  ┌──────────────────┐
+  │  AI Prompt or    │──→ ┌─────────────┐
+  │  Rapid Dev       │    │ Working     │
+  │                  │    │ Prototype   │
+  │ • Core features  │    │             │
+  │ • Quick & dirty  │    │ + README    │
+  │ • Prove concept  │    │ + Notes     │
+  └──────────────────┘    └─────────────┘
+                                 ↓
+  STEP 2: EXTRACT RIPP
+                          ┌──────────────┐
+                          │ RIPP         │
+                          │ Extractor    │
+                          │ (Conceptual) │
+                          └──────────────┘
+                                 ↓
+                          ┌──────────────────────────┐
+                          │ Draft RIPP Packet        │
+                          │ • Extracted sections     │
+                          │ • Evidence map           │
+                          │ • Confidence ratings     │
+                          │ • Open questions         │
+                          └──────────────────────────┘
+                                 ↓
+  STEP 3: REVIEW & REFINE
+                          ┌──────────────────────────┐
+                          │ Human Review             │
+                          │ • Validate extracted     │
+                          │ • Resolve conflicts      │
+                          │ • Fill gaps (perms, etc) │
+                          │ • Answer open questions  │
+                          └──────────────────────────┘
+                                 ↓
+                          ┌──────────────────────────┐
+                          │ Approved RIPP Packet     │
+                          │ status: "approved"       │
+                          └──────────────────────────┘
+                                 ↓
+  STEP 4: PRODUCTION BUILD
+                          ┌──────────────────────────┐
+                          │ Production Implement     │
+                          │ • Guided by RIPP         │
+                          │ • Dev team or AI agent   │
+                          │ • Validated against spec │
+                          └──────────────────────────┘
+                                 ↓
+                          ┌──────────────────────────┐
+                          │ Production-Ready Feature │
+                          │ ✓ Intent preserved       │
+                          │ ✓ Security defined       │
+                          │ ✓ Failure modes handled  │
+                          └──────────────────────────┘
+```
 
 #### Step 1: Build Rapid MVP / Micro App
 
@@ -148,6 +210,7 @@ source_prototype:
 ```
 
 **Fields**:
+
 - `repo_url`: Git repository where prototype code lives
 - `commit_hash`: Specific commit representing the prototype state
 - `generation_date`: When RIPP extraction occurred (ISO 8601)
@@ -180,6 +243,7 @@ evidence_map:
 ```
 
 **Per-section fields**:
+
 - `source`: How this section was derived (stated | extracted | proposed | unknown)
 - `location`: File paths, line numbers, or route names
 - `notes`: Additional context or caveats
@@ -201,6 +265,7 @@ confidence:
 ```
 
 **Levels**:
+
 - `high`: Directly observable in code or explicitly stated
 - `medium`: Inferred with reasonable certainty
 - `low`: Proposed based on patterns, needs review
@@ -224,6 +289,7 @@ open_questions:
 ```
 
 **Per-question fields**:
+
 - `question`: The unresolved decision
 - `section`: Which RIPP section it affects
 - `impact`: Why this matters
@@ -257,6 +323,7 @@ When code behavior and stated intent disagree:
 4. **Document the decision** once resolved
 
 **Example conflict**:
+
 - Code: Allows any authenticated user to update any profile
 - Stated intent: Users should only update their own profile
 - **Resolution**: Flag as open question, require security review
@@ -296,6 +363,7 @@ A RIPP Extractor is a tool or process that generates draft RIPP packets from exi
 ### What It Consumes
 
 **Inputs**:
+
 1. **Prototype code**: Source files, API definitions, database schemas
 2. **Stated requirements**: Prompts, README files, design notes
 3. **Runtime observations**: Logs, API calls, user interactions (optional)
@@ -303,6 +371,7 @@ A RIPP Extractor is a tool or process that generates draft RIPP packets from exi
 ### What It Produces
 
 **Outputs**:
+
 1. **Draft RIPP packet**: Generated RIPP file marked as `status: "draft"`
 2. **Evidence map**: Links each section to its source (code, inputs, or proposed)
 3. **Confidence ratings**: Indicates certainty about each section
@@ -334,6 +403,7 @@ ripp lint feature.ripp.yaml --strict
 ```
 
 **Design principles**:
+
 - Extractors are **read-only**: Never modify prototype code
 - Extractors are **conservative**: When uncertain, mark as `proposed` or `unknown`
 - Extractors are **transparent**: Provide evidence map showing how each section was derived
@@ -401,14 +471,14 @@ But user stories were designed for a human-paced world where requirements evolve
 
 ### The Relationship
 
-| Dimension | User Story | RIPP Packet |
-|-----------|-----------|-------------|
-| **Purpose** | Facilitate discussion | Guide execution |
-| **Audience** | Product + Engineering | Engineering + AI |
-| **Format** | Natural language | Structured YAML/JSON |
-| **Scope** | What and why | How, who can, what if |
-| **Validation** | Manual review | Automated schema validation |
-| **Evolution** | Changes through conversation | Versioned with code |
+| Dimension      | User Story                   | RIPP Packet                 |
+| -------------- | ---------------------------- | --------------------------- |
+| **Purpose**    | Facilitate discussion        | Guide execution             |
+| **Audience**   | Product + Engineering        | Engineering + AI            |
+| **Format**     | Natural language             | Structured YAML/JSON        |
+| **Scope**      | What and why                 | How, who can, what if       |
+| **Validation** | Manual review                | Automated schema validation |
+| **Evolution**  | Changes through conversation | Versioned with code         |
 
 ### When to Use Both
 

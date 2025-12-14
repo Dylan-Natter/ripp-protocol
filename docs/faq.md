@@ -331,6 +331,7 @@ A: Absolutely. RIPP packets are reviewable, transparent, and version-controlled�
 A: Yes! RIPP supports a prototype-first workflow where you start with rapid prototyping (especially AI-generated code) and then extract a formal specification.
 
 **Conceptual workflow**:
+
 1. Build a working prototype with AI or rapid tools
 2. Extract a draft RIPP packet from the prototype code + stated requirements
 3. Review the draft, filling gaps and resolving conflicts
@@ -346,6 +347,7 @@ The RIPP Extractor is a conceptual tool documented but not yet fully implemented
 A: A prototype proves feasibility. A production system must be secure, maintainable, and complete.
 
 **Prototypes typically lack**:
+
 - Durable intent (exists only in prompt history or developer's head)
 - Security boundaries (permissions, authentication often simplified or omitted)
 - Failure handling (edge cases discovered reactively in testing or production)
@@ -361,12 +363,14 @@ A: A prototype proves feasibility. A production system must be secure, maintaina
 A: Choose based on your context:
 
 **Prototype-first** (build MVP, then extract RIPP):
+
 - ✅ Rapid idea validation
 - ✅ Exploring AI-generated solutions
 - ✅ Unclear requirements (prototype clarifies what's possible)
 - ✅ Converting existing PoCs to formal specs
 
 **Spec-first** (write RIPP, then implement):
+
 - ✅ Clear requirements upfront
 - ✅ High-security or regulated features
 - ✅ Team collaboration with review before coding
@@ -381,6 +385,7 @@ Both approaches are valid. RIPP accommodates both workflows.
 A: A conceptual tool that generates draft RIPP packets from prototype code and stated requirements.
 
 **What it would do**:
+
 - Parse prototype code to extract API contracts, data structures, flows
 - Read requirements from README, prompts, or design notes
 - Generate a draft RIPP packet with evidence map and confidence ratings
@@ -389,6 +394,7 @@ A: A conceptual tool that generates draft RIPP packets from prototype code and s
 **Current status**: Documented as a concept, not yet fully implemented. Teams currently extract RIPP specifications manually.
 
 **Design principles**:
+
 - Read-only (never modifies prototype code)
 - Conservative (marks uncertainty rather than guessing)
 - Transparent (shows how each section was derived)
@@ -401,6 +407,7 @@ A: A conceptual tool that generates draft RIPP packets from prototype code and s
 A: Optional metadata fields that provide transparency when a RIPP packet is generated from a prototype.
 
 **`evidence_map`**: Maps each RIPP section to its source in the prototype
+
 ```yaml
 evidence_map:
   ux_flow:
@@ -413,12 +420,13 @@ evidence_map:
 ```
 
 **`confidence`**: Indicates how certain the extraction is
+
 ```yaml
 confidence:
-  purpose: 'high'          # Explicitly stated in README
-  ux_flow: 'high'          # Directly observable in code
-  permissions: 'low'       # Proposed based on patterns
-  audit_events: 'unknown'  # Not present in prototype
+  purpose: 'high' # Explicitly stated in README
+  ux_flow: 'high' # Directly observable in code
+  permissions: 'low' # Proposed based on patterns
+  audit_events: 'unknown' # Not present in prototype
 ```
 
 **These fields are optional** and don't affect RIPP v1.0 conformance. They enhance trust and transparency.
@@ -445,10 +453,12 @@ If these are missing, mark them as **`proposed`** or **`unknown`**, and require 
 A: Flag them explicitly. Never silently choose one over the other.
 
 **Example conflict**:
+
 - **Code**: Allows any authenticated user to update any profile
 - **Stated intent**: "Users should only update their own profile"
 
 **Resolution process**:
+
 1. Document the conflict in `open_questions`:
    ```yaml
    open_questions:
@@ -475,14 +485,15 @@ A: Labels that indicate the source and certainty of each RIPP section.
 - **UNKNOWN**: Not present in prototype or inputs, must be specified
 
 **Used in `evidence_map`**:
+
 ```yaml
 evidence_map:
   data_contracts:
-    source: 'verified'    # Extracted from API request/response handling
+    source: 'verified' # Extracted from API request/response handling
   permissions:
-    source: 'proposed'    # Inferred from UX flow, needs validation
+    source: 'proposed' # Inferred from UX flow, needs validation
   audit_events:
-    source: 'unknown'     # Not addressed in prototype
+    source: 'unknown' # Not addressed in prototype
 ```
 
 These labels help teams understand what's solid, what needs review, and what's missing.
@@ -497,6 +508,7 @@ A: No. RIPP complements prototyping, it doesn't replace it.
 **RIPP**: Formalize intent, define contracts, prepare for production
 
 **Use both**:
+
 1. Prototype to validate ideas quickly
 2. Extract RIPP to formalize for production
 3. Review and approve RIPP before building production system
@@ -511,6 +523,7 @@ RIPP makes prototypes valuable beyond the exploration phase. Instead of discardi
 A: **No.** The prototype proves feasibility. RIPP formalizes the spec. Production is a separate implementation.
 
 **Workflow**:
+
 1. Build prototype (quick and dirty)
 2. Extract RIPP (formal specification)
 3. Review RIPP (fill gaps, resolve conflicts)

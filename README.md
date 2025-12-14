@@ -604,6 +604,7 @@ RIPP acts as an **intent compiler**: it transforms rapid prototypes into durable
 ### The Problem RIPP Solves
 
 **Rapid prototypes prove feasibility** but lack:
+
 - Durable intent (the "why" exists only in prompt history)
 - Security boundaries (permissions often omitted)
 - Failure handling (edge cases discovered reactively)
@@ -614,11 +615,13 @@ RIPP acts as an **intent compiler**: it transforms rapid prototypes into durable
 ### RIPP as the Bridge
 
 **Traditional flow (high risk)**:
+
 ```
 Idea → Prototype → "Looks good, ship it" → Production incidents
 ```
 
 **RIPP flow (controlled)**:
+
 ```
 Idea → Prototype → RIPP Extraction → Review → Production Implementation
          ↓                                         ↑
@@ -655,6 +658,7 @@ To ensure teams trust RIPP packets generated from prototypes:
 - **Never infer**: Permissions, tenancy, audit, or security (mark as "proposed" or "unknown")
 
 Verification labels indicate source:
+
 - **VERIFIED**: Extracted from code and confirmed
 - **STATED**: From explicit requirements
 - **PROPOSED**: Inferred, requires review
@@ -663,6 +667,7 @@ Verification labels indicate source:
 ### The RIPP Extractor (Conceptual)
 
 Future tooling may include a **RIPP Extractor** that:
+
 - Consumes: Prototype code + stated requirements
 - Produces: Draft RIPP packet + evidence map + confidence ratings
 - Flags: Gaps, conflicts, and open questions
