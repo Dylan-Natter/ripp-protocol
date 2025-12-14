@@ -1,7 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
-!tools/ripp-cli/package-lock.json
 
 # Build outputs
 dist/

@@ -1,0 +1,13 @@
+# Ignore files for Prettier
+node_modules/
+dist/
+build/
+*.log
+package-lock.json
+.git/
+.github/
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+CHANGELOG.md
