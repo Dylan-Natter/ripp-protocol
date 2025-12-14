@@ -1,7 +1,7 @@
-title: "RIPP - Regenerative Intent Prompting Protocol"
-description: "An open standard for structured feature specifications that preserve intent from concept to production"
-baseurl: "/ripp-protocol"
-url: "https://dylan-natter.github.io"
+title: 'RIPP - Regenerative Intent Prompting Protocol'
+description: 'An open standard for structured feature specifications that preserve intent from concept to production'
+baseurl: '/ripp-protocol'
+url: 'https://dylan-natter.github.io'
 
 markdown: kramdown
 kramdown:
@@ -23,26 +23,26 @@ permalink: pretty
 
 defaults:
   - scope:
-      path: ""
+      path: ''
     values:
-      layout: "default"
+      layout: 'default'
 
 # Navigation
 nav_links:
-  - title: "Home"
-    url: "/"
-  - title: "Getting Started"
-    url: "/getting-started"
-  - title: "Specification"
-    url: "/spec"
-  - title: "Examples"
-    url: "/examples"
-  - title: "RIPP Levels"
-    url: "/ripp-levels"
-  - title: "Tooling"
-    url: "/tooling"
-  - title: "FAQ"
-    url: "/faq"
-  - title: "GitHub"
-    url: "https://github.com/Dylan-Natter/ripp-protocol"
+  - title: 'Home'
+    url: '/'
+  - title: 'Getting Started'
+    url: '/getting-started'
+  - title: 'Specification'
+    url: '/spec'
+  - title: 'Examples'
+    url: '/examples'
+  - title: 'RIPP Levels'
+    url: '/ripp-levels'
+  - title: 'Tooling'
+    url: '/tooling'
+  - title: 'FAQ'
+    url: '/faq'
+  - title: 'GitHub'
+    url: 'https://github.com/Dylan-Natter/ripp-protocol'
     external: true

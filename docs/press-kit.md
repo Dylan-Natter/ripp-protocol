@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Press Kit"
+title: 'Press Kit'
 ---
 
 ## Press Kit
@@ -16,12 +16,14 @@ Brand guidelines, boilerplate text, and messaging for RIPP.
 ### Naming Rules
 
 ✅ **Correct:**
+
 - Regenerative Intent Prompting Protocol (RIPP)
 - RIPP Protocol
 - RIPP v1.0
 - RIPP
 
 ❌ **Incorrect:**
+
 - Ripp
 - ripp
 - R.I.P.P.
@@ -147,9 +149,11 @@ If creating RIPP-branded materials:
 ### Twitter/X
 
 **Profile bio:**
+
 > Open standard for structured feature specs. Build fast. Ship safely. Regenerate always. MIT licensed.
 
 **Sample tweets:**
+
 - "RIPP v1.0 is now stable. Write structured feature specs that preserve intent from concept to production. https://dylan-natter.github.io/ripp-protocol"
 - "Before RIPP: Requirements scattered across Jira, docs, and Slack. After RIPP: One YAML file with purpose, UX, data, APIs, permissions, and tests."
 - "RIPP has 3 levels: L1 (simple), L2 (production), L3 (high-risk). Choose based on complexity. Start with L1 in 30 minutes."
@@ -157,6 +161,7 @@ If creating RIPP-branded materials:
 ### LinkedIn
 
 **Company/Project description:**
+
 > Regenerative Intent Prompting Protocol (RIPP) is an open standard for capturing feature requirements as structured, machine-readable, human-reviewable specifications. RIPP enables teams to review features before writing code, preserve intent throughout development, and ship production systems with clarity.
 
 ---

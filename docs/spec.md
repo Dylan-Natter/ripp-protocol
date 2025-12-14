@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "RIPP v1.0 Specification"
+title: 'RIPP v1.0 Specification'
 ---
 
 > This page mirrors the [SPEC.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/SPEC.md) from the repository.
@@ -30,12 +30,12 @@ For the complete specification, see the [SPEC.md on GitHub](https://github.com/D
 ### Required Metadata
 
 ```yaml
-ripp_version: "1.0"
-packet_id: "unique-feature-identifier"
-title: "Brief feature title"
-created: "2025-12-13"
-updated: "2025-12-13"
-status: "draft | approved | implemented | deprecated"
+ripp_version: '1.0'
+packet_id: 'unique-feature-identifier'
+title: 'Brief feature title'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'draft | approved | implemented | deprecated'
 level: 1 | 2 | 3
 ```
 
@@ -86,6 +86,7 @@ RIPP packet files must follow this convention:
 ```
 
 Examples:
+
 - `user-authentication.ripp.yaml`
 - `payment-processing.ripp.json`
 - `multi-tenant-data-isolation.ripp.yaml`
@@ -101,6 +102,7 @@ ripp validate <file-or-directory>
 ```
 
 Exit codes:
+
 - `0`: All packets valid
 - `1`: Validation failures found
 

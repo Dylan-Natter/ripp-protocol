@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Adoption Guide"
+title: 'Adoption Guide'
 ---
 
 ## Adoption Guide
@@ -20,6 +20,7 @@ If you're working alone, start immediately:
 5. Implement the feature
 
 **Why it helps solo developers:**
+
 - Clarifies your thinking before coding
 - Documents decisions for future you
 - Makes it easier to onboard contributors later
@@ -32,11 +33,13 @@ If you're working alone, start immediately:
 ### Week 1: Introduction
 
 **Day 1-2: Learn**
+
 - Read the [Getting Started]({{ '/getting-started' | relative_url }}) guide
 - Review [examples]({{ '/examples' | relative_url }})
 - Install the CLI: `npm install -g ripp-cli`
 
 **Day 3-5: First Packet**
+
 - Pick a small upcoming feature
 - One person writes a Level 1 RIPP packet
 - Team reviews it together (30-minute meeting)
@@ -173,6 +176,7 @@ Don't retrofit existing features:
 **Response**: RIPP saves time by catching issues before coding. A 1-hour spec review prevents days of rework.
 
 **Tactics:**
+
 - Start with Level 1 (30 minutes)
 - Track time saved in code review
 - Show metrics from pilot
@@ -182,6 +186,7 @@ Don't retrofit existing features:
 **Response**: Simple features use Level 1 (Purpose, UX, Data). It's 30 minutes of clarity.
 
 **Tactics:**
+
 - Pick a "simple" feature that had production issues
 - Show how RIPP would have caught the issue
 - Use RIPP for complex features only, initially
@@ -191,6 +196,7 @@ Don't retrofit existing features:
 **Response**: RIPP is reviewed **before** coding, not after. It's a planning tool, not overhead.
 
 **Tactics:**
+
 - Frame as "design doc lite"
 - Emphasize machine validation (not manual checklists)
 - Show that it reduces meetings (async spec review)
@@ -200,6 +206,7 @@ Don't retrofit existing features:
 **Response**: RIPP is structured, versioned, and validated. Tickets scatter requirements; RIPP centralizes them.
 
 **Tactics:**
+
 - Link RIPP packets from Jira tickets
 - Use RIPP as the "Acceptance Criteria" source
 - Show how RIPP integrates with existing tools
@@ -241,14 +248,14 @@ Create org-specific templates with:
 Example:
 
 ```yaml
-ripp_version: "1.0"
+ripp_version: '1.0'
 # ... standard RIPP fields ...
 
 # Org-specific extensions
 org_metadata:
-  team: "Platform"
-  jira_ticket: "PLAT-123"
-  deployment_target: "2025-Q1"
+  team: 'Platform'
+  jira_ticket: 'PLAT-123'
+  deployment_target: '2025-Q1'
 ```
 
 ---

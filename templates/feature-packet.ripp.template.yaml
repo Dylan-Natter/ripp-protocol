@@ -1,16 +1,16 @@
-ripp_version: "1.0"
-packet_id: "your-feature-id"
-title: "Brief Feature Title"
+ripp_version: '1.0'
+packet_id: 'your-feature-id'
+title: 'Brief Feature Title'
 # Replace 'YYYY-MM-DD' with an actual ISO 8601 date, e.g., '2024-12-13'
-created: "YYYY-MM-DD"
-updated: "YYYY-MM-DD"
-status: "draft"
-level: 1  # Change to 2 or 3 as you add sections
+created: 'YYYY-MM-DD'
+updated: 'YYYY-MM-DD'
+status: 'draft'
+level: 1 # Change to 2 or 3 as you add sections
 
 purpose:
-  problem: "What problem does this solve?"
-  solution: "How are you solving it?"
-  value: "What value does it deliver?"
+  problem: 'What problem does this solve?'
+  solution: 'How are you solving it?'
+  value: 'What value does it deliver?'
   # Optional fields:
   # out_of_scope: "What is explicitly NOT included?"
   # assumptions: ["List any assumptions"]
@@ -20,33 +20,33 @@ purpose:
 
 ux_flow:
   - step: 1
-    actor: "User | System | Service Name"
-    action: "What happens in this step"
-    trigger: "What initiates this step"
+    actor: 'User | System | Service Name'
+    action: 'What happens in this step'
+    trigger: 'What initiates this step'
   - step: 2
-    actor: "System"
-    action: "System responds"
-    result: "What the user sees or receives"
+    actor: 'System'
+    action: 'System responds'
+    result: 'What the user sees or receives'
   # Add more steps as needed
 
 data_contracts:
   inputs:
-    - name: "InputEntityName"
-      description: "What this entity represents"
+    - name: 'InputEntityName'
+      description: 'What this entity represents'
       fields:
-        - name: "fieldName"
-          type: "string"  # string | number | integer | boolean | object | array
+        - name: 'fieldName'
+          type: 'string' # string | number | integer | boolean | object | array
           required: true
-          description: "What this field represents"
+          description: 'What this field represents'
           # Optional: format, min, max, pattern, enum
   outputs:
-    - name: "OutputEntityName"
-      description: "What this entity represents"
+    - name: 'OutputEntityName'
+      description: 'What this entity represents'
       fields:
-        - name: "fieldName"
-          type: "string"
+        - name: 'fieldName'
+          type: 'string'
           required: true
-          description: "What this field represents"
+          description: 'What this field represents'
 
 # === LEVEL 2: Add these sections if level >= 2 ===
 # api_contracts:

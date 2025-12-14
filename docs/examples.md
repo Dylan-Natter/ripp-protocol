@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Examples"
+title: 'Examples'
 ---
 
 ## RIPP Packet Examples
@@ -16,6 +16,7 @@ Learn by example. These real-world RIPP packets demonstrate best practices at ea
 A complete Level 3 RIPP packet for creating inventory items in a catalog system.
 
 **Demonstrates:**
+
 - Full data contracts with validation rules
 - REST API specification
 - RBAC permissions
@@ -27,18 +28,19 @@ A complete Level 3 RIPP packet for creating inventory items in a catalog system.
 **[View: item-creation.ripp.yaml →](https://github.com/Dylan-Natter/ripp-protocol/blob/main/examples/item-creation.ripp.yaml)**
 
 **Key Sections:**
+
 ```yaml
 level: 3
 api_contracts:
-  - endpoint: "/api/v1/items"
-    method: "POST"
+  - endpoint: '/api/v1/items'
+    method: 'POST'
     response:
       errors:
         - status: 409
-          description: "SKU already exists"
+          description: 'SKU already exists'
 nfrs:
   performance:
-    response_time_p95: "300ms"
+    response_time_p95: '300ms'
   security:
     encryption_at_rest: true
 ```
@@ -50,6 +52,7 @@ nfrs:
 A Level 3 packet for implementing tenant-aware data access with row-level security.
 
 **Demonstrates:**
+
 - Organization-scoped permissions
 - Security-critical failure modes
 - Detailed audit events for access tracking
@@ -60,16 +63,17 @@ A Level 3 packet for implementing tenant-aware data access with row-level securi
 **[View: multi-tenant-feature.ripp.yaml →](https://github.com/Dylan-Natter/ripp-protocol/blob/main/examples/multi-tenant-feature.ripp.yaml)**
 
 **Key Sections:**
+
 ```yaml
 level: 3
 failure_modes:
-  - scenario: "User attempts to access project from different organization"
-    impact: "Potential data leak if not handled correctly"
-    handling: "Return 403 Forbidden, log security event"
+  - scenario: 'User attempts to access project from different organization'
+    impact: 'Potential data leak if not handled correctly'
+    handling: 'Return 403 Forbidden, log security event'
 audit_events:
-  - event: "tenant.isolation_violation_attempt"
-    severity: "error"
-    retention: "730 days"
+  - event: 'tenant.isolation_violation_attempt'
+    severity: 'error'
+    retention: '730 days'
 ```
 
 ---
@@ -81,6 +85,7 @@ audit_events:
 An API-only feature (no UI) for reliable webhook delivery with retry logic.
 
 **Demonstrates:**
+
 - API-first design
 - Webhook-specific patterns (signatures, retries)
 - Permission model for third-party integrations
@@ -90,14 +95,15 @@ An API-only feature (no UI) for reliable webhook delivery with retry logic.
 **[View: api-only-feature.ripp.yaml →](https://github.com/Dylan-Natter/ripp-protocol/blob/main/examples/api-only-feature.ripp.yaml)**
 
 **Key Sections:**
+
 ```yaml
 level: 2
 failure_modes:
-  - scenario: "Webhook endpoint is unreachable (network timeout)"
-    handling: "Retry up to 3 times with exponential backoff"
+  - scenario: 'Webhook endpoint is unreachable (network timeout)'
+    handling: 'Retry up to 3 times with exponential backoff'
 permissions:
-  - action: "create:webhook"
-    required_roles: ["admin", "developer"]
+  - action: 'create:webhook'
+    required_roles: ['admin', 'developer']
 ```
 
 ---
@@ -107,6 +113,7 @@ permissions:
 Use the [feature packet template](https://github.com/Dylan-Natter/ripp-protocol/blob/main/templates/feature-packet.ripp.template.yaml) as a starting point for Level 1 packets.
 
 A basic Level 1 packet includes:
+
 - Purpose (problem, solution, value)
 - UX Flow (user interaction steps)
 - Data Contracts (inputs and outputs)
@@ -184,15 +191,17 @@ See [api-only-feature.ripp.yaml](https://github.com/Dylan-Natter/ripp-protocol/b
 ### ❌ Too Vague
 
 **Bad:**
+
 ```yaml
 purpose:
-  problem: "Users need better features"
+  problem: 'Users need better features'
 ```
 
 **Good:**
+
 ```yaml
 purpose:
-  problem: "Users cannot update their profile information after registration, leading to support tickets"
+  problem: 'Users cannot update their profile information after registration, leading to support tickets'
 ```
 
 ---
@@ -200,28 +209,30 @@ purpose:
 ### ❌ Missing Error Cases
 
 **Bad:**
+
 ```yaml
 api_contracts:
-  - endpoint: "/api/v1/items"
+  - endpoint: '/api/v1/items'
     response:
       success:
         status: 201
 ```
 
 **Good:**
+
 ```yaml
 api_contracts:
-  - endpoint: "/api/v1/items"
+  - endpoint: '/api/v1/items'
     response:
       success:
         status: 201
       errors:
         - status: 400
-          description: "Invalid input"
+          description: 'Invalid input'
         - status: 401
-          description: "Unauthorized"
+          description: 'Unauthorized'
         - status: 409
-          description: "SKU already exists"
+          description: 'SKU already exists'
 ```
 
 ---
@@ -229,25 +240,27 @@ api_contracts:
 ### ❌ Incomplete Data Contracts
 
 **Bad:**
+
 ```yaml
 data_contracts:
   inputs:
-    - name: "UserInput"
+    - name: 'UserInput'
       fields:
-        - name: "email"
+        - name: 'email'
 ```
 
 **Good:**
+
 ```yaml
 data_contracts:
   inputs:
-    - name: "UserInput"
+    - name: 'UserInput'
       fields:
-        - name: "email"
-          type: "string"
+        - name: 'email'
+          type: 'string'
           required: true
           description: "User's email address"
-          format: "email"
+          format: 'email'
 ```
 
 ---
@@ -255,6 +268,7 @@ data_contracts:
 ### ❌ Skipping Failure Modes
 
 Even simple features can fail. Always document at least:
+
 - Network/database unavailable
 - Invalid input
 - Authentication/authorization failures

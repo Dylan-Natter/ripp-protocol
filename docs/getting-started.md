@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Getting Started with RIPP"
+title: 'Getting Started with RIPP'
 ---
 
 ## Getting Started with RIPP
@@ -16,6 +16,7 @@ This guide will help you create your first RIPP packet in under 10 minutes.
 - A feature or API to document
 
 **Optional:**
+
 - Node.js (for the validator CLI)
 - Git (for version control)
 
@@ -38,11 +39,11 @@ For higher-risk features, you can add API contracts, permissions, failure modes,
 
 RIPP defines three conformance levels. Choose based on your feature's risk and complexity:
 
-| Level | When to Use | Required Sections |
-|-------|-------------|-------------------|
-| **Level 1** | Simple features, internal tools, low risk | Purpose, UX Flow, Data Contracts |
-| **Level 2** | Production features, customer-facing APIs | Level 1 + API Contracts, Permissions, Failure Modes |
-| **Level 3** | High-risk features (payments, auth, PII, multi-tenant) | Level 2 + Audit Events, NFRs, Acceptance Tests |
+| Level       | When to Use                                            | Required Sections                                   |
+| ----------- | ------------------------------------------------------ | --------------------------------------------------- |
+| **Level 1** | Simple features, internal tools, low risk              | Purpose, UX Flow, Data Contracts                    |
+| **Level 2** | Production features, customer-facing APIs              | Level 1 + API Contracts, Permissions, Failure Modes |
+| **Level 3** | High-risk features (payments, auth, PII, multi-tenant) | Level 2 + Audit Events, NFRs, Acceptance Tests      |
 
 **Start with Level 1.** You can always upgrade to Level 2 or 3 later.
 
@@ -65,16 +66,17 @@ Or create a new file `my-feature.ripp.yaml` and paste the template.
 Start by filling out the basic metadata:
 
 ```yaml
-ripp_version: "1.0"
-packet_id: "user-profile-update"
-title: "User Profile Update Feature"
-created: "2025-12-13"
-updated: "2025-12-13"
-status: "draft"
+ripp_version: '1.0'
+packet_id: 'user-profile-update'
+title: 'User Profile Update Feature'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'draft'
 level: 1
 ```
 
 **Tips:**
+
 - Use kebab-case for `packet_id` (lowercase, hyphens)
 - Use ISO 8601 dates (YYYY-MM-DD)
 - Start with `status: "draft"` until reviewed
@@ -87,9 +89,9 @@ Why does this feature exist? What problem does it solve?
 
 ```yaml
 purpose:
-  problem: "Users cannot update their profile information after registration"
-  solution: "Provide a profile editing form with server-side validation"
-  value: "Improves user experience and data accuracy"
+  problem: 'Users cannot update their profile information after registration'
+  solution: 'Provide a profile editing form with server-side validation'
+  value: 'Improves user experience and data accuracy'
 ```
 
 **Optional:** Add `out_of_scope`, `assumptions`, and `references` if helpful.
@@ -103,24 +105,25 @@ How do users interact with this feature? List each step:
 ```yaml
 ux_flow:
   - step: 1
-    actor: "User"
-    action: "Navigates to profile settings page"
+    actor: 'User'
+    action: 'Navigates to profile settings page'
     trigger: "Clicks 'Edit Profile' button"
   - step: 2
-    actor: "User"
-    action: "Updates name and email fields"
-    result: "Form shows real-time validation"
+    actor: 'User'
+    action: 'Updates name and email fields'
+    result: 'Form shows real-time validation'
   - step: 3
-    actor: "User"
-    action: "Submits form"
+    actor: 'User'
+    action: 'Submits form'
     trigger: "Clicks 'Save Changes'"
   - step: 4
-    actor: "System"
-    action: "Validates and saves changes"
-    result: "User sees success message"
+    actor: 'System'
+    action: 'Validates and saves changes'
+    result: 'User sees success message'
 ```
 
 **Tips:**
+
 - Each step needs `actor` and `action`
 - Include at least one of: `trigger`, `result`, or `condition`
 
@@ -133,31 +136,32 @@ What data does this feature accept and return?
 ```yaml
 data_contracts:
   inputs:
-    - name: "ProfileUpdateRequest"
+    - name: 'ProfileUpdateRequest'
       fields:
-        - name: "name"
-          type: "string"
+        - name: 'name'
+          type: 'string'
           required: true
           description: "User's display name"
-        - name: "email"
-          type: "string"
+        - name: 'email'
+          type: 'string'
           required: true
           description: "User's email address"
-          format: "email"
+          format: 'email'
   outputs:
-    - name: "ProfileUpdateResponse"
+    - name: 'ProfileUpdateResponse'
       fields:
-        - name: "user_id"
-          type: "string"
+        - name: 'user_id'
+          type: 'string'
           required: true
-          description: "UUID of the user"
-        - name: "updated_at"
-          type: "string"
+          description: 'UUID of the user'
+        - name: 'updated_at'
+          type: 'string'
           required: true
-          description: "Timestamp of last update"
+          description: 'Timestamp of last update'
 ```
 
 **Tips:**
+
 - Each field needs `name`, `type`, `required`, and `description`
 - Valid types: `string`, `number`, `integer`, `boolean`, `object`, `array`
 
@@ -195,8 +199,8 @@ If there are errors, the validator will tell you what's missing or incorrect.
 4. Update the status to `approved`:
 
 ```yaml
-status: "approved"
-updated: "2025-12-13"
+status: 'approved'
+updated: '2025-12-13'
 ```
 
 ---
@@ -212,7 +216,7 @@ Now you can write code. The RIPP packet is your spec. As you implement:
 When done, update the status:
 
 ```yaml
-status: "implemented"
+status: 'implemented'
 ```
 
 ---
@@ -220,11 +224,13 @@ status: "implemented"
 ## Next Steps
 
 **Add Level 2 sections** if your feature is customer-facing:
+
 - API Contracts: Define endpoints, methods, request/response formats
 - Permissions: Document who can do what
 - Failure Modes: What can go wrong and how to handle it
 
 **Add Level 3 sections** for high-risk features:
+
 - Audit Events: What gets logged
 - NFRs: Performance, scalability, security requirements
 - Acceptance Tests: How to verify correctness

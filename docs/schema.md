@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Schema Documentation"
+title: 'Schema Documentation'
 ---
 
 ## RIPP v1.0 Schema Documentation
@@ -38,9 +38,7 @@ Add to `.vscode/settings.json`:
 ```json
 {
   "yaml.schemas": {
-    "https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json": [
-      "**/*.ripp.yaml"
-    ]
+    "https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json": ["**/*.ripp.yaml"]
   }
 }
 ```
@@ -85,18 +83,18 @@ validate(instance=your_packet, schema=schema)
 
 ### Root Properties
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `ripp_version` | string | Yes | Must be "1.0" |
-| `packet_id` | string | Yes | Unique ID (kebab-case) |
-| `title` | string | Yes | Human-readable title |
-| `created` | string (date) | Yes | ISO 8601 date |
-| `updated` | string (date) | Yes | ISO 8601 date |
-| `status` | enum | Yes | draft \| approved \| implemented \| deprecated |
-| `level` | integer | Yes | 1, 2, or 3 |
-| `purpose` | object | Yes | See Purpose section |
-| `ux_flow` | array | Yes | See UX Flow section |
-| `data_contracts` | object | Yes | See Data Contracts section |
+| Property         | Type          | Required | Description                                    |
+| ---------------- | ------------- | -------- | ---------------------------------------------- |
+| `ripp_version`   | string        | Yes      | Must be "1.0"                                  |
+| `packet_id`      | string        | Yes      | Unique ID (kebab-case)                         |
+| `title`          | string        | Yes      | Human-readable title                           |
+| `created`        | string (date) | Yes      | ISO 8601 date                                  |
+| `updated`        | string (date) | Yes      | ISO 8601 date                                  |
+| `status`         | enum          | Yes      | draft \| approved \| implemented \| deprecated |
+| `level`          | integer       | Yes      | 1, 2, or 3                                     |
+| `purpose`        | object        | Yes      | See Purpose section                            |
+| `ux_flow`        | array         | Yes      | See UX Flow section                            |
+| `data_contracts` | object        | Yes      | See Data Contracts section                     |
 
 ### Conditional Requirements
 
@@ -237,13 +235,13 @@ RIPP allows custom sections via `additionalProperties: true` at the root level.
 You can add organization-specific fields:
 
 ```yaml
-ripp_version: "1.0"
+ripp_version: '1.0'
 # ... standard fields ...
 
 # Custom section (not part of RIPP spec)
 custom_tracking:
-  jira_ticket: "PROJ-123"
-  team: "Platform"
+  jira_ticket: 'PROJ-123'
+  team: 'Platform'
 ```
 
 Validators will **not** fail on unknown fields, ensuring forward compatibility.

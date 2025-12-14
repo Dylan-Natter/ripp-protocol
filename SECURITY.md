@@ -21,6 +21,7 @@ Instead, please report security issues by:
 2. Emailing the maintainers directly (if listed in package.json or GOVERNANCE.md)
 
 Include:
+
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact

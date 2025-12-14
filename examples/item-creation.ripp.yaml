@@ -1,255 +1,255 @@
-ripp_version: "1.0"
-packet_id: "item-creation"
-title: "Create New Item in Inventory System"
-created: "2025-12-13"
-updated: "2025-12-13"
-status: "approved"
+ripp_version: '1.0'
+packet_id: 'item-creation'
+title: 'Create New Item in Inventory System'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'approved'
 level: 3
 
 purpose:
-  problem: "Users cannot add new inventory items to their catalogs, requiring manual database updates"
-  solution: "Provide a web form and API endpoint for creating inventory items with validation and duplicate detection"
-  value: "Enables self-service item management, reduces support tickets, improves catalog accuracy"
-  out_of_scope: "Bulk import, image upload, integration with third-party catalogs"
+  problem: 'Users cannot add new inventory items to their catalogs, requiring manual database updates'
+  solution: 'Provide a web form and API endpoint for creating inventory items with validation and duplicate detection'
+  value: 'Enables self-service item management, reduces support tickets, improves catalog accuracy'
+  out_of_scope: 'Bulk import, image upload, integration with third-party catalogs'
   assumptions:
-    - "Users have basic understanding of their product taxonomy"
-    - "Item SKUs are managed externally and provided by the user"
+    - 'Users have basic understanding of their product taxonomy'
+    - 'Item SKUs are managed externally and provided by the user'
   references:
-    - title: "Inventory Management Design Doc"
-      url: "https://example.com/docs/inventory-design"
+    - title: 'Inventory Management Design Doc'
+      url: 'https://example.com/docs/inventory-design'
 
 ux_flow:
   - step: 1
-    actor: "User"
+    actor: 'User'
     action: "Navigates to 'Add Item' page"
     trigger: "Clicks 'Add New Item' button in inventory dashboard"
   - step: 2
-    actor: "User"
-    action: "Fills out item form (name, SKU, category, price)"
-    result: "Form validates fields in real-time"
+    actor: 'User'
+    action: 'Fills out item form (name, SKU, category, price)'
+    result: 'Form validates fields in real-time'
   - step: 3
-    actor: "User"
-    action: "Submits form"
+    actor: 'User'
+    action: 'Submits form'
     trigger: "Clicks 'Create Item' button"
   - step: 4
-    actor: "System"
-    action: "Validates input, checks for duplicate SKU"
-    condition: "If SKU already exists, show error"
+    actor: 'System'
+    action: 'Validates input, checks for duplicate SKU'
+    condition: 'If SKU already exists, show error'
   - step: 5
-    actor: "System"
-    action: "Creates item record in database"
-    result: "User sees success message with item ID"
+    actor: 'System'
+    action: 'Creates item record in database'
+    result: 'User sees success message with item ID'
   - step: 6
-    actor: "System"
-    action: "Redirects user to item details page"
-    result: "Newly created item is displayed"
+    actor: 'System'
+    action: 'Redirects user to item details page'
+    result: 'Newly created item is displayed'
 
 data_contracts:
   inputs:
-    - name: "CreateItemRequest"
-      description: "Request payload for creating a new inventory item"
+    - name: 'CreateItemRequest'
+      description: 'Request payload for creating a new inventory item'
       fields:
-        - name: "name"
-          type: "string"
+        - name: 'name'
+          type: 'string'
           required: true
-          description: "Item display name"
+          description: 'Item display name'
           min: 1
           max: 200
-        - name: "sku"
-          type: "string"
+        - name: 'sku'
+          type: 'string'
           required: true
-          description: "Stock keeping unit (unique identifier)"
-          pattern: "^[A-Z0-9-]{6,20}$"
-        - name: "category_id"
-          type: "string"
+          description: 'Stock keeping unit (unique identifier)'
+          pattern: '^[A-Z0-9-]{6,20}$'
+        - name: 'category_id'
+          type: 'string'
           required: true
-          description: "UUID of the item category"
-          format: "uuid"
-        - name: "price"
-          type: "number"
+          description: 'UUID of the item category'
+          format: 'uuid'
+        - name: 'price'
+          type: 'number'
           required: true
-          description: "Item price in USD"
+          description: 'Item price in USD'
           min: 0
-        - name: "description"
-          type: "string"
+        - name: 'description'
+          type: 'string'
           required: false
-          description: "Optional item description"
+          description: 'Optional item description'
           max: 1000
-        - name: "stock_quantity"
-          type: "integer"
+        - name: 'stock_quantity'
+          type: 'integer'
           required: false
-          description: "Initial stock quantity (defaults to 0)"
+          description: 'Initial stock quantity (defaults to 0)'
           min: 0
   outputs:
-    - name: "CreateItemResponse"
-      description: "Response after successfully creating an item"
+    - name: 'CreateItemResponse'
+      description: 'Response after successfully creating an item'
       fields:
-        - name: "item_id"
-          type: "string"
+        - name: 'item_id'
+          type: 'string'
           required: true
-          description: "UUID of the newly created item"
-          format: "uuid"
-        - name: "name"
-          type: "string"
+          description: 'UUID of the newly created item'
+          format: 'uuid'
+        - name: 'name'
+          type: 'string'
           required: true
-          description: "Item display name"
-        - name: "sku"
-          type: "string"
+          description: 'Item display name'
+        - name: 'sku'
+          type: 'string'
           required: true
-          description: "Stock keeping unit"
-        - name: "created_at"
-          type: "string"
+          description: 'Stock keeping unit'
+        - name: 'created_at'
+          type: 'string'
           required: true
-          description: "ISO 8601 timestamp of creation"
-          format: "date-time"
-        - name: "status"
-          type: "string"
+          description: 'ISO 8601 timestamp of creation'
+          format: 'date-time'
+        - name: 'status'
+          type: 'string'
           required: true
-          description: "Item status (active, draft, archived)"
-          enum: ["active", "draft", "archived"]
+          description: 'Item status (active, draft, archived)'
+          enum: ['active', 'draft', 'archived']
 
 api_contracts:
-  - endpoint: "/api/v1/items"
-    method: "POST"
-    purpose: "Create a new inventory item"
+  - endpoint: '/api/v1/items'
+    method: 'POST'
+    purpose: 'Create a new inventory item'
     request:
-      content_type: "application/json"
-      schema_ref: "CreateItemRequest"
+      content_type: 'application/json'
+      schema_ref: 'CreateItemRequest'
     response:
       success:
         status: 201
-        schema_ref: "CreateItemResponse"
-        content_type: "application/json"
+        schema_ref: 'CreateItemResponse'
+        content_type: 'application/json'
       errors:
         - status: 400
-          description: "Invalid input (validation failure)"
+          description: 'Invalid input (validation failure)'
         - status: 401
-          description: "User not authenticated"
+          description: 'User not authenticated'
         - status: 403
-          description: "User lacks permission to create items"
+          description: 'User lacks permission to create items'
         - status: 409
-          description: "SKU already exists"
+          description: 'SKU already exists'
         - status: 500
-          description: "Internal server error"
+          description: 'Internal server error'
 
 permissions:
-  - action: "create:item"
-    required_roles: ["admin", "inventory_manager", "editor"]
-    resource_scope: "organization"
-    description: "User must have inventory management permissions within their organization"
-  - action: "view:categories"
-    required_roles: ["admin", "inventory_manager", "editor", "viewer"]
-    resource_scope: "organization"
-    description: "User must be able to view categories to select category_id"
+  - action: 'create:item'
+    required_roles: ['admin', 'inventory_manager', 'editor']
+    resource_scope: 'organization'
+    description: 'User must have inventory management permissions within their organization'
+  - action: 'view:categories'
+    required_roles: ['admin', 'inventory_manager', 'editor', 'viewer']
+    resource_scope: 'organization'
+    description: 'User must be able to view categories to select category_id'
 
 failure_modes:
-  - scenario: "Database is unavailable"
-    impact: "Item creation fails, user cannot proceed"
-    handling: "Return 503 Service Unavailable, log error, retry with exponential backoff (3 attempts)"
-    user_message: "Service temporarily unavailable. Please try again in a moment."
-  - scenario: "SKU already exists in database"
-    impact: "Duplicate item would be created"
-    handling: "Return 409 Conflict with existing item_id in error response"
+  - scenario: 'Database is unavailable'
+    impact: 'Item creation fails, user cannot proceed'
+    handling: 'Return 503 Service Unavailable, log error, retry with exponential backoff (3 attempts)'
+    user_message: 'Service temporarily unavailable. Please try again in a moment.'
+  - scenario: 'SKU already exists in database'
+    impact: 'Duplicate item would be created'
+    handling: 'Return 409 Conflict with existing item_id in error response'
     user_message: "An item with SKU '{sku}' already exists. Please use a different SKU."
-  - scenario: "Invalid category_id (not found)"
-    impact: "Item would reference non-existent category"
-    handling: "Return 400 Bad Request with validation error"
-    user_message: "Selected category does not exist. Please choose a valid category."
-  - scenario: "Price is negative"
-    impact: "Invalid item pricing"
-    handling: "Return 400 Bad Request with validation error"
-    user_message: "Price must be zero or greater."
-  - scenario: "User session expires during form submission"
-    impact: "Request fails with authentication error"
-    handling: "Return 401 Unauthorized, redirect to login page"
-    user_message: "Your session has expired. Please log in again."
+  - scenario: 'Invalid category_id (not found)'
+    impact: 'Item would reference non-existent category'
+    handling: 'Return 400 Bad Request with validation error'
+    user_message: 'Selected category does not exist. Please choose a valid category.'
+  - scenario: 'Price is negative'
+    impact: 'Invalid item pricing'
+    handling: 'Return 400 Bad Request with validation error'
+    user_message: 'Price must be zero or greater.'
+  - scenario: 'User session expires during form submission'
+    impact: 'Request fails with authentication error'
+    handling: 'Return 401 Unauthorized, redirect to login page'
+    user_message: 'Your session has expired. Please log in again.'
 
 audit_events:
-  - event: "item.created"
-    severity: "info"
+  - event: 'item.created'
+    severity: 'info'
     includes:
-      - "user_id"
-      - "item_id"
-      - "sku"
-      - "category_id"
-      - "timestamp"
-      - "ip_address"
-      - "organization_id"
-    retention: "90 days"
-    purpose: "Track item creation for audit and analytics"
-  - event: "item.creation_failed"
-    severity: "warn"
+      - 'user_id'
+      - 'item_id'
+      - 'sku'
+      - 'category_id'
+      - 'timestamp'
+      - 'ip_address'
+      - 'organization_id'
+    retention: '90 days'
+    purpose: 'Track item creation for audit and analytics'
+  - event: 'item.creation_failed'
+    severity: 'warn'
     includes:
-      - "user_id"
-      - "error_code"
-      - "error_message"
-      - "timestamp"
-      - "ip_address"
-    retention: "30 days"
-    purpose: "Debug creation failures and identify patterns"
+      - 'user_id'
+      - 'error_code'
+      - 'error_message'
+      - 'timestamp'
+      - 'ip_address'
+    retention: '30 days'
+    purpose: 'Debug creation failures and identify patterns'
 
 nfrs:
   performance:
-    response_time_p95: "300ms"
-    response_time_p99: "500ms"
-    throughput: "100 requests/second"
+    response_time_p95: '300ms'
+    response_time_p99: '500ms'
+    throughput: '100 requests/second'
   scalability:
     max_concurrent_users: 1000
-    data_growth: "10,000 new items/month"
+    data_growth: '10,000 new items/month'
   availability:
-    uptime_target: "99.9%"
-    rpo: "1 hour"
-    rto: "4 hours"
+    uptime_target: '99.9%'
+    rpo: '1 hour'
+    rto: '4 hours'
   security:
     encryption_at_rest: true
     encryption_in_transit: true
     authentication_required: true
-    authorization_model: "RBAC with organization-level scoping"
+    authorization_model: 'RBAC with organization-level scoping'
 
 acceptance_tests:
-  - test_id: "TC-001"
-    title: "Authenticated user with correct permissions can create item"
+  - test_id: 'TC-001'
+    title: 'Authenticated user with correct permissions can create item'
     given: "User is authenticated with 'inventory_manager' role"
-    when: "User submits valid CreateItemRequest with unique SKU"
-    then: "Item is created and response contains item_id"
+    when: 'User submits valid CreateItemRequest with unique SKU'
+    then: 'Item is created and response contains item_id'
     verification:
-      - "HTTP 201 response received"
-      - "Response body contains valid item_id (UUID format)"
-      - "Response body contains submitted SKU"
-      - "Item is retrievable via GET /api/v1/items/{item_id}"
+      - 'HTTP 201 response received'
+      - 'Response body contains valid item_id (UUID format)'
+      - 'Response body contains submitted SKU'
+      - 'Item is retrievable via GET /api/v1/items/{item_id}'
       - "Audit event 'item.created' is logged"
-  - test_id: "TC-002"
-    title: "Duplicate SKU is rejected"
+  - test_id: 'TC-002'
+    title: 'Duplicate SKU is rejected'
     given: "Item with SKU 'TEST-123' already exists"
     when: "User submits CreateItemRequest with SKU 'TEST-123'"
-    then: "Request fails with 409 Conflict"
+    then: 'Request fails with 409 Conflict'
     verification:
-      - "HTTP 409 response received"
-      - "Error message mentions SKU conflict"
-      - "No new item is created in database"
-  - test_id: "TC-003"
-    title: "Unauthenticated user cannot create item"
-    given: "User is not authenticated (no session token)"
-    when: "User submits CreateItemRequest"
-    then: "Request fails with 401 Unauthorized"
+      - 'HTTP 409 response received'
+      - 'Error message mentions SKU conflict'
+      - 'No new item is created in database'
+  - test_id: 'TC-003'
+    title: 'Unauthenticated user cannot create item'
+    given: 'User is not authenticated (no session token)'
+    when: 'User submits CreateItemRequest'
+    then: 'Request fails with 401 Unauthorized'
     verification:
-      - "HTTP 401 response received"
-      - "No item is created in database"
-  - test_id: "TC-004"
-    title: "User without permission cannot create item"
+      - 'HTTP 401 response received'
+      - 'No item is created in database'
+  - test_id: 'TC-004'
+    title: 'User without permission cannot create item'
     given: "User is authenticated with 'viewer' role"
-    when: "User submits CreateItemRequest"
-    then: "Request fails with 403 Forbidden"
+    when: 'User submits CreateItemRequest'
+    then: 'Request fails with 403 Forbidden'
     verification:
-      - "HTTP 403 response received"
-      - "Error message indicates insufficient permissions"
-      - "No item is created in database"
-  - test_id: "TC-005"
-    title: "Invalid input is rejected with helpful error messages"
+      - 'HTTP 403 response received'
+      - 'Error message indicates insufficient permissions'
+      - 'No item is created in database'
+  - test_id: 'TC-005'
+    title: 'Invalid input is rejected with helpful error messages'
     given: "User is authenticated with 'inventory_manager' role"
-    when: "User submits CreateItemRequest with negative price"
-    then: "Request fails with 400 Bad Request"
+    when: 'User submits CreateItemRequest with negative price'
+    then: 'Request fails with 400 Bad Request'
     verification:
-      - "HTTP 400 response received"
-      - "Error message specifies price validation failure"
-      - "No item is created in database"
+      - 'HTTP 400 response received'
+      - 'Error message specifies price validation failure'
+      - 'No item is created in database'
