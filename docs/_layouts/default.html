@@ -5,14 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
   <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+  <link rel="icon" type="image/png" href="{{ '/assets/icon.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
 </head>
 <body>
   <header class="site-header">
     <div class="container">
       <div class="header-content">
-        <h1 class="site-title"><a href="{{ '/' | relative_url }}">RIPP</a></h1>
-        <p class="site-tagline">Build fast. Ship safely. Regenerate always.</p>
+        <div class="header-branding">
+          <a href="{{ '/' | relative_url }}" class="logo-link">
+            <img src="{{ '/assets/icon.png' | relative_url }}" alt="RIPP Logo" class="site-logo">
+          </a>
+          <div class="header-text">
+            <h1 class="site-title"><a href="{{ '/' | relative_url }}">RIPP</a></h1>
+            <p class="site-tagline">Build fast. Ship safely. Regenerate always.</p>
+          </div>
+        </div>
       </div>
       <nav class="site-nav">
         {% for link in site.nav_links %}

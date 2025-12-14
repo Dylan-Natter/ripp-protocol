@@ -106,11 +106,21 @@ Use these messages in talks, articles, and presentations:
 
 ## Logo and Visual Identity
 
-RIPP is a **text-based protocol**. There is no official graphical logo.
+### Icon
+
+RIPP has an official icon used in tooling and GitHub Pages:
+
+<img src="{{ '/assets/icon.png' | relative_url }}" alt="RIPP Icon" style="width: 96px; height: 96px; border-radius: 12px;">
+
+**Usage:**
+
+- The icon is available at `/docs/assets/icon.png` in the repository
+- Used in the VS Code extension, GitHub Pages, and other RIPP tooling
+- The icon features a green background with a white circular profile symbol and "RIPP" text
 
 ### Text Logo Usage
 
-When representing RIPP visually, use:
+When representing RIPP in text-only contexts, use:
 
 ```
 RIPP
