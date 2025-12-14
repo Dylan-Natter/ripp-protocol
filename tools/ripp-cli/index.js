@@ -7,6 +7,7 @@ const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const { glob } = require('glob');
 const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./lib/linter');
+const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
 
 // ANSI color codes
 const colors = {
@@ -153,6 +154,8 @@ ${colors.blue}RIPP CLI v${pkg.version}${colors.reset}
 ${colors.green}Commands:${colors.reset}
   ripp validate <path>              Validate RIPP packets
   ripp lint <path>                  Lint RIPP packets for best practices
+  ripp package --in <file> --out <file>
+                                    Package RIPP packet into normalized artifact
   ripp --help                       Show this help message
   ripp --version                    Show version
 
@@ -164,12 +167,19 @@ ${colors.green}Lint Options:${colors.reset}
   --strict                          Treat warnings as errors
   --output <dir>                    Output directory for reports (default: reports/)
 
+${colors.green}Package Options:${colors.reset}
+  --in <file>                       Input RIPP packet file (required)
+  --out <file>                      Output file path (required)
+  --format <json|yaml|md>           Output format (auto-detected from extension)
+
 ${colors.green}Examples:${colors.reset}
   ripp validate my-feature.ripp.yaml
   ripp validate features/
   ripp validate api/ --min-level 2
   ripp lint examples/
   ripp lint examples/ --strict
+  ripp package --in feature.ripp.yaml --out handoff.md
+  ripp package --in feature.ripp.yaml --out packaged.json --format json
 
 ${colors.green}Exit Codes:${colors.reset}
   0                                 All checks passed
@@ -203,6 +213,8 @@ async function main() {
     await handleValidateCommand(args);
   } else if (command === 'lint') {
     await handleLintCommand(args);
+  } else if (command === 'package') {
+    await handlePackageCommand(args);
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
@@ -404,6 +416,114 @@ async function handleLintCommand(args) {
   // Exit with appropriate code
   const hasFailures = totalErrors > 0 || (options.strict && totalWarnings > 0);
   process.exit(hasFailures ? 1 : 0);
+}
+
+async function handlePackageCommand(args) {
+  // Parse options
+  const options = {
+    input: null,
+    output: null,
+    format: null
+  };
+
+  const inIndex = args.indexOf('--in');
+  if (inIndex !== -1 && args[inIndex + 1]) {
+    options.input = args[inIndex + 1];
+  }
+
+  const outIndex = args.indexOf('--out');
+  if (outIndex !== -1 && args[outIndex + 1]) {
+    options.output = args[outIndex + 1];
+  }
+
+  const formatIndex = args.indexOf('--format');
+  if (formatIndex !== -1 && args[formatIndex + 1]) {
+    options.format = args[formatIndex + 1].toLowerCase();
+  }
+
+  // Validate required options
+  if (!options.input) {
+    console.error(`${colors.red}Error: --in <file> is required${colors.reset}`);
+    console.error('Usage: ripp package --in <file> --out <file>');
+    process.exit(1);
+  }
+
+  if (!options.output) {
+    console.error(`${colors.red}Error: --out <file> is required${colors.reset}`);
+    console.error('Usage: ripp package --in <file> --out <file>');
+    process.exit(1);
+  }
+
+  // Check if input exists
+  if (!fs.existsSync(options.input)) {
+    console.error(`${colors.red}Error: Input file not found: ${options.input}${colors.reset}`);
+    process.exit(1);
+  }
+
+  // Auto-detect format from output extension if not specified
+  if (!options.format) {
+    const ext = path.extname(options.output).toLowerCase();
+    if (ext === '.json') {
+      options.format = 'json';
+    } else if (ext === '.yaml' || ext === '.yml') {
+      options.format = 'yaml';
+    } else if (ext === '.md') {
+      options.format = 'md';
+    } else {
+      console.error(`${colors.red}Error: Unable to detect format from extension. Use --format <json|yaml|md>${colors.reset}`);
+      process.exit(1);
+    }
+  }
+
+  // Validate format
+  if (!['json', 'yaml', 'md'].includes(options.format)) {
+    console.error(`${colors.red}Error: Invalid format '${options.format}'. Must be json, yaml, or md${colors.reset}`);
+    process.exit(1);
+  }
+
+  console.log(`${colors.blue}Packaging RIPP packet...${colors.reset}`);
+
+  try {
+    // Load and validate the packet
+    const packet = loadPacket(options.input);
+    const schema = loadSchema();
+    const validation = validatePacket(packet, schema, options.input);
+
+    if (!validation.valid) {
+      console.error(`${colors.red}Error: Input packet failed validation${colors.reset}`);
+      validation.errors.forEach(error => {
+        console.error(`  ${colors.red}•${colors.reset} ${error}`);
+      });
+      process.exit(1);
+    }
+
+    // Package the packet
+    const packaged = packagePacket(packet);
+
+    // Format according to requested format
+    let output;
+    if (options.format === 'json') {
+      output = formatAsJson(packaged, { pretty: true });
+    } else if (options.format === 'yaml') {
+      output = formatAsYaml(packaged);
+    } else if (options.format === 'md') {
+      output = formatAsMarkdown(packaged);
+    }
+
+    // Write to output file
+    fs.writeFileSync(options.output, output);
+
+    log(colors.green, '✓', `Packaged successfully: ${options.output}`);
+    console.log(`  ${colors.gray}Format: ${options.format}${colors.reset}`);
+    console.log(`  ${colors.gray}Level: ${packet.level}${colors.reset}`);
+    console.log('');
+
+    process.exit(0);
+
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
 }
 
 main().catch(error => {
