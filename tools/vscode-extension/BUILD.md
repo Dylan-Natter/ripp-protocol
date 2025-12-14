@@ -4,7 +4,7 @@ This guide covers how to build and package the RIPP Protocol VS Code extension f
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm 8+
 - VS Code 1.85.0 or higher (for testing)
 
@@ -35,6 +35,7 @@ npm install
 ```
 
 Installs all required dependencies including:
+
 - TypeScript compiler
 - VS Code extension API types
 - ESLint and related packages
@@ -47,6 +48,7 @@ npm run compile
 ```
 
 Compiles TypeScript source files from `src/` to JavaScript in `out/`. The compiled output includes:
+
 - `out/extension.js` - Main extension code
 - `out/extension.js.map` - Source maps for debugging
 
@@ -75,11 +77,13 @@ npm run package
 ```
 
 This command:
+
 1. Runs `vscode:prepublish` script (compiles TypeScript)
 2. Packages the extension using `vsce package`
 3. Creates `ripp-protocol-0.1.0.vsix`
 
 The package includes:
+
 - `CHANGELOG.md` - Release notes
 - `LICENSE` - MIT license
 - `README.md` - Extension documentation
@@ -173,6 +177,7 @@ Ensure TypeScript is installed: `npm install`
 ### Package is too large
 
 Check `.vscodeignore` to ensure unnecessary files are excluded:
+
 - Source TypeScript files (`src/**`, `**/*.ts`)
 - Development dependencies (`node_modules/**`)
 - Test files (`.vscode-test/**`)
@@ -225,27 +230,27 @@ jobs:
     defaults:
       run:
         working-directory: tools/vscode-extension
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Compile TypeScript
         run: npm run compile
-      
+
       - name: Lint
         run: npm run lint
-      
+
       - name: Package extension
         run: npm run package
-      
+
       - name: Upload .vsix artifact
         uses: actions/upload-artifact@v4
         with:
@@ -256,5 +261,6 @@ jobs:
 ## Support
 
 For issues or questions:
+
 - GitHub Issues: https://github.com/Dylan-Natter/ripp-protocol/issues
 - Repository: https://github.com/Dylan-Natter/ripp-protocol

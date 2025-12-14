@@ -5,6 +5,7 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 ## ✅ Pre-Release Validation (ALL COMPLETE)
 
 ### Required Files
+
 - [x] `package.json` - Extension manifest with all required fields
 - [x] `README.md` - Marketplace landing page documentation
 - [x] `CHANGELOG.md` - Release notes and version history
@@ -12,6 +13,7 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 - [x] `icon.png` - Extension icon (1560 bytes)
 
 ### Package Configuration
+
 - [x] **Name**: `ripp-protocol` (valid format)
 - [x] **Display Name**: `RIPP Protocol`
 - [x] **Version**: `0.1.0` (follows semver)
@@ -27,12 +29,14 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 - [x] **License**: MIT
 
 ### Build & Compilation
+
 - [x] TypeScript compiles without errors
 - [x] Output directory `out/` contains `extension.js`
 - [x] Dependencies installed (`node_modules/`)
 - [x] No TypeScript source files in package (`.vscodeignore` configured)
 
 ### Extension Functionality
+
 - [x] **5 Commands Registered**:
   - `ripp.validate` - RIPP: Validate Packet(s)
   - `ripp.lint` - RIPP: Lint Packet(s)
@@ -44,12 +48,14 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 - [x] **Configuration**: 3 settings exposed (cliMode, strict, paths)
 
 ### Package Validation
+
 - [x] **Package Size**: ~12-13KB (well under 50MB limit)
 - [x] **File Count**: 8 files included
 - [x] **vsce package**: Runs without errors
 - [x] **No unnecessary files**: Verified via `.vscodeignore`
 
 ### Files Included in .vsix
+
 ```
 ✓ BUILD.md         - Build and packaging documentation
 ✓ CHANGELOG.md     - Release notes
@@ -61,6 +67,7 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 ```
 
 ### Files Excluded from .vsix (Correctly)
+
 ```
 ✓ src/**           - TypeScript source files
 ✓ node_modules/**  - Dependencies
@@ -74,12 +81,14 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 ## 📋 Marketplace Publication Steps
 
 ### 1. Create Publisher Account
+
 - [ ] Go to https://marketplace.visualstudio.com/manage
 - [ ] Sign in with Microsoft/GitHub account
 - [ ] Create a new publisher or use existing one
 - [ ] Note your publisher ID (e.g., "my-publisher-name")
 
 ### 2. Generate Personal Access Token (PAT)
+
 - [ ] Go to https://dev.azure.com
 - [ ] User Settings → Personal Access Tokens
 - [ ] Create new token with **"Marketplace (Manage)"** scope
@@ -87,6 +96,7 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 - [ ] Copy and save the token securely
 
 ### 3. Update Publisher in package.json
+
 - [ ] Open `package.json`
 - [ ] Update `"publisher": "RIPP"` to `"publisher": "your-publisher-id"`
 - [ ] Save the file
@@ -96,6 +106,7 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 ### 4. Publish Extension
 
 **Option A: Command Line (Recommended)**
+
 ```bash
 # Login to publisher account
 npx vsce login your-publisher-id
@@ -110,12 +121,14 @@ npx vsce publish --packagePath ripp-protocol-0.1.0.vsix
 ```
 
 **Option B: Manual Upload**
+
 - [ ] Go to https://marketplace.visualstudio.com/manage/publishers/your-publisher-id
 - [ ] Click "New Extension" → "Visual Studio Code"
 - [ ] Upload `ripp-protocol-0.1.0.vsix`
 - [ ] Verify details and publish
 
 ### 5. Post-Publication Verification
+
 - [ ] Extension appears in marketplace: https://marketplace.visualstudio.com/vscode
 - [ ] Search for "RIPP Protocol"
 - [ ] Verify README renders correctly
@@ -127,6 +140,7 @@ npx vsce publish --packagePath ripp-protocol-0.1.0.vsix
 ## 🧪 Local Testing (Before Publishing)
 
 ### Test Installation from .vsix
+
 ```bash
 # Install extension (replace {version} with actual version, e.g., 0.1.0)
 code --install-extension ripp-protocol-{version}.vsix
@@ -142,6 +156,7 @@ code --list-extensions | grep ripp-protocol
 ```
 
 ### Test Commands
+
 - [ ] **RIPP: Initialize Repository** - Creates ripp/ directory structure
 - [ ] **RIPP: Validate Packet(s)** - Validates RIPP packets
 - [ ] **RIPP: Lint Packet(s)** - Runs linting checks
@@ -149,6 +164,7 @@ code --list-extensions | grep ripp-protocol
 - [ ] **RIPP: Analyze Project** - Generates draft packets
 
 ### Test Environments
+
 - [ ] **VS Code Desktop** (Windows/Mac/Linux)
 - [ ] **GitHub Codespaces** (if available)
 - [ ] **Remote Containers** (if available)
@@ -156,6 +172,7 @@ code --list-extensions | grep ripp-protocol
 ## 🔄 Future Updates
 
 ### Version Bump Commands
+
 ```bash
 # Patch version (0.1.0 → 0.1.1)
 npx vsce publish patch
@@ -168,6 +185,7 @@ npx vsce publish major
 ```
 
 ### Update Checklist
+
 - [ ] Update version in `package.json`
 - [ ] Add entry to `CHANGELOG.md`
 - [ ] Compile: `npm run compile`
@@ -187,13 +205,14 @@ The extension is ready for marketplace publication when:
 ✅ License is included and correct  
 ✅ Icon displays correctly  
 ✅ No unnecessary files are included in the package  
-✅ Extension can be installed and tested locally  
+✅ Extension can be installed and tested locally
 
 ## 🎯 Current Status: ✅ READY FOR PUBLICATION
 
 All validation checks passed. The extension can be published to the VS Code Marketplace.
 
 **Next Steps:**
+
 1. Create publisher account (if needed)
 2. Update publisher field in package.json
 3. Publish to marketplace
@@ -201,6 +220,7 @@ All validation checks passed. The extension can be published to the VS Code Mark
 ---
 
 **Package Information:**
+
 - File: `ripp-protocol-{version}.vsix` (version from package.json)
 - Size: ~12-13KB (verify with `ls -lh *.vsix`)
 - Files: 8

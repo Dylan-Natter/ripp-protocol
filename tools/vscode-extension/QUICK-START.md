@@ -3,38 +3,45 @@
 ## For Maintainers: Build & Publish in 5 Steps
 
 ### Step 1: Navigate to Extension Directory
+
 ```bash
 cd tools/vscode-extension
 ```
 
 ### Step 2: Install Dependencies (First Time Only)
+
 ```bash
 npm install
 ```
 
 Expected output:
+
 ```
 added 302 packages, and audited 303 packages in 6s
 found 0 vulnerabilities
 ```
 
 ### Step 3: Build the Extension
+
 ```bash
 npm run compile
 ```
 
 Expected output:
+
 ```
 > ripp-protocol@0.1.0 compile
 > tsc -p ./
 ```
 
 ### Step 4: Package for Marketplace
+
 ```bash
 npm run package
 ```
 
 Expected output:
+
 ```
 Packaged: /path/to/ripp-protocol-0.1.0.vsix (8 files, 12.28 KB)
 ```
@@ -42,6 +49,7 @@ Packaged: /path/to/ripp-protocol-0.1.0.vsix (8 files, 12.28 KB)
 ### Step 5: Publish to Marketplace
 
 **First, update the publisher in package.json:**
+
 ```json
 {
   "publisher": "your-publisher-id"
@@ -49,6 +57,7 @@ Packaged: /path/to/ripp-protocol-0.1.0.vsix (8 files, 12.28 KB)
 ```
 
 **Then publish:**
+
 ```bash
 # Login (first time only)
 npx vsce login your-publisher-id
@@ -78,6 +87,7 @@ code --install-extension ripp-protocol-0.1.0.vsix
 ## What Gets Packaged?
 
 ✅ **Included (8 files, 12.28 KB):**
+
 - CHANGELOG.md
 - LICENSE
 - README.md
@@ -86,8 +96,9 @@ code --install-extension ripp-protocol-0.1.0.vsix
 - out/extension.js
 
 ❌ **Excluded:**
-- Source TypeScript files (src/**)
-- Node modules (node_modules/**)
+
+- Source TypeScript files (src/\*\*)
+- Node modules (node_modules/\*\*)
 - Build configuration files
 - Development documentation
 
@@ -96,6 +107,7 @@ code --install-extension ripp-protocol-0.1.0.vsix
 ## Troubleshooting
 
 **Q: Package command fails?**
+
 ```bash
 # Ensure dependencies are installed
 npm install
@@ -108,10 +120,12 @@ npm run package
 ```
 
 **Q: Extension doesn't activate?**
+
 - Check that `main` field in package.json points to `./out/extension.js`
 - Ensure TypeScript compiled successfully (`out/extension.js` exists)
 
 **Q: Commands don't appear?**
+
 - Verify `activationEvents` in package.json
 - Check Developer Tools console (Help → Toggle Developer Tools)
 
