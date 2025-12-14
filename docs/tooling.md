@@ -21,6 +21,12 @@ The official RIPP validator CLI validates packets against the JSON Schema and ch
 npm install -g ripp-cli
 ```
 
+**As a dev dependency in your project:**
+
+```bash
+npm install -D ripp-cli
+```
+
 **From source:**
 
 ```bash
@@ -31,6 +37,28 @@ npm link
 ```
 
 ### Usage
+
+**Initialize RIPP in your repository:**
+
+```bash
+# Create scaffolding for RIPP
+ripp init
+
+# Force overwrite existing files
+ripp init --force
+```
+
+This creates:
+- `ripp/` - Main directory for RIPP artifacts
+- `ripp/README.md` - Documentation about RIPP
+- `ripp/features/` - Feature RIPP packets
+- `ripp/intent-packages/` - Packaged artifacts for distribution
+- `.github/workflows/ripp-validate.yml` - GitHub Action for CI/CD
+
+The `init` command is:
+- ✅ **Idempotent** - Safe to run multiple times
+- ✅ **Non-destructive** - Preserves existing files by default
+- ✅ **Complete** - Sets up everything you need in one command
 
 **Validate a single file:**
 
