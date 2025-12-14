@@ -44,6 +44,64 @@ No. RIPP is **language and platform agnostic**. The same RIPP packet can describ
 
 ---
 
+### Is RIPP an Infrastructure-as-Code (IaC) tool like Terraform?
+
+No. RIPP documents **intent**; IaC tools provision **infrastructure**. They complement each other:
+
+- **RIPP**: "Why this infrastructure is needed, what it must achieve (NFRs)"
+- **IaC**: "Provision EC2 instances, configure auto-scaling"
+
+They coexist. RIPP captures requirements; IaC implements them.
+
+See **[RIPP vs Existing Paradigms](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/RIPP-VS-EXISTING-PARADIGMS.md)** for detailed comparisons.
+
+---
+
+### Does RIPP replace GitOps or policy-as-code tools?
+
+No. RIPP complements them:
+
+- **GitOps (ArgoCD, Flux)**: Deploys applications and reconciles state
+- **Policy-as-Code (OPA, Cedar)**: Enforces authorization at runtime
+- **RIPP**: Documents why deployments exist and why policies are needed
+
+**Workflow**: RIPP defines intent → GitOps deploys → Policies enforce
+
+See **[What RIPP Is and Is Not](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/WHAT-RIPP-IS-AND-IS-NOT.md)** for boundaries.
+
+---
+
+### Is RIPP a code generator?
+
+No. RIPP is a **specification format**, not a code generator.
+
+- RIPP documents what a feature should do
+- Engineers (or AI) implement code that satisfies the RIPP specification
+- Code generation is optional tooling, not part of the core protocol
+
+See **[Intent as Protocol](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/INTENT-AS-PROTOCOL.md)** for the philosophy.
+
+---
+
+### Who should use RIPP?
+
+RIPP is ideal for:
+
+- Teams using AI to generate code (RIPP provides durable specs)
+- Platform teams building APIs for other teams
+- Compliance-driven organizations (audit trails, permissions)
+- Anyone experiencing intent erosion (scattered requirements)
+
+RIPP is NOT ideal for:
+
+- Throwaway prototypes or one-off scripts
+- Teams that already have mature, stable specifications
+- Pure research projects with no production intent
+
+See **[Who RIPP Is For](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/WHO-RIPP-IS-FOR.md)** for detailed use cases.
+
+---
+
 ## Getting Started
 
 ### How long does it take to write a RIPP packet?

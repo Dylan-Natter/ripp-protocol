@@ -425,6 +425,17 @@ def create_item():
 
 ---
 
+## Category and Positioning
+
+For a deeper understanding of RIPP's position in the software development ecosystem:
+
+- **[Intent as Protocol](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/INTENT-AS-PROTOCOL.md)** — Why intent must be a protocol, not just documentation
+- **[What RIPP Is and Is Not](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/WHAT-RIPP-IS-AND-IS-NOT.md)** — Clear boundaries and misconceptions
+- **[RIPP vs Existing Paradigms](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/RIPP-VS-EXISTING-PARADIGMS.md)** — Comparison to IaC, GitOps, Policy-as-Code
+- **[Who RIPP Is For](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/WHO-RIPP-IS-FOR.md)** — Ideal adopters and team readiness
+
+---
+
 ## Next Steps
 
 - Read [Core Concepts](Core-Concepts) for foundational principles

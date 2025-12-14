@@ -20,6 +20,17 @@ Modern software development faces a critical challenge:
 
 RIPP fixes this by making the feature specification the **primary artifact**—reviewable, versioned, and validated before code is written.
 
+## Understanding RIPP's Category
+
+**RIPP is an intent specification protocol layer**—not an IaC tool, not a policy engine, not a code generator. It complements existing tools by documenting the "why" and "what" that other systems execute and enforce.
+
+**Category documentation** (in the main repository):
+
+- **[Intent as Protocol](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/INTENT-AS-PROTOCOL.md)** — Why intent must be a first-class protocol artifact
+- **[What RIPP Is and Is Not](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/WHAT-RIPP-IS-AND-IS-NOT.md)** — Explicit boundaries and common misconceptions
+- **[RIPP vs Existing Paradigms](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/RIPP-VS-EXISTING-PARADIGMS.md)** — How RIPP relates to IaC, GitOps, Policy-as-Code, and AI
+- **[Who RIPP Is For](https://github.com/Dylan-Natter/ripp-protocol/blob/main/docs/category/WHO-RIPP-IS-FOR.md)** — Ideal adopters and use cases
+
 ## Core Principles
 
 - **Intent is the source of truth** — Code is regenerable; intent must be preserved
