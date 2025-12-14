@@ -31,6 +31,8 @@ When information conflicts across sources, this is the order of authority:
 4. **Public Documentation** (`README.md`, `docs/`) — User-facing API
 5. **Wiki** — Design notes and decision log (lowest authority)
 
+**Note on Schema vs. Specification Conflicts**: If the JSON Schema and SPEC.md conflict on structural requirements, the schema takes precedence for validation. If they conflict on semantic meaning or protocol behavior, SPEC.md takes precedence. In practice, these should always be aligned; conflicts indicate a bug that must be resolved.
+
 If the wiki contradicts any of the above, **the wiki is wrong** and should be corrected.
 
 ---

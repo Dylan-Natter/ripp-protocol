@@ -39,9 +39,9 @@ When uncertain about:
 **STOP** and add a `TODO` comment instead of guessing:
 
 ```javascript
-// TODO: Clarify whether this change affects backward compatibility
-// TODO: Verify this interpretation with protocol maintainers
-// TODO: Determine if this violates additive-only principle
+// TODO: [COMPATIBILITY] Clarify whether this change affects backward compatibility
+// TODO: [PROTOCOL] Verify this interpretation with protocol maintainers
+// TODO: [GUARDRAILS] Determine if this violates additive-only principle
 ```
 
 ---

@@ -60,6 +60,7 @@ Tool that examines existing code, APIs, or documentation to generate **draft** R
 - **Must never** claim generated packets are authoritative
 - **Must** clearly mark output as "draft" or "generated"
 - **Must** require human approval before use
+- May only extract facts directly observable from code, APIs, schemas, or existing documentation
 
 ---
 
@@ -71,7 +72,7 @@ All tools that read RIPP packets must be **read-only**. Validation, linting, pac
 ### 2. Analyzers Must Never Guess Intent
 Analyzers may extract observable facts (API signatures, database schemas) but **must not**:
 - Infer business purpose or rationale
-- Generate failure modes or edge cases without evidence
+- Generate failure modes beyond those explicitly handled in code (e.g., try/catch blocks, error handlers)
 - Make assumptions about user behavior or security requirements
 
 ### 3. Backward Compatibility is Mandatory
