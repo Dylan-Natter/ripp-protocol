@@ -37,13 +37,16 @@ jobs:
           EXCLUDE_FILES=("README.md" "RIPP-Tooling-Evolution-Log.md")
 
           # Remove all existing markdown files from wiki (clean sync)
-          cd wiki
+          cd "$GITHUB_WORKSPACE/wiki" || exit 1
           echo "Cleaning existing wiki files..."
-          rm -f *.md
+          rm -f *.md || true
 
           # Copy all wiki markdown files except excluded ones
-          cd ../repo/docs/wiki
+          cd "$GITHUB_WORKSPACE/repo/docs/wiki" || exit 1
           echo "Copying wiki files..."
+
+          # Enable nullglob to handle case where no .md files exist
+          shopt -s nullglob
           for file in *.md; do
             # Check if file should be excluded
             skip=false
@@ -57,11 +60,11 @@ jobs:
 
             if [ "$skip" = false ]; then
               echo "  Copying $file"
-              cp "$file" "../../wiki/$file"
+              cp "$file" "$GITHUB_WORKSPACE/wiki/$file"
             fi
           done
 
-          cd ../../wiki
+          cd "$GITHUB_WORKSPACE/wiki" || exit 1
 
       - name: Check for changes
         id: check-changes
