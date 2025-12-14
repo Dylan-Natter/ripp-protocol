@@ -94,7 +94,9 @@ function initRepository(options = {}) {
       fs.writeFileSync(intentReadmePath, intentReadme);
       results.created.push('ripp/intent-packages/README.md');
     } else {
-      results.skipped.push('ripp/intent-packages/README.md (already exists, use --force to overwrite)');
+      results.skipped.push(
+        'ripp/intent-packages/README.md (already exists, use --force to overwrite)'
+      );
     }
   } catch (error) {
     results.errors.push(`Failed to create ripp/intent-packages/README.md: ${error.message}`);
@@ -122,7 +124,9 @@ function initRepository(options = {}) {
       fs.writeFileSync(workflowPath, workflow);
       results.created.push('.github/workflows/ripp-validate.yml');
     } else {
-      results.skipped.push('.github/workflows/ripp-validate.yml (already exists, use --force to overwrite)');
+      results.skipped.push(
+        '.github/workflows/ripp-validate.yml (already exists, use --force to overwrite)'
+      );
     }
   } catch (error) {
     results.errors.push(`Failed to create .github/workflows/ripp-validate.yml: ${error.message}`);

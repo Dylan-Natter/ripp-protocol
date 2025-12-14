@@ -24,16 +24,19 @@ All commands are accessible via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift
 ### RIPP: Initialize Repository
 
 **What it does:**
+
 - Runs `ripp init` in your workspace root
 - Creates `ripp/` directory structure
 - Creates `.github/workflows/ripp-validate.yml`
 - Creates documentation files
 
 **When to use:**
+
 - ✅ When adopting RIPP in a new or existing project
 - ✅ To regenerate scaffolding files
 
 **What it doesn't do:**
+
 - ❌ Automatically run on extension installation
 - ❌ Modify existing RIPP packets
 - ❌ Generate feature specifications
@@ -43,16 +46,19 @@ All commands are accessible via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift
 ### RIPP: Validate Packet(s)
 
 **What it does:**
+
 - Runs `ripp validate` on your workspace
 - Finds all `*.ripp.yaml` and `*.ripp.json` files
 - Reports validation results in the Output panel
 
 **When to use:**
+
 - ✅ After creating or editing a RIPP packet
 - ✅ Before committing changes
 - ✅ To verify schema conformance
 
 **What it doesn't do:**
+
 - ❌ Modify RIPP packet files
 - ❌ Auto-fix validation errors
 - ❌ Generate missing sections
@@ -64,17 +70,20 @@ All commands are accessible via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift
 ### RIPP: Lint Packet(s)
 
 **What it does:**
+
 - Runs `ripp lint` on your workspace
 - Checks best practices beyond schema validation
 - Reports warnings and errors in the Output panel
 - Generates lint reports in `reports/` directory
 
 **When to use:**
+
 - ✅ Before marking a RIPP packet as `approved`
 - ✅ To catch placeholder text (TODO, TBD)
 - ✅ To verify `schema_ref` consistency
 
 **What it doesn't do:**
+
 - ❌ Modify RIPP packet files
 - ❌ Auto-fix lint warnings
 - ❌ Fail builds (unless `--strict` mode enabled)
@@ -84,17 +93,20 @@ All commands are accessible via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift
 ### RIPP: Package Handoff
 
 **What it does:**
+
 - Prompts for input RIPP packet file
 - Prompts for output file path and format
 - Runs `ripp package --in <input> --out <output>`
 - Creates normalized handoff artifact (Markdown, JSON, or YAML)
 
 **When to use:**
+
 - ✅ Creating handoff documentation for production teams
 - ✅ Archiving approved specifications
 - ✅ Generating stakeholder-friendly documentation
 
 **What it doesn't do:**
+
 - ❌ Modify source RIPP packet file (read-only operation)
 - ❌ Generate code from RIPP packets
 - ❌ Deploy or publish artifacts
@@ -104,17 +116,20 @@ All commands are accessible via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift
 ### RIPP: Analyze Project (Draft Packet)
 
 **What it does:**
+
 - Prompts for input file (OpenAPI spec or JSON Schema)
 - Prompts for output RIPP packet file path
 - Runs `ripp analyze` to generate a DRAFT packet
 - Creates packet with TODO markers for human review
 
 **When to use:**
+
 - ✅ Bootstrapping RIPP from existing API documentation
 - ✅ Extracting data contracts from schemas
 - ✅ Starting point for formalization
 
 **What it doesn't do:**
+
 - ❌ Modify existing RIPP packets
 - ❌ Guess intent, business logic, or failure modes
 - ❌ Produce production-ready packets (always DRAFT)
@@ -133,6 +148,7 @@ The extension enforces a **clear separation** between read-only and write operat
 - `RIPP: Lint Packet(s)`
 
 These commands:
+
 - ✅ Never modify files
 - ✅ Can be run safely at any time
 - ✅ Provide feedback only
@@ -144,6 +160,7 @@ These commands:
 - `RIPP: Analyze Project (Draft Packet)`
 
 These commands:
+
 - ⚠️ Create new files
 - ⚠️ Require user confirmation (file picker dialogs)
 - ✅ Never modify existing RIPP packets
@@ -439,15 +456,15 @@ Currently, the extension has **no configurable settings**. All behavior is deter
 
 ## Comparison to CLI
 
-| Feature | VS Code Extension | RIPP CLI |
-|---------|-------------------|----------|
-| **Validation** | Via command palette | Via terminal: `ripp validate` |
-| **Linting** | Via command palette | Via terminal: `ripp lint` |
-| **Initialization** | Via command palette | Via terminal: `ripp init` |
-| **Packaging** | Via command palette | Via terminal: `ripp package` |
-| **Analysis** | Via command palette | Via terminal: `ripp analyze` |
-| **Output** | VS Code Output panel | Terminal stdout |
-| **Error Handling** | Same (uses CLI) | Same |
+| Feature            | VS Code Extension    | RIPP CLI                      |
+| ------------------ | -------------------- | ----------------------------- |
+| **Validation**     | Via command palette  | Via terminal: `ripp validate` |
+| **Linting**        | Via command palette  | Via terminal: `ripp lint`     |
+| **Initialization** | Via command palette  | Via terminal: `ripp init`     |
+| **Packaging**      | Via command palette  | Via terminal: `ripp package`  |
+| **Analysis**       | Via command palette  | Via terminal: `ripp analyze`  |
+| **Output**         | VS Code Output panel | Terminal stdout               |
+| **Error Handling** | Same (uses CLI)      | Same                          |
 
 **Key takeaway:** The extension is a convenience wrapper. The CLI is the source of truth.
 
@@ -465,14 +482,14 @@ Currently, the extension has **no configurable settings**. All behavior is deter
 
 ## Summary
 
-| Aspect | Guarantee |
-|--------|-----------|
-| **Read-only validation** | ✅ Never modifies source packets |
-| **Local processing** | ✅ All operations happen locally |
-| **No credentials collected** | ✅ No secrets or tokens accessed |
-| **Explicit writes** | ✅ User must confirm all file writes |
-| **CLI wrapper** | ✅ Extension delegates to official CLI |
-| **Codespaces compatible** | ✅ Works with proper setup |
+| Aspect                       | Guarantee                              |
+| ---------------------------- | -------------------------------------- |
+| **Read-only validation**     | ✅ Never modifies source packets       |
+| **Local processing**         | ✅ All operations happen locally       |
+| **No credentials collected** | ✅ No secrets or tokens accessed       |
+| **Explicit writes**          | ✅ User must confirm all file writes   |
+| **CLI wrapper**              | ✅ Extension delegates to official CLI |
+| **Codespaces compatible**    | ✅ Works with proper setup             |
 
 **Philosophy:** The extension serves you. You own your intent. No surprises.
 

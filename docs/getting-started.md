@@ -47,12 +47,14 @@ ripp init
 ```
 
 This creates:
+
 - `ripp/` directory for your RIPP packets
 - `ripp/features/` for feature specifications
 - `ripp/intent-packages/` for packaged artifacts
 - `.github/workflows/ripp-validate.yml` for automated validation
 
 **What you get:**
+
 - ✅ Proper directory structure
 - ✅ GitHub Actions for CI/CD validation
 - ✅ Documentation and examples

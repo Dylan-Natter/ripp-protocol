@@ -283,6 +283,7 @@ ripp init
 ```
 
 This creates:
+
 - `ripp/` directory for your RIPP packets
 - `ripp/features/` for feature specifications
 - GitHub Actions workflow for automated validation

@@ -52,15 +52,15 @@ RIPP is a **community-driven standard**. Spec changes require discussion and con
 
 ### What Requires Spec Change?
 
-| Change Type | Requires Spec Change? |
-|-------------|----------------------|
-| New required field | ✅ Yes (MAJOR version) |
-| New optional field | ✅ Yes (MINOR version) |
-| New conformance level | ✅ Yes (MAJOR version) |
+| Change Type              | Requires Spec Change?             |
+| ------------------------ | --------------------------------- |
+| New required field       | ✅ Yes (MAJOR version)            |
+| New optional field       | ✅ Yes (MINOR version)            |
+| New conformance level    | ✅ Yes (MAJOR version)            |
 | Clarification in SPEC.md | ⚠️ Maybe (PATCH if non-normative) |
-| Typo fix | ❌ No (documentation fix) |
-| Example addition | ❌ No (documentation enhancement) |
-| CLI feature | ❌ No (tooling, not spec) |
+| Typo fix                 | ❌ No (documentation fix)         |
+| Example addition         | ❌ No (documentation enhancement) |
+| CLI feature              | ❌ No (tooling, not spec)         |
 
 ---
 
@@ -87,7 +87,7 @@ Validation rules are defined in the JSON Schema and enforced by the RIPP CLI.
       "description": "New required field"
     }
   },
-  "required": ["new_field"]  // Add to required array
+  "required": ["new_field"] // Add to required array
 }
 ```
 
@@ -215,7 +215,7 @@ Use consistent terminology:
 
 **Example:**
 
-```markdown
+````markdown
 ## Section Title
 
 Brief introduction.
@@ -223,7 +223,7 @@ Brief introduction.
 ### Subsection
 
 | Column 1 | Column 2 |
-|----------|----------|
+| -------- | -------- |
 | Value A  | Value B  |
 
 **Example:**
@@ -232,7 +232,9 @@ Brief introduction.
 ripp_version: '1.0'
 packet_id: 'example'
 ```
-```
+````
+
+````
 
 ---
 
@@ -274,7 +276,7 @@ Addresses #123. Users reported confusion about X.
 - Reviewed by 2+ team members
 
 Fixes #123
-```
+````
 
 ### PR Size
 

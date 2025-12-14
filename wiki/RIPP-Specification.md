@@ -34,18 +34,19 @@ A **RIPP packet** is a single YAML or JSON file that fully describes one feature
 ```
 
 Examples:
+
 - `user-authentication.ripp.yaml`
 - `payment-processing.ripp.json`
 - `item-creation.ripp.yaml`
 
 ### Supporting Artifacts
 
-| Artifact | Purpose | Created By |
-|----------|---------|------------|
-| RIPP Packet | Source of truth for feature intent | Humans |
-| Packaged Artifact | Normalized handoff document (Markdown/JSON/YAML) | `ripp package` |
-| Lint Report | Best practices compliance report | `ripp lint` |
-| Draft Packet | Generated from existing code/schemas (requires review) | `ripp analyze` |
+| Artifact          | Purpose                                                | Created By     |
+| ----------------- | ------------------------------------------------------ | -------------- |
+| RIPP Packet       | Source of truth for feature intent                     | Humans         |
+| Packaged Artifact | Normalized handoff document (Markdown/JSON/YAML)       | `ripp package` |
+| Lint Report       | Best practices compliance report                       | `ripp lint`    |
+| Draft Packet      | Generated from existing code/schemas (requires review) | `ripp analyze` |
 
 ---
 
@@ -108,12 +109,14 @@ RIPP defines three conformance levels. Teams choose the level appropriate for th
 ### Level 1: Basic Intent
 
 **Required sections:**
+
 - Metadata
 - Purpose
 - UX Flow
 - Data Contracts
 
 **Use for:**
+
 - Simple, low-risk features
 - Internal tools
 - Prototypes being formalized
@@ -125,12 +128,14 @@ RIPP defines three conformance levels. Teams choose the level appropriate for th
 ### Level 2: Production-Ready
 
 **Required sections:**
+
 - Level 1 sections
 - API Contracts
 - Permissions
 - Failure Modes
 
 **Use for:**
+
 - Customer-facing features
 - Public APIs
 - Features with security implications
@@ -142,12 +147,14 @@ RIPP defines three conformance levels. Teams choose the level appropriate for th
 ### Level 3: High-Assurance
 
 **Required sections:**
+
 - Level 1 and 2 sections
 - Audit Events
 - Non-Functional Requirements
 - Acceptance Tests
 
 **Use for:**
+
 - Payment processing
 - Authentication/authorization
 - Handling PII or sensitive data
@@ -183,7 +190,7 @@ Example:
 ```yaml
 ripp_version: '1.0'
 packet_id: 'item-creation'
-version: '2.1.0'  # Optional packet version
+version: '2.1.0' # Optional packet version
 created: '2025-01-10'
 updated: '2025-12-14'
 ```
@@ -294,12 +301,12 @@ RIPP packets progress through a defined lifecycle:
 draft → approved → implemented → deprecated
 ```
 
-| Status | Meaning | Actions Allowed |
-|--------|---------|-----------------|
-| `draft` | Specification being written | Active editing, not yet reviewed |
-| `approved` | Reviewed and ready for implementation | Implementation can begin |
-| `implemented` | Code has been written and deployed | May be updated if requirements change |
-| `deprecated` | Feature is being phased out | No new development; maintained for legacy |
+| Status        | Meaning                               | Actions Allowed                           |
+| ------------- | ------------------------------------- | ----------------------------------------- |
+| `draft`       | Specification being written           | Active editing, not yet reviewed          |
+| `approved`    | Reviewed and ready for implementation | Implementation can begin                  |
+| `implemented` | Code has been written and deployed    | May be updated if requirements change     |
+| `deprecated`  | Feature is being phased out           | No new development; maintained for legacy |
 
 **Transitions:**
 

@@ -14,6 +14,7 @@
 **Overall Health**: 🟡 **MODERATE DRIFT** - Extension is functional but has several alignment gaps with current RIPP v1.0 expectations.
 
 **Key Findings**:
+
 - ✅ **GOOD**: Extension correctly avoids writing to RIPP packet files during validation
 - ✅ **GOOD**: Command structure and CLI wrapping approach is sound
 - 🟡 **DRIFT**: Missing support for `ripp init` command (critical for user onboarding)
@@ -30,14 +31,14 @@
 
 ### 1.1 Core Specification Documents
 
-| File Path | Purpose | Key Content |
-|-----------|---------|-------------|
-| `/SPEC.md` | Protocol specification | Defines RIPP packet structure, levels 1-3, protocol philosophy |
-| `/schema/ripp-1.0.schema.json` | JSON Schema | Authoritative validation schema for RIPP v1.0 |
-| `/README.md` | Repository overview | High-level protocol introduction, links to docs |
-| `/docs/getting-started.md` | User onboarding | Quick start guide, recommends `ripp init` |
-| `/docs/tooling.md` | CLI documentation | Documents all CLI commands including `init` |
-| `/docs/EXTENSIONS.md` | Extension guidelines | Principles for extending RIPP (additive-only) |
+| File Path                      | Purpose                | Key Content                                                    |
+| ------------------------------ | ---------------------- | -------------------------------------------------------------- |
+| `/SPEC.md`                     | Protocol specification | Defines RIPP packet structure, levels 1-3, protocol philosophy |
+| `/schema/ripp-1.0.schema.json` | JSON Schema            | Authoritative validation schema for RIPP v1.0                  |
+| `/README.md`                   | Repository overview    | High-level protocol introduction, links to docs                |
+| `/docs/getting-started.md`     | User onboarding        | Quick start guide, recommends `ripp init`                      |
+| `/docs/tooling.md`             | CLI documentation      | Documents all CLI commands including `init`                    |
+| `/docs/EXTENSIONS.md`          | Extension guidelines   | Principles for extending RIPP (additive-only)                  |
 
 ### 1.2 CLI Implementation
 
@@ -48,6 +49,7 @@
 **Binary**: `./index.js` (executable via `ripp` command)
 
 **Available Commands** (from `index.js` lines 151-206):
+
 ```
 ripp init [--force]                   # Initialize RIPP in repository (WRITES FILES)
 ripp validate <path> [--min-level N] [--quiet]  # Validate packets (READ-ONLY)
@@ -57,10 +59,12 @@ ripp analyze <input> --output <file>  # Generate draft packet (WRITES OUTPUT)
 ```
 
 **Exit Codes** (lines 201-204):
+
 - `0`: Success
 - `1`: Validation/lint failures
 
 **CLI Execution Expectations**:
+
 - ✅ Validates RIPP packets against schema (read-only)
 - ✅ Never modifies source RIPP files (`*.ripp.yaml`, `*.ripp.json`)
 - ✅ `init` creates scaffolding (explicit user action required)
@@ -86,19 +90,19 @@ jobs:
   validate:
     name: Validate RIPP Packets
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
-    
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI
         run: npm install -g ripp-cli
-      
+
       - name: Validate RIPP packets
         run: |
           if [ -d "ripp/features" ]; then
@@ -107,6 +111,7 @@ jobs:
 ```
 
 **Key Differences from Existing `.github/workflows/ripp-validate.yml`**:
+
 - ❌ Current repo workflow validates `examples/` (dev-specific)
 - ✅ CLI template validates `ripp/features/` (user-facing standard)
 - ❌ Current repo workflow uses local CLI (`npm link`)
@@ -135,6 +140,7 @@ repo-root/
 **File Naming Convention**: `*.ripp.yaml`, `*.ripp.yml`, or `*.ripp.json`
 
 **Detection Strategy**:
+
 - Primary location: `ripp/features/`
 - Fallback: Any `*.ripp.{yaml,yml,json}` in workspace
 - Exclude: `node_modules/`, `.git/`, build artifacts
@@ -147,14 +153,15 @@ repo-root/
 
 **From `/tools/vscode-extension/package.json` (lines 43-64)**:
 
-| Command ID | Title | Handler Function | CLI Mapping |
-|------------|-------|------------------|-------------|
-| `ripp.validate` | RIPP: Validate Packet(s) | `validatePackets()` | `ripp validate .` |
-| `ripp.lint` | RIPP: Lint Packet(s) | `lintPackets()` | `ripp lint .` |
-| `ripp.package` | RIPP: Package Handoff | `packageHandoff()` | `ripp package --in X --out Y` |
-| `ripp.analyze` | RIPP: Analyze Project (Draft Packet) | `analyzeProject()` | `ripp analyze X --output Y` |
+| Command ID      | Title                                | Handler Function    | CLI Mapping                   |
+| --------------- | ------------------------------------ | ------------------- | ----------------------------- |
+| `ripp.validate` | RIPP: Validate Packet(s)             | `validatePackets()` | `ripp validate .`             |
+| `ripp.lint`     | RIPP: Lint Packet(s)                 | `lintPackets()`     | `ripp lint .`                 |
+| `ripp.package`  | RIPP: Package Handoff                | `packageHandoff()`  | `ripp package --in X --out Y` |
+| `ripp.analyze`  | RIPP: Analyze Project (Draft Packet) | `analyzeProject()`  | `ripp analyze X --output Y`   |
 
 **Missing Command**:
+
 - ❌ `ripp init` - Not exposed in extension (users must run manually in terminal)
 
 ### 2.2 Workspace Root Detection
@@ -168,11 +175,12 @@ function getWorkspaceRoot(): string | undefined {
     vscode.window.showErrorMessage('No workspace folder open');
     return undefined;
   }
-  return workspaceFolders[0].uri.fsPath;  // Uses first folder only
+  return workspaceFolders[0].uri.fsPath; // Uses first folder only
 }
 ```
 
 **Analysis**:
+
 - ✅ Works for single-folder workspaces
 - ✅ Works for multi-root workspaces (uses first)
 - 🟡 No explicit monorepo support (doesn't detect workspace root vs package root)
@@ -185,7 +193,7 @@ function getWorkspaceRoot(): string | undefined {
 ```typescript
 async function discoverPackets(): Promise<vscode.Uri[]> {
   const config = getConfig();
-  const patterns = config.paths;  // Default: ['**/*.ripp.yaml', '**/*.ripp.json']
+  const patterns = config.paths; // Default: ['**/*.ripp.yaml', '**/*.ripp.json']
 
   const files: vscode.Uri[] = [];
   for (const pattern of patterns) {
@@ -198,6 +206,7 @@ async function discoverPackets(): Promise<vscode.Uri[]> {
 ```
 
 **Analysis**:
+
 - ✅ Uses glob patterns (configurable)
 - ✅ Excludes `node_modules/`
 - 🟡 Doesn't check for `ripp/` directory existence
@@ -211,7 +220,7 @@ async function discoverPackets(): Promise<vscode.Uri[]> {
 ```typescript
 async function executeRippCommand(args: string[], workspaceRoot: string) {
   const config = getConfig();
-  
+
   let command: string;
   let commandArgs: string[];
 
@@ -234,6 +243,7 @@ async function executeRippCommand(args: string[], workspaceRoot: string) {
 ```
 
 **Analysis**:
+
 - ✅ Uses `execFile` with `shell: false` (secure)
 - ✅ Uses args array (no injection risk)
 - ✅ Sets `cwd` to workspace root
@@ -243,17 +253,20 @@ async function executeRippCommand(args: string[], workspaceRoot: string) {
 - ✅ Proper error handling (lines 170-195)
 
 **Expected Behavior** (per issue requirements):
+
 1. Check for local devDependency: `node_modules/.bin/ripp`
 2. If found, use it directly
 3. Otherwise, fallback to `npx ripp`
 
 **Current Behavior**:
+
 - Always uses `npx ripp` (slow, may fetch remote package)
 - Or uses npm scripts (requires manual setup)
 
 ### 2.5 Result Display
 
 **Implementation**:
+
 - ✅ Dedicated output channel: "RIPP" (`extension.ts` line 30)
 - ✅ Streams stdout/stderr to output channel (lines 162-166)
 - ✅ Shows progress notifications (lines 207-233)
@@ -268,48 +281,58 @@ async function executeRippCommand(args: string[], workspaceRoot: string) {
 **Security Analysis** (per hard requirement: "validate MUST NEVER write"):
 
 **Validate Command** (`extension.ts` lines 201-234):
+
 ```typescript
 await executeRippCommand(['validate', '.'], workspaceRoot);
 ```
+
 - ✅ Only passes `validate` command to CLI
 - ✅ CLI `validate` is read-only (confirmed in `ripp-cli/index.js` lines 306-374)
 - ✅ No file writes in extension code
 - ✅ **VERIFIED SAFE**: Validate never writes files
 
 **Lint Command** (`extension.ts` lines 239-277):
+
 ```typescript
 await executeRippCommand(['lint', '.', '--strict'], workspaceRoot);
 ```
+
 - ⚠️ CLI `lint` writes to `reports/` directory (see `ripp-cli/index.js` lines 478-492)
 - ✅ **ACCEPTABLE**: Reports are separate from source RIPP files
 - ✅ Does NOT modify `*.ripp.yaml` or `*.ripp.json` files
 - ✅ **VERIFIED SAFE**: Lint never modifies source packets
 
 **Package Command** (`extension.ts` lines 282-351):
+
 ```typescript
 await executeRippCommand(['package', '--in', inputPath, '--out', outputPath], workspaceRoot);
 ```
+
 - ⚠️ Writes output file (user-specified location)
 - ✅ **ACCEPTABLE**: User explicitly chooses output location via save dialog
 - ✅ Does NOT modify source packet
 - ✅ **VERIFIED SAFE**: Package creates new file, doesn't modify source
 
 **Analyze Command** (`extension.ts` lines 356-420):
+
 ```typescript
 await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspaceRoot);
 ```
+
 - ⚠️ Writes draft RIPP packet (user-specified location)
 - ✅ **ACCEPTABLE**: User explicitly chooses output location via save dialog
 - ✅ Generates new file, doesn't modify existing RIPP packets
 - ✅ **VERIFIED SAFE**: Analyze creates new draft, doesn't modify sources
 
 **Init Command**:
+
 - ❌ **NOT IMPLEMENTED** in extension
 - ⚠️ If implemented: Must be explicit user action (button/command)
 - ⚠️ Should warn user about file creation
 - ⚠️ Should respect `--force` flag
 
 **CONCLUSION**: ✅ **NO WRITE VIOLATIONS FOUND**
+
 - Validate is read-only ✓
 - Lint writes reports (not source files) ✓
 - Package/Analyze write to user-selected locations ✓
@@ -319,13 +342,14 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 
 **Settings** (`package.json` lines 65-94):
 
-| Setting | Type | Default | Purpose |
-|---------|------|---------|---------|
-| `ripp.cliMode` | enum | `"npx"` | `"npx"` or `"npmScript"` |
-| `ripp.strict` | boolean | `false` | Treat lint warnings as errors |
-| `ripp.paths` | array | `["**/*.ripp.yaml", "**/*.ripp.json"]` | Glob patterns for discovery |
+| Setting        | Type    | Default                                | Purpose                       |
+| -------------- | ------- | -------------------------------------- | ----------------------------- |
+| `ripp.cliMode` | enum    | `"npx"`                                | `"npx"` or `"npmScript"`      |
+| `ripp.strict`  | boolean | `false`                                | Treat lint warnings as errors |
+| `ripp.paths`   | array   | `["**/*.ripp.yaml", "**/*.ripp.json"]` | Glob patterns for discovery   |
 
 **Analysis**:
+
 - ✅ Minimal, focused configuration
 - 🟡 Missing: Option to prefer local CLI binary
 - 🟡 Missing: Option to specify RIPP directory location
@@ -334,18 +358,18 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 
 ## 3. Extension Drift Matrix
 
-| Area | Current Extension Behavior | Current RIPP v1.0 Expectation | Severity | Minimal Fix Approach | Files to Change |
-|------|---------------------------|-------------------------------|----------|---------------------|-----------------|
-| **Commands** | Missing `ripp init` command | `ripp init` is primary onboarding tool (docs, tooling.md) | **HIGH** | Add `ripp.init` command with UI prompts | `package.json`, `extension.ts` |
-| **CLI Execution** | Always uses `npx ripp` or npm scripts | Should prefer local `node_modules/.bin/ripp` first | **HIGH** | Check for local binary before npx fallback | `extension.ts` |
-| **CLI Execution** | npm scripts mode requires manual setup | Should work out-of-box with local devDependency | **MEDIUM** | Improve CLI detection logic | `extension.ts` |
-| **Repo Detection** | Generic glob-based discovery | Expects standard `ripp/features/` layout | **LOW** | Add hint/info message about standard layout | `extension.ts`, `README.md` |
-| **CI Templates** | README links to generic workflow | Should reference CLI-generated template | **MEDIUM** | Update docs to match `init.js` template | `README.md` |
-| **Documentation** | Generic CLI invocation docs | Should mention local devDependency preference | **MEDIUM** | Update README Codespaces section | `README.md` |
-| **Documentation** | Missing `ripp init` in feature list | `init` is documented in CLI and getting-started | **MEDIUM** | Add init command to README | `README.md`, `package.json` description |
-| **Messaging** | "Validate Packet(s)" | Could clarify RIPP™ branding (first mention) | **LOW** | Use "RIPP™" in first mention per section | `README.md` |
-| **Error Handling** | Generic "CLI not found" message | Should guide to `npm install -D ripp-cli` | **LOW** | Improve error message with install suggestion | `extension.ts` |
-| **Platform Support** | Works but untested messaging | Should explicitly document Windows/macOS/Linux | **LOW** | Add platform notes to README | `README.md` |
+| Area                 | Current Extension Behavior             | Current RIPP v1.0 Expectation                             | Severity   | Minimal Fix Approach                          | Files to Change                         |
+| -------------------- | -------------------------------------- | --------------------------------------------------------- | ---------- | --------------------------------------------- | --------------------------------------- |
+| **Commands**         | Missing `ripp init` command            | `ripp init` is primary onboarding tool (docs, tooling.md) | **HIGH**   | Add `ripp.init` command with UI prompts       | `package.json`, `extension.ts`          |
+| **CLI Execution**    | Always uses `npx ripp` or npm scripts  | Should prefer local `node_modules/.bin/ripp` first        | **HIGH**   | Check for local binary before npx fallback    | `extension.ts`                          |
+| **CLI Execution**    | npm scripts mode requires manual setup | Should work out-of-box with local devDependency           | **MEDIUM** | Improve CLI detection logic                   | `extension.ts`                          |
+| **Repo Detection**   | Generic glob-based discovery           | Expects standard `ripp/features/` layout                  | **LOW**    | Add hint/info message about standard layout   | `extension.ts`, `README.md`             |
+| **CI Templates**     | README links to generic workflow       | Should reference CLI-generated template                   | **MEDIUM** | Update docs to match `init.js` template       | `README.md`                             |
+| **Documentation**    | Generic CLI invocation docs            | Should mention local devDependency preference             | **MEDIUM** | Update README Codespaces section              | `README.md`                             |
+| **Documentation**    | Missing `ripp init` in feature list    | `init` is documented in CLI and getting-started           | **MEDIUM** | Add init command to README                    | `README.md`, `package.json` description |
+| **Messaging**        | "Validate Packet(s)"                   | Could clarify RIPP™ branding (first mention)              | **LOW**    | Use "RIPP™" in first mention per section      | `README.md`                             |
+| **Error Handling**   | Generic "CLI not found" message        | Should guide to `npm install -D ripp-cli`                 | **LOW**    | Improve error message with install suggestion | `extension.ts`                          |
+| **Platform Support** | Works but untested messaging           | Should explicitly document Windows/macOS/Linux            | **LOW**    | Add platform notes to README                  | `README.md`                             |
 
 ---
 
@@ -358,6 +382,7 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Finding**: ✅ **REQUIREMENT MET**
 
 **Evidence**:
+
 1. Extension calls `executeRippCommand(['validate', '.'], ...)` (extension.ts:224)
 2. CLI `handleValidateCommand` is read-only:
    - Loads schema (index.js:338)
@@ -371,6 +396,7 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 4. No hidden file mutations
 
 **Code Path Verified**: ✓
+
 - `extension.ts:validatePackets()` → `executeRippCommand(['validate', '.'])`
 - `ripp-cli/index.js:handleValidateCommand()` → read-only operations
 - No file writes in any code path
@@ -382,11 +408,13 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Finding**: ✅ **REQUIREMENT MET** (by omission)
 
 **Evidence**:
+
 - `ripp init` is NOT exposed in extension
 - No automatic scaffolding on activation
 - No hidden init calls in any command
 
 **Recommendation**: When adding `ripp init`:
+
 - Require explicit user command invocation
 - Show clear message about what will be created
 - Offer `--force` option via checkbox
@@ -399,6 +427,7 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Finding**: ✅ **REQUIREMENT MET**
 
 **Evidence**:
+
 - Extension operates at workspace root level
 - CLI executes in repository context (`cwd: workspaceRoot`)
 - No package-specific or npm-centric assumptions
@@ -411,6 +440,7 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Finding**: ⚠️ **DRIFT DETECTED** (documentation references, not implementation)
 
 **Evidence**:
+
 - Extension doesn't generate GitHub Actions (not its responsibility)
 - `ripp init` CLI command generates correct workflow (init.js:462-504)
 - Extension README doesn't reference correct workflow format
@@ -427,12 +457,14 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Finding**: ✅ **REQUIREMENT LIKELY MET** (needs explicit testing)
 
 **Evidence**:
+
 - Uses `execFile` (works in Codespaces with Node.js)
 - No desktop-only APIs used
 - No file system assumptions beyond standard Node.js
 - README mentions Codespaces (line 28-29)
 
 **Gaps**:
+
 - No explicit Codespaces testing documented
 - No web environment testing documented
 - Should verify `npx` works in web environments
@@ -446,6 +478,7 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Finding**: ❌ **REQUIREMENT NOT MET**
 
 **Evidence**:
+
 - Extension uses `npx ripp` directly (extension.ts:136)
 - No check for `node_modules/.bin/ripp`
 - No check for local `ripp-cli` package
@@ -454,6 +487,7 @@ await executeRippCommand(['analyze', inputPath, '--output', outputPath], workspa
 **Impact**: HIGH (performance, reliability, offline usage)
 
 **Fix**: Implement local binary detection:
+
 ```typescript
 const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', 'ripp');
 if (fs.existsSync(localBinary)) {
@@ -470,6 +504,7 @@ if (fs.existsSync(localBinary)) {
 **Finding**: ✅ **NO BREAKING CHANGES REQUIRED**
 
 **Reasoning**:
+
 - All fixes are additive (new command, improved detection)
 - Configuration schema doesn't need changes
 - Existing commands remain compatible
@@ -485,19 +520,22 @@ if (fs.existsSync(localBinary)) {
 
 **Analysis**: ✅ **WORKS** but slow
 
-**Recommendation**: 
+**Recommendation**:
+
 - Document that local install is faster
 - Suggest `npm install -D ripp-cli` in error messages
 
 ### 5.2 pnpm/yarn/npm Workspaces
 
-**Current Behavior**: 
+**Current Behavior**:
+
 - Uses `vscode.workspace.findFiles()` (workspace-aware)
 - Executes with `cwd: workspaceRoot`
 
 **Analysis**: ✅ **SHOULD WORK** (workspace-agnostic)
 
 **Gaps**:
+
 - No explicit testing with pnpm/yarn
 - No documentation about workspace support
 
@@ -506,17 +544,20 @@ if (fs.existsSync(localBinary)) {
 ### 5.3 Windows/macOS/Linux Path Handling
 
 **Current Behavior**:
+
 - Uses `vscode.Uri.fsPath` (cross-platform)
 - Uses `path.relative()` for CLI args (cross-platform)
 - Uses `execFile` (cross-platform)
 
 **Analysis**: ✅ **SHOULD WORK**
 
-**Potential Issue**: 
+**Potential Issue**:
+
 - `node_modules/.bin/ripp` on Windows is `ripp.cmd`
 - Need to check for platform-specific binary names
 
 **Fix**: Use cross-platform binary detection:
+
 ```typescript
 const binName = process.platform === 'win32' ? 'ripp.cmd' : 'ripp';
 const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
@@ -529,6 +570,7 @@ const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
 **Analysis**: ✅ **SHOULD WORK**
 
 **Verification Needed**:
+
 - Test in Codespaces with `npx ripp`
 - Test in Codespaces with local `ripp-cli` devDependency
 - Verify environment variables are correctly passed
@@ -540,14 +582,17 @@ const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
 **Analysis**: 🟡 **PARTIAL SUPPORT**
 
 **Works**:
+
 - Single folder workspace ✓
 - Multi-root workspace (uses first folder) ✓
 
 **Doesn't Work**:
+
 - No per-folder RIPP validation
 - No option to select which folder
 
-**Recommendation**: 
+**Recommendation**:
+
 - Current behavior is acceptable for v1
 - Future: Add multi-folder selector UI
 
@@ -611,6 +656,7 @@ const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
 ## 7. No Breaking Changes Required
 
 All recommended changes are:
+
 - ✅ Additive (new features, improved detection)
 - ✅ Backward compatible (existing commands unchanged)
 - ✅ Non-breaking (configuration remains valid)
@@ -668,16 +714,19 @@ Users on v0.1.0 will seamlessly upgrade to v0.2.0.
 ## 9. Risk Assessment
 
 ### Low Risk
+
 - All changes are localized to extension code
 - No RIPP protocol changes
 - No schema modifications
 - No breaking changes to existing users
 
 ### Medium Risk
+
 - Local binary detection requires platform-specific logic
 - Init command UX requires careful design (user guidance)
 
 ### Mitigation
+
 - Thorough testing on all platforms
 - Clear user messaging for init command
 - Fallback to npx if local detection fails
@@ -690,6 +739,7 @@ Users on v0.1.0 will seamlessly upgrade to v0.2.0.
 The RIPP VS Code extension is **fundamentally sound** but has **moderate drift** from current RIPP v1.0 expectations. The extension correctly upholds the critical no-write requirement for validation and provides a clean CLI wrapper.
 
 **Key gaps**:
+
 1. Missing `ripp init` command (onboarding tool)
 2. Not preferring local CLI binary (performance)
 3. Documentation doesn't reflect current RIPP v1.0 guidance
@@ -703,6 +753,7 @@ The RIPP VS Code extension is **fundamentally sound** but has **moderate drift**
 ## Appendix A: File Location Reference
 
 ### RIPP v1.0 Source Files
+
 - Spec: `/SPEC.md`
 - Schema: `/schema/ripp-1.0.schema.json`
 - CLI: `/tools/ripp-cli/index.js`
@@ -715,6 +766,7 @@ The RIPP VS Code extension is **fundamentally sound** but has **moderate drift**
 - Example Workflow: `/tools/ripp-cli/lib/init.js:462-504`
 
 ### Extension Files
+
 - Main Code: `/tools/vscode-extension/src/extension.ts`
 - Package Manifest: `/tools/vscode-extension/package.json`
 - README: `/tools/vscode-extension/README.md`

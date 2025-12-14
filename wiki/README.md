@@ -44,12 +44,14 @@ GitHub wikis are separate git repositories that must be enabled and populated.
 1. **Enable the Wiki** (see above)
 
 2. **Clone the wiki repository**:
+
    ```bash
    git clone https://github.com/Dylan-Natter/ripp-protocol.wiki.git
    cd ripp-protocol.wiki
    ```
 
 3. **Copy all wiki pages**:
+
    ```bash
    cp ../ripp-protocol/wiki/Home.md ./Home.md
    cp ../ripp-protocol/wiki/Getting-Started.md ./Getting-Started.md

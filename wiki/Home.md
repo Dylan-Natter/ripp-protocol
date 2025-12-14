@@ -46,6 +46,7 @@ RIPP fixes this by making the feature specification the **primary artifact**—r
 ```
 
 **Alternative (Prototype-First):**
+
 ```
 1. Build Prototype (AI-assisted or rapid dev)
    ↓

@@ -185,11 +185,13 @@ RIPP validators are **read-only** by design. Auto-fixing structural issues doesn
 No. RIPP is a **specification format**, not a code generator. While tools **may** generate code from RIPP packets, this is optional and not part of the core protocol.
 
 **What RIPP does:**
+
 - Preserves intent so features can be regenerated when code needs to be rewritten
 - Provides contracts that implementations must satisfy
 - Enables validation that implementations match specifications
 
 **What RIPP does NOT do:**
+
 - Generate implementation code
 - Transform prototype code into production code
 - Scaffold boilerplate
@@ -225,6 +227,7 @@ ripp lint my-feature.ripp.yaml --strict
 Not recommended. The RIPP schema is the authoritative definition of the protocol. Customizing it breaks interoperability with tooling.
 
 **Instead:**
+
 - Use custom sections (ignored by validators)
 - Propose schema changes via [spec change issue](https://github.com/Dylan-Natter/ripp-protocol/issues/new?template=spec_change.yml)
 
@@ -283,11 +286,13 @@ Update the RIPP packet to reflect reality. **The packet is the source of truth.*
 Usually not. RIPP is for features and significant changes. Trivial bug fixes don't need RIPP (that's Level 0).
 
 **When to use RIPP for bug fixes:**
+
 - ✅ Bug reveals missing feature or incorrect design
 - ✅ Fix requires significant changes to data contracts or APIs
 - ✅ Fix introduces new permissions or failure modes
 
 **When NOT to use RIPP:**
+
 - ❌ Typo fixes
 - ❌ Simple logic errors
 - ❌ Performance optimizations that don't change contracts
@@ -322,11 +327,13 @@ Include "RIPP packet complete and approved" in your Definition of Done.
 RIPP is the evolution of the user story for AI-assisted and production-grade development.
 
 **User stories excel at:**
+
 - Facilitating conversation between product and engineering
 - Capturing high-level problem and value
 - Remaining lightweight and discussable
 
 **RIPP adds:**
+
 - Structured data contracts and API specifications
 - Explicit permissions and authorization model
 - Documented failure modes and error handling
@@ -384,6 +391,7 @@ In version control with your code. Recommended locations:
 - `/specs/` (centralized specs directory)
 
 **Why co-locate with code:**
+
 - ✅ Single source of truth
 - ✅ Specs and code versioned together
 - ✅ Same review workflow (pull requests)
@@ -403,7 +411,7 @@ RIPP packets are versioned through:
 ```yaml
 ripp_version: '1.0'
 packet_id: 'item-creation'
-version: '2.1.0'  # Optional
+version: '2.1.0' # Optional
 created: '2025-01-10'
 updated: '2025-12-14'
 ```
@@ -446,6 +454,7 @@ Start small:
 Success builds momentum.
 
 **Tips:**
+
 - Frame RIPP as a "spec review" (already familiar to most teams)
 - Start with Level 1 (low overhead)
 - Use it for high-risk features first (auth, payments)
@@ -456,12 +465,14 @@ Success builds momentum.
 ### What's the ROI of using RIPP?
 
 **Time saved:**
+
 - Fewer requirements clarification meetings
 - Fewer mid-implementation surprises
 - Fewer production bugs from undocumented edge cases
 - Faster onboarding (specs are reviewable and versioned)
 
 **Quality improved:**
+
 - Security and permissions defined upfront
 - Failure modes documented before they happen
 - Acceptance tests written before implementation
@@ -498,12 +509,12 @@ Expand as you see value.
 
 ### How is RIPP different from OpenAPI?
 
-| Dimension | RIPP | OpenAPI |
-|-----------|------|---------|
-| **Scope** | Full feature specification (purpose, UX, data, API, permissions, tests) | API contracts only |
-| **Purpose** | Capture intent before coding | Document existing APIs |
-| **Audience** | Product + Engineering | API consumers |
-| **Includes** | Why, what, how, who, what if, how to verify | API endpoints, parameters, responses |
+| Dimension    | RIPP                                                                    | OpenAPI                              |
+| ------------ | ----------------------------------------------------------------------- | ------------------------------------ |
+| **Scope**    | Full feature specification (purpose, UX, data, API, permissions, tests) | API contracts only                   |
+| **Purpose**  | Capture intent before coding                                            | Document existing APIs               |
+| **Audience** | Product + Engineering                                                   | API consumers                        |
+| **Includes** | Why, what, how, who, what if, how to verify                             | API endpoints, parameters, responses |
 
 **Can they coexist?** Yes. RIPP packets can reference OpenAPI specs in `purpose.references`. Or use `ripp analyze` to bootstrap from OpenAPI.
 
@@ -511,11 +522,11 @@ Expand as you see value.
 
 ### How is RIPP different from Gherkin (Cucumber)?
 
-| Dimension | RIPP | Gherkin |
-|-----------|------|---------|
-| **Purpose** | Feature specification | Behavior-driven tests |
-| **Format** | YAML/JSON | Plain text (Given/When/Then) |
-| **Audience** | Engineering + Product | QA + Engineering |
+| Dimension            | RIPP                        | Gherkin                           |
+| -------------------- | --------------------------- | --------------------------------- |
+| **Purpose**          | Feature specification       | Behavior-driven tests             |
+| **Format**           | YAML/JSON                   | Plain text (Given/When/Then)      |
+| **Audience**         | Engineering + Product       | QA + Engineering                  |
 | **Machine-readable** | Yes (JSON Schema validated) | Partially (test framework parses) |
 
 **Can they coexist?** Yes. RIPP's `acceptance_tests` can be translated into Gherkin scenarios.
@@ -524,12 +535,12 @@ Expand as you see value.
 
 ### How is RIPP different from Architecture Decision Records (ADRs)?
 
-| Dimension | RIPP | ADRs |
-|-----------|------|---------|
-| **Scope** | Feature specifications | Architecture decisions |
-| **Purpose** | Define what and how | Document why (decision rationale) |
-| **Format** | Structured YAML/JSON | Markdown or plain text |
-| **Validation** | Schema-validated | No formal validation |
+| Dimension      | RIPP                   | ADRs                              |
+| -------------- | ---------------------- | --------------------------------- |
+| **Scope**      | Feature specifications | Architecture decisions            |
+| **Purpose**    | Define what and how    | Document why (decision rationale) |
+| **Format**     | Structured YAML/JSON   | Markdown or plain text            |
+| **Validation** | Schema-validated       | No formal validation              |
 
 **Can they coexist?** Yes. RIPP packets can reference ADRs in `purpose.references`.
 

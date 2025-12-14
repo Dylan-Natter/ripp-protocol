@@ -15,12 +15,14 @@
 **Commit**: feat: add RIPP init command to initialize repository
 
 **What Changed**:
+
 - Added new command `ripp.init` to Command Palette
 - Prompts user to choose Standard or Force initialization
 - Calls `ripp init` or `ripp init --force` based on selection
 - Shows success message with guidance
 
 **Verification**:
+
 ```
 1. Open Command Palette (Ctrl+Shift+P)
 2. Run "RIPP: Initialize Repository"
@@ -41,12 +43,14 @@
 **Commit**: feat: prefer local ripp CLI binary over npx for better performance
 
 **What Changed**:
+
 - Added cross-platform binary detection (Windows: `ripp.cmd`, Unix: `ripp`)
 - Checks for `node_modules/.bin/ripp[.cmd]` before using npx
 - Falls back to npx if local binary not found
 - Logs which execution method is used
 
 **Verification**:
+
 ```
 1. Install ripp-cli: npm install -D ripp-cli
 2. Run any RIPP command
@@ -64,12 +68,14 @@
 **Commit**: feat: improve CLI not found error message with install guidance
 
 **What Changed**:
+
 - Error message now suggests `npm install -D ripp-cli`
 - Added "Install Locally" button to open terminal with suggestion
 - Added "Open Terminal" button for manual action
 - More helpful than generic "CLI not found" message
 
 **Verification**:
+
 ```
 1. Remove ripp-cli and ensure npx is unavailable (or mock error)
 2. Run any RIPP command
@@ -86,6 +92,7 @@
 **Commit**: docs: update README and package.json for RIPP v1.0 alignment
 
 **What Changed**:
+
 - Added RIPP™ trademark in title
 - Added "What RIPP is / is not" section (aligned with SPEC.md)
 - Added "RIPP: Initialize Repository" to command list
@@ -97,6 +104,7 @@
 - Updated package.json description
 
 **Verification**:
+
 ```
 1. Read README.md top to bottom
 2. Verify all commands are listed
@@ -114,6 +122,7 @@
 **Commit**: docs: add Codespaces and platform-specific testing verification
 
 **What Changed**:
+
 - Added "Testing in GitHub Codespaces" section
 - Documented local binary detection testing in Codespaces
 - Added npx fallback testing steps
@@ -121,6 +130,7 @@
 - Updated pre-publishing checklist with new verification items
 
 **Verification**:
+
 ```
 1. Open TESTING.md
 2. Review Codespaces testing section
@@ -134,13 +144,13 @@
 
 ### ✅ Commands Match CLI
 
-| CLI Command | Extension Command | Status |
-|-------------|------------------|--------|
-| `ripp init` | RIPP: Initialize Repository | ✅ Added |
-| `ripp validate` | RIPP: Validate Packet(s) | ✅ Existing |
-| `ripp lint` | RIPP: Lint Packet(s) | ✅ Existing |
-| `ripp package` | RIPP: Package Handoff | ✅ Existing |
-| `ripp analyze` | RIPP: Analyze Project | ✅ Existing |
+| CLI Command     | Extension Command           | Status      |
+| --------------- | --------------------------- | ----------- |
+| `ripp init`     | RIPP: Initialize Repository | ✅ Added    |
+| `ripp validate` | RIPP: Validate Packet(s)    | ✅ Existing |
+| `ripp lint`     | RIPP: Lint Packet(s)        | ✅ Existing |
+| `ripp package`  | RIPP: Package Handoff       | ✅ Existing |
+| `ripp analyze`  | RIPP: Analyze Project       | ✅ Existing |
 
 ### ✅ CLI Execution Reliability
 
@@ -151,7 +161,8 @@
 
 ### ✅ No-Write Guarantee for Validate
 
-**Verified**: 
+**Verified**:
+
 - Validate command only passes `['validate', '.']` to CLI
 - CLI validate function is read-only (no writes)
 - No formatting, scaffolding, or auto-fix features
@@ -245,6 +256,7 @@
 ### None for Core Functionality ✅
 
 All drift items identified in Phase A have been addressed:
+
 - ✅ Added init command
 - ✅ Prefer local CLI binary
 - ✅ Improved error messages

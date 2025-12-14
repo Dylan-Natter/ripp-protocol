@@ -24,13 +24,13 @@ RIPP Level 1 requires only:
 
 ### What RIPP Does Not Require
 
-| Common in other specs | Required in RIPP? | Why not? |
-|-----------------------|-------------------|----------|
-| Authors / Contributors | ❌ No | Git history tracks this |
-| Change log | ❌ No | Git commit messages track this |
-| Approval signatures | ❌ No | PR approval process tracks this |
-| Implementation details | ❌ No | Code is separate from intent |
-| Project timelines | ❌ No | RIPP is a spec, not a project plan |
+| Common in other specs  | Required in RIPP? | Why not?                           |
+| ---------------------- | ----------------- | ---------------------------------- |
+| Authors / Contributors | ❌ No             | Git history tracks this            |
+| Change log             | ❌ No             | Git commit messages track this     |
+| Approval signatures    | ❌ No             | PR approval process tracks this    |
+| Implementation details | ❌ No             | Code is separate from intent       |
+| Project timelines      | ❌ No             | RIPP is a spec, not a project plan |
 
 **Philosophy:** If Git, GitHub, or code already tracks it, RIPP doesn't duplicate it.
 
@@ -57,11 +57,12 @@ purpose:
 # Auto-fixed (syntactically valid, semantically useless)
 purpose:
   problem: 'Users cannot do X'
-  solution: 'TODO'  # Validator guessed
-  value: 'TODO'     # Validator guessed
+  solution: 'TODO' # Validator guessed
+  value: 'TODO' # Validator guessed
 ```
 
 **Result:**
+
 - ✅ Packet is now valid (passes schema validation)
 - ❌ Packet is useless (no actual solution or value defined)
 - ❌ Intent is unclear
@@ -89,6 +90,7 @@ purpose:
 ```
 
 **Result:**
+
 - ✅ Packet is valid
 - ✅ Packet is meaningful
 - ✅ Intent is clear
@@ -98,10 +100,10 @@ purpose:
 
 ### Why This Matters
 
-| Approach | Outcome |
-|----------|---------|
-| **Auto-fix** | Syntactically valid, semantically questionable |
-| **Human fix** | Syntactically valid, semantically correct |
+| Approach      | Outcome                                        |
+| ------------- | ---------------------------------------------- |
+| **Auto-fix**  | Syntactically valid, semantically questionable |
+| **Human fix** | Syntactically valid, semantically correct      |
 
 **RIPP principle:** Validators report problems. Humans solve them deliberately.
 
@@ -113,16 +115,16 @@ RIPP's core philosophy: **Humans own intent. Automation executes it.**
 
 ### Division of Responsibilities
 
-| Responsibility | Owner |
-|----------------|-------|
-| Define what the feature does | Human |
-| Specify who can use it | Human |
-| Document what can go wrong | Human |
-| Decide when it's ready for production | Human |
-| **Validate schema conformance** | **Tool** |
-| **Check best practices** | **Tool** |
-| **Enforce CI/CD gates** | **Tool** |
-| **Package for handoff** | **Tool** |
+| Responsibility                        | Owner    |
+| ------------------------------------- | -------- |
+| Define what the feature does          | Human    |
+| Specify who can use it                | Human    |
+| Document what can go wrong            | Human    |
+| Decide when it's ready for production | Human    |
+| **Validate schema conformance**       | **Tool** |
+| **Check best practices**              | **Tool** |
+| **Enforce CI/CD gates**               | **Tool** |
+| **Package for handoff**               | **Tool** |
 
 ### What This Prevents
 
@@ -190,14 +192,14 @@ permissions:
 
 ### Key Differences
 
-| Dimension | Policy-as-Code | RIPP |
-|-----------|----------------|------|
-| **Purpose** | Runtime enforcement | Specification and documentation |
-| **Evaluated by** | Policy engine (OPA, Cedar, etc.) | Humans (review) and validators (schema) |
-| **When used** | During request execution | Before and during development |
-| **Format** | Domain-specific language (Rego, Cedar) | YAML/JSON (human-readable) |
-| **Scope** | Authorization and access control | Full feature specification |
-| **Enforcement** | Blocks unauthorized actions | Prevents incomplete specs from being approved |
+| Dimension        | Policy-as-Code                         | RIPP                                          |
+| ---------------- | -------------------------------------- | --------------------------------------------- |
+| **Purpose**      | Runtime enforcement                    | Specification and documentation               |
+| **Evaluated by** | Policy engine (OPA, Cedar, etc.)       | Humans (review) and validators (schema)       |
+| **When used**    | During request execution               | Before and during development                 |
+| **Format**       | Domain-specific language (Rego, Cedar) | YAML/JSON (human-readable)                    |
+| **Scope**        | Authorization and access control       | Full feature specification                    |
+| **Enforcement**  | Blocks unauthorized actions            | Prevents incomplete specs from being approved |
 
 ---
 
@@ -238,13 +240,13 @@ RIPP is designed for **Git-based workflows**, not external tools.
 
 ### Benefits
 
-| Benefit | Explanation |
-|---------|-------------|
+| Benefit                    | Explanation                         |
+| -------------------------- | ----------------------------------- |
 | **Single source of truth** | Specs and code are in the same repo |
-| **Version control** | RIPP packets are versioned with Git |
-| **Review workflow** | Same PR process as code |
-| **CI/CD integration** | Automated validation on every PR |
-| **Accessibility** | No separate login or tool required |
+| **Version control**        | RIPP packets are versioned with Git |
+| **Review workflow**        | Same PR process as code             |
+| **CI/CD integration**      | Automated validation on every PR    |
+| **Accessibility**          | No separate login or tool required  |
 
 ### Example Workflow
 
@@ -278,12 +280,12 @@ RIPP validators **never modify source files**. This is a deliberate design choic
 
 ### What This Prevents
 
-| Anti-Pattern | Risk |
-|--------------|------|
-| **Auto-fix errors** | Introduces semantically incorrect "fixes" |
-| **Normalize formatting** | Overwrites human-chosen structure |
-| **Remove "unnecessary" sections** | Deletes context humans intended to keep |
-| **Inject defaults** | Adds fields humans didn't approve |
+| Anti-Pattern                      | Risk                                      |
+| --------------------------------- | ----------------------------------------- |
+| **Auto-fix errors**               | Introduces semantically incorrect "fixes" |
+| **Normalize formatting**          | Overwrites human-chosen structure         |
+| **Remove "unnecessary" sections** | Deletes context humans intended to keep   |
+| **Inject defaults**               | Adds fields humans didn't approve         |
 
 ### RIPP's Approach
 
@@ -327,11 +329,11 @@ ripp init
 
 ### Contrast with Other Tools
 
-| Tool | Behavior | RIPP's Approach |
-|------|----------|-----------------|
-| **npm** | Auto-creates `node_modules/` | Explicit: `ripp init` |
-| **Git** | `git init` creates `.git/` | Explicit: `ripp init` |
-| **eslint** | `--init` prompts for config | Explicit: `ripp init` |
+| Tool       | Behavior                     | RIPP's Approach       |
+| ---------- | ---------------------------- | --------------------- |
+| **npm**    | Auto-creates `node_modules/` | Explicit: `ripp init` |
+| **Git**    | `git init` creates `.git/`   | Explicit: `ripp init` |
+| **eslint** | `--init` prompts for config  | Explicit: `ripp init` |
 
 **Philosophy:** Humans choose when to adopt. Tools don't assume.
 
@@ -343,11 +345,11 @@ RIPP has three conformance levels (1, 2, 3) to balance simplicity and rigor.
 
 ### Progressive Disclosure
 
-| Level | Sections Required | Time to Write | Use For |
-|-------|-------------------|---------------|---------|
-| **Level 1** | Purpose, UX Flow, Data Contracts | 30-60 min | Simple features, prototypes |
-| **Level 2** | Level 1 + API, Permissions, Failure Modes | 1-2 hours | Production features |
-| **Level 3** | Level 2 + Audit, NFRs, Tests | 2-4 hours | High-risk features |
+| Level       | Sections Required                         | Time to Write | Use For                     |
+| ----------- | ----------------------------------------- | ------------- | --------------------------- |
+| **Level 1** | Purpose, UX Flow, Data Contracts          | 30-60 min     | Simple features, prototypes |
+| **Level 2** | Level 1 + API, Permissions, Failure Modes | 1-2 hours     | Production features         |
+| **Level 3** | Level 2 + Audit, NFRs, Tests              | 2-4 hours     | High-risk features          |
 
 ### Why Not One Level?
 
@@ -395,12 +397,12 @@ def create_item():
 
 ### Why Separate?
 
-| Dimension | Intent (RIPP) | Implementation (Code) |
-|-----------|---------------|------------------------|
-| **Durability** | Survives rewrites | Gets rewritten |
-| **Portability** | Language-agnostic | Language-specific |
-| **Reviewability** | Reviewed before coding | Reviewed during coding |
-| **Source of truth** | RIPP packet | Code must match RIPP |
+| Dimension           | Intent (RIPP)          | Implementation (Code)  |
+| ------------------- | ---------------------- | ---------------------- |
+| **Durability**      | Survives rewrites      | Gets rewritten         |
+| **Portability**     | Language-agnostic      | Language-specific      |
+| **Reviewability**   | Reviewed before coding | Reviewed during coding |
+| **Source of truth** | RIPP packet            | Code must match RIPP   |
 
 **Key insight:** Code is ephemeral. Intent is durable.
 
@@ -408,16 +410,16 @@ def create_item():
 
 ## Summary: Design Principles
 
-| Principle | Rationale |
-|-----------|-----------|
-| **Minimal required fields** | Low barrier to entry, progressive disclosure |
-| **No auto-fix** | Humans fix deliberately, no semantic guessing |
-| **Human intent as control** | Humans own decisions, tools execute |
-| **GitHub-first** | Single source of truth, no external tools |
-| **Read-only validation** | No surprises, no file modifications |
-| **Explicit scaffolding** | Consent and control, no hidden side effects |
-| **Three levels** | Balance simplicity and rigor |
-| **Intent vs implementation** | Intent is durable, code is ephemeral |
+| Principle                    | Rationale                                     |
+| ---------------------------- | --------------------------------------------- |
+| **Minimal required fields**  | Low barrier to entry, progressive disclosure  |
+| **No auto-fix**              | Humans fix deliberately, no semantic guessing |
+| **Human intent as control**  | Humans own decisions, tools execute           |
+| **GitHub-first**             | Single source of truth, no external tools     |
+| **Read-only validation**     | No surprises, no file modifications           |
+| **Explicit scaffolding**     | Consent and control, no hidden side effects   |
+| **Three levels**             | Balance simplicity and rigor                  |
+| **Intent vs implementation** | Intent is durable, code is ephemeral          |
 
 **Philosophy:** RIPP serves humans. Humans own intent. No surprises.
 

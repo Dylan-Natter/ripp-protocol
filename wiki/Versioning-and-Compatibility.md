@@ -10,11 +10,11 @@ RIPP uses **semantic versioning**: `MAJOR.MINOR.PATCH`
 
 ### Version Number Meaning
 
-| Component | Changes | Example | Impact |
-|-----------|---------|---------|--------|
-| **MAJOR** | Breaking changes to required sections or validation rules | `1.0` → `2.0` | May require packet updates |
-| **MINOR** | New optional sections or backward-compatible additions | `1.0` → `1.1` | Existing packets remain valid |
-| **PATCH** | Clarifications, documentation, non-normative updates | `1.0.0` → `1.0.1` | No changes required |
+| Component | Changes                                                   | Example           | Impact                        |
+| --------- | --------------------------------------------------------- | ----------------- | ----------------------------- |
+| **MAJOR** | Breaking changes to required sections or validation rules | `1.0` → `2.0`     | May require packet updates    |
+| **MINOR** | New optional sections or backward-compatible additions    | `1.0` → `1.1`     | Existing packets remain valid |
+| **PATCH** | Clarifications, documentation, non-normative updates      | `1.0.0` → `1.0.1` | No changes required           |
 
 ---
 
@@ -22,14 +22,14 @@ RIPP uses **semantic versioning**: `MAJOR.MINOR.PATCH`
 
 Each RIPP version has a corresponding JSON Schema:
 
-| RIPP Version | Schema File | Schema $id |
-|--------------|-------------|------------|
-| `1.0` | `schema/ripp-1.0.schema.json` | `https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json` |
+| RIPP Version | Schema File                   | Schema $id                                                                 |
+| ------------ | ----------------------------- | -------------------------------------------------------------------------- |
+| `1.0`        | `schema/ripp-1.0.schema.json` | `https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json` |
 
 **Future versions:**
 
-| RIPP Version | Schema File | Schema $id |
-|--------------|-------------|------------|
+| RIPP Version   | Schema File                   | Schema $id                                                                 |
+| -------------- | ----------------------------- | -------------------------------------------------------------------------- |
 | `2.0` (future) | `schema/ripp-2.0.schema.json` | `https://dylan-natter.github.io/ripp-protocol/schema/ripp-2.0.schema.json` |
 
 ---
@@ -66,6 +66,7 @@ observability:        # New optional section
 ```
 
 **Result:**
+
 - RIPP 1.0 packets validate against RIPP 1.1 schema
 - RIPP 1.1 packets with `observability` are valid
 - RIPP 1.0 packets without `observability` are still valid
@@ -222,7 +223,7 @@ level: 3
 # ... existing sections ...
 # New required section in 2.0:
 security:
-  threat_model: [ ... ]
+  threat_model: [...]
 ```
 
 ---
@@ -237,7 +238,7 @@ RIPP packets themselves can be versioned independently of the RIPP spec:
 
 ```yaml
 created: '2025-01-10'
-updated: '2025-12-14'  # Update this when packet changes
+updated: '2025-12-14' # Update this when packet changes
 ```
 
 **Best practice:** Update this field whenever you modify the packet.
@@ -249,10 +250,11 @@ updated: '2025-12-14'  # Update this when packet changes
 **Optional field:** Packets can include a `version` field for explicit versioning.
 
 ```yaml
-version: '2.1.0'  # Semver recommended
+version: '2.1.0' # Semver recommended
 ```
 
 **Use when:**
+
 - ✅ Packet goes through multiple revisions
 - ✅ Team wants explicit version tracking
 - ✅ Packet is referenced by external systems
@@ -326,11 +328,11 @@ git commit -m "docs(item-creation): add examples to acceptance tests"
 
 The RIPP CLI follows semantic versioning and supports specific RIPP spec versions:
 
-| CLI Version | Supported RIPP Versions | Notes |
-|-------------|-------------------------|-------|
-| `1.0.x` | `1.0` | Initial release |
-| `1.1.x` (future) | `1.0`, `1.1` | Backward compatible |
-| `2.0.x` (future) | `1.0`, `2.0` | Migration tools included |
+| CLI Version      | Supported RIPP Versions | Notes                    |
+| ---------------- | ----------------------- | ------------------------ |
+| `1.0.x`          | `1.0`                   | Initial release          |
+| `1.1.x` (future) | `1.0`, `1.1`            | Backward compatible      |
+| `2.0.x` (future) | `1.0`, `2.0`            | Migration tools included |
 
 **Recommendation:** Pin CLI version in `package.json`:
 
@@ -373,11 +375,11 @@ When RIPP features are deprecated:
 
 **Example (hypothetical):**
 
-| Version | Action |
-|---------|--------|
-| `1.3` | Deprecate `permissions.resource_scope` (warn but still valid) |
-| `1.4` | Continue warning |
-| `2.0` | Remove `permissions.resource_scope` (breaking change) |
+| Version | Action                                                        |
+| ------- | ------------------------------------------------------------- |
+| `1.3`   | Deprecate `permissions.resource_scope` (warn but still valid) |
+| `1.4`   | Continue warning                                              |
+| `2.0`   | Remove `permissions.resource_scope` (breaking change)         |
 
 **Migration guide provided:** Shows how to replace deprecated features.
 
@@ -388,7 +390,7 @@ When RIPP features are deprecated:
 RIPP validators detect the version from the `ripp_version` field:
 
 ```yaml
-ripp_version: '1.0'  # Validator uses ripp-1.0.schema.json
+ripp_version: '1.0' # Validator uses ripp-1.0.schema.json
 ```
 
 **If version is missing or invalid:**
@@ -437,11 +439,11 @@ ripp validate .  # Validates both 1.0 and 2.0 packets
 
 ## Summary
 
-| Upgrade Type | Impact | Action Required | Frequency |
-|--------------|--------|-----------------|-----------|
-| **PATCH** | Documentation, clarifications | None | As needed |
-| **MINOR** | New optional features | Optional adoption | Every few months |
-| **MAJOR** | Breaking changes | Required migration | Yearly or less |
+| Upgrade Type | Impact                        | Action Required    | Frequency        |
+| ------------ | ----------------------------- | ------------------ | ---------------- |
+| **PATCH**    | Documentation, clarifications | None               | As needed        |
+| **MINOR**    | New optional features         | Optional adoption  | Every few months |
+| **MAJOR**    | Breaking changes              | Required migration | Yearly or less   |
 
 **Philosophy:** RIPP evolves carefully. Existing packets remain valid within MAJOR versions. Breaking changes are rare and well-communicated.
 

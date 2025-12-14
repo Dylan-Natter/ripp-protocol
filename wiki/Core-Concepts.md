@@ -41,21 +41,23 @@ Intent is **durable** and **portable**:
 
 RIPP separates **intent** (what should happen) from **implementation** (how it's coded).
 
-| Dimension | Intent (RIPP) | Code (Implementation) |
-|-----------|---------------|------------------------|
-| **Durability** | Survives rewrites | Gets rewritten |
-| **Reviewability** | Reviewed before coding | Reviewed during coding |
-| **Portability** | Language/platform agnostic | Tied to tech stack |
-| **Validation** | Schema-validated | Syntax-validated |
-| **Evolution** | Evolves with requirements | Evolves with implementation |
-| **Source of Truth** | RIPP packet | Code must match RIPP |
+| Dimension           | Intent (RIPP)              | Code (Implementation)       |
+| ------------------- | -------------------------- | --------------------------- |
+| **Durability**      | Survives rewrites          | Gets rewritten              |
+| **Reviewability**   | Reviewed before coding     | Reviewed during coding      |
+| **Portability**     | Language/platform agnostic | Tied to tech stack          |
+| **Validation**      | Schema-validated           | Syntax-validated            |
+| **Evolution**       | Evolves with requirements  | Evolves with implementation |
+| **Source of Truth** | RIPP packet                | Code must match RIPP        |
 
 ### Example
 
 **Intent (RIPP):**
+
 > Users must be authenticated with `editor` role to create items. Invalid SKUs return HTTP 400 with error details.
 
 **Implementation (Code):**
+
 ```python
 @app.route('/items', methods=['POST'])
 @require_auth(['editor'])
@@ -84,13 +86,13 @@ RIPP packets are **repo-native**: they live in version control alongside code.
 
 ### Benefits of Repo-Native
 
-| Benefit | Explanation |
-|---------|-------------|
-| **Single Source of Truth** | Spec and code are in the same repository |
-| **Diff-able** | Changes to requirements are visible in PRs |
-| **Versioned Together** | Code and spec versions stay in sync |
-| **Review-able** | Specs are reviewed in the same workflow as code |
-| **Accessible** | No separate login or tool required |
+| Benefit                    | Explanation                                     |
+| -------------------------- | ----------------------------------------------- |
+| **Single Source of Truth** | Spec and code are in the same repository        |
+| **Diff-able**              | Changes to requirements are visible in PRs      |
+| **Versioned Together**     | Code and spec versions stay in sync             |
+| **Review-able**            | Specs are reviewed in the same workflow as code |
+| **Accessible**             | No separate login or tool required              |
 
 ### Where RIPP Packets Live
 
@@ -175,13 +177,13 @@ RIPP validators **never modify source files**. This is a core design principle.
 
 ### What This Means
 
-| Operation | Read-Only? | Why? |
-|-----------|------------|------|
-| `ripp validate` | ✅ Yes | Only checks schema conformance |
-| `ripp lint` | ✅ Yes | Only reports best practice violations |
-| `ripp package` | ✅ Yes | Creates new file, never modifies source |
-| `ripp analyze` | ✅ Yes | Creates new draft file, never edits existing |
-| `ripp init` | ⚠️ Writes | But only creates new files, never modifies existing (unless `--force`) |
+| Operation       | Read-Only? | Why?                                                                   |
+| --------------- | ---------- | ---------------------------------------------------------------------- |
+| `ripp validate` | ✅ Yes     | Only checks schema conformance                                         |
+| `ripp lint`     | ✅ Yes     | Only reports best practice violations                                  |
+| `ripp package`  | ✅ Yes     | Creates new file, never modifies source                                |
+| `ripp analyze`  | ✅ Yes     | Creates new draft file, never edits existing                           |
+| `ripp init`     | ⚠️ Writes  | But only creates new files, never modifies existing (unless `--force`) |
 
 ### Why Not Auto-Fix?
 
@@ -254,17 +256,17 @@ RIPP's design philosophy is clear: **Humans define what should happen. Tools mak
 
 ### Division of Responsibilities
 
-| Responsibility | Owned By |
-|----------------|----------|
-| Define feature purpose | Human |
-| Specify data contracts | Human |
-| Decide permissions model | Human |
-| Document failure modes | Human |
-| Write acceptance tests | Human |
+| Responsibility                  | Owned By |
+| ------------------------------- | -------- |
+| Define feature purpose          | Human    |
+| Specify data contracts          | Human    |
+| Decide permissions model        | Human    |
+| Document failure modes          | Human    |
+| Write acceptance tests          | Human    |
 | **Validate schema conformance** | **Tool** |
-| **Check best practices** | **Tool** |
-| **Enforce CI/CD gates** | **Tool** |
-| **Package for handoff** | **Tool** |
+| **Check best practices**        | **Tool** |
+| **Enforce CI/CD gates**         | **Tool** |
+| **Package for handoff**         | **Tool** |
 
 ### What This Prevents
 
@@ -284,15 +286,15 @@ RIPP's design philosophy is clear: **Humans define what should happen. Tools mak
 
 ## Summary
 
-| Concept | Core Principle |
-|---------|----------------|
-| **Regenerative Intent** | Preserve the "why" and "how" across rewrites |
-| **Intent vs Code** | Intent is durable; code is ephemeral |
-| **Repo-Native** | Specs live in Git alongside code |
-| **Determinism** | Specifications are unambiguous |
-| **Read-Only Validation** | Tools never modify your files |
-| **Explicit Scaffolding** | Initialization requires human action |
-| **Human Ownership** | Humans own intent; tools execute it |
+| Concept                  | Core Principle                               |
+| ------------------------ | -------------------------------------------- |
+| **Regenerative Intent**  | Preserve the "why" and "how" across rewrites |
+| **Intent vs Code**       | Intent is durable; code is ephemeral         |
+| **Repo-Native**          | Specs live in Git alongside code             |
+| **Determinism**          | Specifications are unambiguous               |
+| **Read-Only Validation** | Tools never modify your files                |
+| **Explicit Scaffolding** | Initialization requires human action         |
+| **Human Ownership**      | Humans own intent; tools execute it          |
 
 ---
 

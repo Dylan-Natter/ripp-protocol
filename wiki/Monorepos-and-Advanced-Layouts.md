@@ -22,6 +22,7 @@ my-app/
 ```
 
 **Validation:**
+
 ```bash
 ripp validate .
 ```
@@ -55,6 +56,7 @@ monorepo/
 ```
 
 **Validation:**
+
 ```bash
 # Validate all packages
 ripp validate .
@@ -89,6 +91,7 @@ enterprise-app/
 ```
 
 **Validation:**
+
 ```bash
 # Validate all RIPP packets
 ripp validate ripp/
@@ -119,6 +122,7 @@ feature-based-app/
 ```
 
 **Validation:**
+
 ```bash
 # Validate all features
 ripp validate features/
@@ -152,12 +156,14 @@ The RIPP CLI automatically detects the repository root:
 ```
 
 **Command:**
+
 ```bash
 cd packages/auth
 ripp validate .
 ```
 
 **Behavior:**
+
 - CLI detects `/home/user/monorepo/` as repository root
 - Validates all `*.ripp.yaml` files under `packages/auth/`
 
@@ -184,14 +190,17 @@ packages/
 ```
 
 **Pros:**
+
 - ✅ Clear ownership (each package owns its RIPP packets)
 - ✅ Easy to validate per package
 - ✅ Natural fit for independent deployment
 
 **Cons:**
+
 - ⚠️ Cross-package dependencies harder to track
 
 **Validation:**
+
 ```bash
 # All packages
 ripp validate packages/*/ripp/
@@ -221,15 +230,18 @@ packages/
 ```
 
 **Pros:**
+
 - ✅ All RIPP packets in one place (easier to browse)
 - ✅ Simplifies cross-cutting concerns
 - ✅ Single source of truth for specs
 
 **Cons:**
+
 - ⚠️ Ownership less clear
 - ⚠️ Potential merge conflicts if multiple teams edit
 
 **Validation:**
+
 ```bash
 ripp validate ripp/
 ```
@@ -259,15 +271,18 @@ packages/
 ```
 
 **Pros:**
+
 - ✅ Shared specs centralized
 - ✅ Package-specific specs colocated
 - ✅ Clear separation of concerns
 
 **Cons:**
+
 - ⚠️ More complex structure
 - ⚠️ Need to validate multiple directories
 
 **Validation:**
+
 ```bash
 # Validate all RIPP packets
 ripp validate ripp/ packages/*/ripp/
@@ -300,7 +315,7 @@ jobs:
       - run: npm install -g ripp-cli
       - run: ripp validate packages/auth/ --min-level 3
       - run: ripp validate packages/billing/ --min-level 3
-  
+
   validate-other:
     name: Validate Other Packages (Level 1)
     runs-on: ubuntu-latest
@@ -312,6 +327,7 @@ jobs:
 ```
 
 **Result:**
+
 - `auth` and `billing` must be Level 3
 - `web` and `tools` can be Level 1
 
@@ -354,14 +370,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed for git diff
-      
+          fetch-depth: 0 # Needed for git diff
+
       - name: Get changed RIPP files
         id: changed-files
         run: |
           CHANGED=$(git diff --name-only origin/main...HEAD | grep '.ripp.yaml$' || true)
           echo "files=$CHANGED" >> $GITHUB_OUTPUT
-      
+
       - name: Validate changed RIPP packets
         if: steps.changed-files.outputs.files != ''
         run: |
@@ -386,7 +402,7 @@ RIPP packets cannot reference entities from other packages' `data_contracts`:
 api_contracts:
   - endpoint: '/login'
     request:
-      schema_ref: '../billing/CreateSubscription'  # NOT SUPPORTED
+      schema_ref: '../billing/CreateSubscription' # NOT SUPPORTED
 ```
 
 **Workaround:** Duplicate shared entities or use centralized RIPP directory.
@@ -547,12 +563,12 @@ build/reports/
 
 ## Summary
 
-| Layout | Best For | Validation Command |
-|--------|----------|-------------------|
-| **Single project** | Small apps, single team | `ripp validate .` |
-| **One RIPP per package** | Independent packages, clear ownership | `ripp validate packages/*/ripp/` |
-| **Centralized RIPP** | Shared specs, integration testing | `ripp validate ripp/` |
-| **Hybrid** | Complex monorepos, mixed ownership | `ripp validate ripp/ packages/*/ripp/` |
+| Layout                   | Best For                              | Validation Command                     |
+| ------------------------ | ------------------------------------- | -------------------------------------- |
+| **Single project**       | Small apps, single team               | `ripp validate .`                      |
+| **One RIPP per package** | Independent packages, clear ownership | `ripp validate packages/*/ripp/`       |
+| **Centralized RIPP**     | Shared specs, integration testing     | `ripp validate ripp/`                  |
+| **Hybrid**               | Complex monorepos, mixed ownership    | `ripp validate ripp/ packages/*/ripp/` |
 
 **Philosophy:** RIPP adapts to your repository structure. No prescribed layout.
 

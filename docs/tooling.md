@@ -49,6 +49,7 @@ ripp init --force
 ```
 
 This creates:
+
 - `ripp/` - Main directory for RIPP artifacts
 - `ripp/README.md` - Documentation about RIPP
 - `ripp/features/` - Feature RIPP packets
@@ -56,6 +57,7 @@ This creates:
 - `.github/workflows/ripp-validate.yml` - GitHub Action for CI/CD
 
 The `init` command is:
+
 - ✅ **Idempotent** - Safe to run multiple times
 - ✅ **Non-destructive** - Preserves existing files by default
 - ✅ **Complete** - Sets up everything you need in one command

@@ -70,33 +70,33 @@ jobs:
   validate:
     name: Validate RIPP Packets
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: tools/ripp-cli/package-lock.json
-      
+
       - name: Install RIPP CLI
         run: |
           cd tools/ripp-cli
           npm ci
           npm link
-      
+
       - name: Validate all RIPP packets
         run: |
           echo "Validating RIPP packets..."
           ripp validate examples/
           ripp validate templates/ || true
-      
+
       - name: Summary
         if: always()
         run: |
@@ -111,6 +111,7 @@ jobs:
 ### `pull_request` (Recommended)
 
 Runs when:
+
 - ✅ PR is opened
 - ✅ PR is updated (new commits pushed)
 - ✅ Files matching `**.ripp.yaml` or `**.ripp.json` are changed
@@ -120,6 +121,7 @@ Runs when:
 ### `push` to `main`
 
 Runs when:
+
 - ✅ Code is merged to `main` branch
 - ✅ Files matching `**.ripp.yaml` or `**.ripp.json` are changed
 
@@ -128,6 +130,7 @@ Runs when:
 ### `workflow_dispatch` (Optional)
 
 Allows manual triggering:
+
 - ✅ Via GitHub Actions UI
 - ✅ Via GitHub CLI (`gh workflow run`)
 
@@ -153,15 +156,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI
         run: npm install -g ripp-cli
-      
+
       - name: Validate RIPP Packets
         run: ripp validate .
 ```
@@ -184,18 +187,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI
         run: npm install -g ripp-cli
-      
+
       - name: Validate RIPP Packets
         run: ripp validate .
-      
+
       - name: Lint RIPP Packets (strict mode)
         run: ripp lint . --strict
 ```
@@ -219,15 +222,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI
         run: npm install -g ripp-cli
-      
+
       - name: Validate Production Features (Level 2+)
         run: ripp validate ripp/features/ --min-level 2
 ```
@@ -252,16 +255,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Validate RIPP Packets
         run: npx ripp validate .
 ```
@@ -286,21 +289,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI
         run: npm install -g ripp-cli
-      
+
       - name: Validate RIPP Packets
         run: ripp validate .
-      
+
       - name: Lint RIPP Packets
         run: ripp lint . --output ./lint-reports/
-      
+
       - name: Upload Lint Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -317,13 +320,13 @@ jobs:
 
 RIPP validation behaves **identically** in local and CI environments:
 
-| Aspect | Local (`ripp validate`) | CI (`ripp validate`) |
-|--------|-------------------------|----------------------|
-| **Validation logic** | Same | Same |
-| **Schema used** | Same | Same |
-| **Exit codes** | Same | Same |
-| **Error messages** | Same | Same |
-| **File modification** | Never | Never |
+| Aspect                | Local (`ripp validate`) | CI (`ripp validate`) |
+| --------------------- | ----------------------- | -------------------- |
+| **Validation logic**  | Same                    | Same                 |
+| **Schema used**       | Same                    | Same                 |
+| **Exit codes**        | Same                    | Same                 |
+| **Error messages**    | Same                    | Same                 |
+| **File modification** | Never                   | Never                |
 
 **Why this matters:** You can test locally before pushing and get the same results.
 
@@ -381,7 +384,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install -g ripp-cli
       - run: ripp validate packages/auth/ --min-level 3
-  
+
   validate-billing:
     if: contains(github.event.pull_request.changed_files, 'packages/billing/')
     runs-on: ubuntu-latest
@@ -453,15 +456,15 @@ jobs:
         ripp-version: ['1.0', '2.0']
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI (version ${{ matrix.ripp-version }})
         run: npm install -g ripp-cli@${{ matrix.ripp-version }}
-      
+
       - name: Validate RIPP Packets
         run: ripp validate .
 ```
@@ -533,13 +536,13 @@ git push
 
 ## Summary
 
-| Feature | Recommendation |
-|---------|----------------|
-| **Trigger** | `pull_request` + `push` to `main` |
-| **Validation** | Always run `ripp validate .` |
-| **Linting** | Optional, use `--strict` for enforcement |
-| **Branch Protection** | Enable required status checks |
-| **Local Testing** | Always validate locally before pushing |
+| Feature               | Recommendation                           |
+| --------------------- | ---------------------------------------- |
+| **Trigger**           | `pull_request` + `push` to `main`        |
+| **Validation**        | Always run `ripp validate .`             |
+| **Linting**           | Optional, use `--strict` for enforcement |
+| **Branch Protection** | Enable required status checks            |
+| **Local Testing**     | Always validate locally before pushing   |
 
 **Philosophy:** Validation in CI prevents bad specs from reaching `main`. Local validation prevents wasted CI cycles.
 

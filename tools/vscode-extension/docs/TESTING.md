@@ -279,6 +279,7 @@ Extension logs appear in:
    - Click **Code** → **Codespaces** → **Create codespace on main**
 
 3. **Install RIPP CLI** in Codespace:
+
    ```bash
    npm install -D ripp-cli
    ```
@@ -317,6 +318,7 @@ Extension logs appear in:
 ### Test: Without Local Install (npx fallback)
 
 1. Remove local RIPP CLI:
+
    ```bash
    npm uninstall ripp-cli
    rm -rf node_modules/.bin/ripp*
@@ -346,14 +348,17 @@ Extension logs appear in:
 ### Windows Testing
 
 **Binary Detection:**
+
 - Verify uses `ripp.cmd` from `node_modules/.bin/`
 - Test in PowerShell, Command Prompt, and Git Bash
 
 **Path Handling:**
+
 - Verify backslash paths work correctly
 - Test with spaces in workspace path
 
 **Commands:**
+
 - [ ] RIPP: Initialize Repository
 - [ ] RIPP: Validate Packet(s)
 - [ ] RIPP: Lint Packet(s)
@@ -363,20 +368,25 @@ Extension logs appear in:
 ### macOS Testing
 
 **Binary Detection:**
+
 - Verify uses `ripp` (Unix binary) from `node_modules/.bin/`
 
 **Commands:**
+
 - [ ] All commands (same as Windows)
 
 ### Linux Testing
 
 **Binary Detection:**
+
 - Verify uses `ripp` (Unix binary) from `node_modules/.bin/`
 
 **Commands:**
+
 - [ ] All commands (same as Windows)
 
 **Distribution Testing:**
+
 - [ ] Ubuntu (common in Codespaces)
 - [ ] Debian
 - [ ] Fedora (optional)

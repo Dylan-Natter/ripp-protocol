@@ -35,13 +35,13 @@ purpose:
   # ERROR: missing 'solution' and 'value'
 
 # Wrong type
-level: '3'  # ERROR: should be integer, not string
+level: '3' # ERROR: should be integer, not string
 
 # Invalid status
-status: 'in-progress'  # ERROR: not in allowed values
+status: 'in-progress' # ERROR: not in allowed values
 
 # Bad packet_id format
-packet_id: 'My_Feature_123'  # ERROR: must be lowercase kebab-case
+packet_id: 'My_Feature_123' # ERROR: must be lowercase kebab-case
 ```
 
 ### Semantic Validation (`ripp lint`)
@@ -60,19 +60,19 @@ Checks for best practices:
 ```yaml
 # Placeholder text
 purpose:
-  problem: 'TODO: Define the problem'  # WARNING
+  problem: 'TODO: Define the problem' # WARNING
 
 # Undefined schema_ref
 api_contracts:
   - endpoint: '/api/items'
     request:
-      schema_ref: 'CreateItemRequest'  # WARNING if not in data_contracts.inputs
+      schema_ref: 'CreateItemRequest' # WARNING if not in data_contracts.inputs
 
 # Vague verification
 acceptance_tests:
   - test_id: 'TC-001'
     verification:
-      - 'It works'  # WARNING: too vague
+      - 'It works' # WARNING: too vague
 ```
 
 ---
@@ -190,7 +190,7 @@ purpose:
 **Fix:**
 
 ```yaml
-status: 'approved'  # Use only allowed values
+status: 'approved' # Use only allowed values
 ```
 
 ---
@@ -326,7 +326,7 @@ ux_flow:
   - step: 1
     actor: 'User'
     action: 'Clicks button'
-    trigger: 'User navigates to page'  # Add this
+    trigger: 'User navigates to page' # Add this
 ```
 
 ---
@@ -344,7 +344,7 @@ ux_flow:
 ```yaml
 data_contracts:
   inputs:
-    - name: 'CreateItemRequest'  # Must match schema_ref
+    - name: 'CreateItemRequest' # Must match schema_ref
       fields:
         - name: 'item_name'
           type: 'string'
@@ -443,12 +443,12 @@ verification:
 
 ## Exit Codes
 
-| Command | Exit Code | Meaning |
-|---------|-----------|---------|
-| `ripp validate` | `0` | All packets valid |
-| `ripp validate` | `1` | Validation failures |
-| `ripp lint` | `0` | No errors (warnings allowed unless `--strict`) |
-| `ripp lint` | `1` | Errors found, or warnings with `--strict` |
+| Command         | Exit Code | Meaning                                        |
+| --------------- | --------- | ---------------------------------------------- |
+| `ripp validate` | `0`       | All packets valid                              |
+| `ripp validate` | `1`       | Validation failures                            |
+| `ripp lint`     | `0`       | No errors (warnings allowed unless `--strict`) |
+| `ripp lint`     | `1`       | Errors found, or warnings with `--strict`      |
 
 ---
 
@@ -509,10 +509,10 @@ Validation errors often reveal misunderstandings about the feature:
 
 ## Summary
 
-| Validation Type | Tool | Purpose | Fail Build? |
-|----------------|------|---------|-------------|
-| **Structural** | `ripp validate` | Schema conformance, required fields | ✅ Yes |
-| **Semantic** | `ripp lint` | Best practices, placeholders, consistency | ⚠️ Only with `--strict` |
+| Validation Type | Tool            | Purpose                                   | Fail Build?             |
+| --------------- | --------------- | ----------------------------------------- | ----------------------- |
+| **Structural**  | `ripp validate` | Schema conformance, required fields       | ✅ Yes                  |
+| **Semantic**    | `ripp lint`     | Best practices, placeholders, consistency | ⚠️ Only with `--strict` |
 
 **Philosophy:** Validation catches errors. Humans fix them deliberately. No surprises.
 
