@@ -65,6 +65,24 @@ function getWorkspaceRoot(): string | undefined {
 }
 
 /**
+ * Handle CLI execution errors with user-friendly messages
+ */
+function handleCommandError(error: any, commandName: string) {
+	if ((error as any).code === 'CLI_NOT_FOUND') {
+		vscode.window.showErrorMessage(
+			`RIPP CLI not found. Please verify that \`npx ripp\` works in your terminal.`,
+			'Open Terminal'
+		).then(selection => {
+			if (selection === 'Open Terminal') {
+				vscode.commands.executeCommand('workbench.action.terminal.new');
+			}
+		});
+	} else {
+		vscode.window.showErrorMessage(`RIPP ${commandName} failed: ${error.message}`);
+	}
+}
+
+/**
  * Get configuration
  */
 function getConfig() {
@@ -150,6 +168,7 @@ async function executeRippCommand(
 
 		return result;
 	} catch (error: any) {
+		// Log technical details to output channel
 		if (showOutput) {
 			outputChannel.appendLine(`Error: ${error.message}`);
 			if (error.stdout) {
@@ -160,6 +179,18 @@ async function executeRippCommand(
 				outputChannel.appendLine(error.stderr);
 			}
 		}
+
+		// Check if this is a CLI not found error
+		if (error.code === 'ENOENT' || error.message.includes('command not found') || error.message.includes('not recognized')) {
+			// Create user-friendly error for missing CLI
+			const cliNotFoundError = new Error(
+				'RIPP CLI was not found. Please verify that `npx ripp` works in your terminal.'
+			);
+			(cliNotFoundError as any).code = 'CLI_NOT_FOUND';
+			(cliNotFoundError as any).originalError = error;
+			throw cliNotFoundError;
+		}
+
 		throw error;
 	}
 }
@@ -196,7 +227,7 @@ async function validatePackets() {
 					`RIPP validation complete. Found ${packets.length} packet(s).`
 				);
 			} catch (error: any) {
-				vscode.window.showErrorMessage(`RIPP validation failed: ${error.message}`);
+				handleCommandError(error, 'validation');
 			}
 		}
 	);
@@ -239,7 +270,7 @@ async function lintPackets() {
 					`RIPP linting complete. Check output for details.`
 				);
 			} catch (error: any) {
-				vscode.window.showErrorMessage(`RIPP linting failed: ${error.message}`);
+				handleCommandError(error, 'linting');
 			}
 		}
 	);
@@ -313,7 +344,7 @@ async function packageHandoff() {
 				const doc = await vscode.workspace.openTextDocument(outputUri);
 				await vscode.window.showTextDocument(doc);
 			} catch (error: any) {
-				vscode.window.showErrorMessage(`RIPP packaging failed: ${error.message}`);
+				handleCommandError(error, 'packaging');
 			}
 		}
 	);
@@ -382,7 +413,7 @@ async function analyzeProject() {
 				const doc = await vscode.workspace.openTextDocument(outputUri);
 				await vscode.window.showTextDocument(doc);
 			} catch (error: any) {
-				vscode.window.showErrorMessage(`RIPP analysis failed: ${error.message}`);
+				handleCommandError(error, 'analysis');
 			}
 		}
 	);

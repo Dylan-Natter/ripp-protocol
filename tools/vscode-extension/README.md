@@ -19,6 +19,10 @@ This extension requires:
 
 The RIPP CLI will be automatically installed via `npx` if using the default configuration.
 
+## Codespaces & CLI Availability
+
+**Codespaces note:** This extension works in GitHub Codespaces and other VS Code remote environments. Ensure the RIPP CLI is available via `npx ripp` or workspace npm scripts (for example, `npm run ripp:validate`).
+
 ## Installation
 
 Install from the VS Code Marketplace:
