@@ -22,7 +22,7 @@ Where user stories describe what humans should discuss, RIPP defines what machin
 
 **The gap RIPP fills:**
 
-- **User stories** excel at capturing "As a user, I want X so that Y"—the problem and the value  
+- **User stories** excel at capturing "As a user, I want X so that Y"—the problem and the value
 - **RIPP** adds "here's exactly how it works, what can break, who can access it, and how to verify it"—the contract
 
 For teams building with AI assistance, RIPP provides the rigor that prevents prototype-to-production disasters. For teams building without AI, RIPP provides the clarity that prevents intent erosion.
@@ -46,24 +46,24 @@ RIPP fixes this. Write a RIPP packet first. Review it. Approve it. Then build it
 
 RIPP is not a replacement for user stories—it's a complement. User stories define the "what" and "why" at a high level. RIPP adds the "how," "who," "what if," and "how to verify."
 
-| Dimension | Traditional User Story | RIPP Packet |
-|-----------|------------------------|-------------|
-| **Intent Capture** | High-level problem and value statement | Structured purpose with problem, solution, and value |
-| **Human Readability** | Optimized for conversation and consensus | Human-reviewable but structured for machines |
-| **AI Executability** | Requires interpretation and clarification | Machine-readable with explicit contracts |
-| **Security & Permissions** | Implicit or documented separately | Explicit permissions and authorization model (Level 2+) |
-| **Multi-Tenancy** | Rarely addressed | Tenant isolation in permissions and failure modes (Level 3) |
-| **Auditability** | No standard format | Structured audit events with severity and purpose (Level 3) |
+| Dimension                       | Traditional User Story                     | RIPP Packet                                                           |
+| ------------------------------- | ------------------------------------------ | --------------------------------------------------------------------- |
+| **Intent Capture**              | High-level problem and value statement     | Structured purpose with problem, solution, and value                  |
+| **Human Readability**           | Optimized for conversation and consensus   | Human-reviewable but structured for machines                          |
+| **AI Executability**            | Requires interpretation and clarification  | Machine-readable with explicit contracts                              |
+| **Security & Permissions**      | Implicit or documented separately          | Explicit permissions and authorization model (Level 2+)               |
+| **Multi-Tenancy**               | Rarely addressed                           | Tenant isolation in permissions and failure modes (Level 3)           |
+| **Auditability**                | No standard format                         | Structured audit events with severity and purpose (Level 3)           |
 | **Non-Functional Requirements** | Often in separate docs or tribal knowledge | Explicit NFRs section for performance, security, compliance (Level 3) |
-| **Failure Modes** | Discovered during testing or production | Documented upfront with handling strategies (Level 2+) |
-| **Regenerability** | Intent erodes during implementation | Intent preserved and versioned with code |
-| **Validation** | Manual review only | Automated schema validation in CI/CD |
+| **Failure Modes**               | Discovered during testing or production    | Documented upfront with handling strategies (Level 2+)                |
+| **Regenerability**              | Intent erodes during implementation        | Intent preserved and versioned with code                              |
+| **Validation**                  | Manual review only                         | Automated schema validation in CI/CD                                  |
 
 **When to use both:**
 
-1. Start with a user story to align on business value  
-2. Translate to a RIPP packet to define implementation contract  
-3. Review the RIPP packet before writing code  
+1. Start with a user story to align on business value
+2. Translate to a RIPP packet to define implementation contract
+3. Review the RIPP packet before writing code
 4. Reference the user story in RIPP's `purpose.references` field
 
 ---
@@ -76,10 +76,10 @@ AI coding assistants have made prototyping nearly frictionless. Ideas become run
 
 **The problem:**
 
-- Features ship with the intent trapped in a conversation log  
-- Security and edge cases are addressed reactively  
-- Code review has no authoritative spec to validate against  
-- Six months later, no one remembers why it works this way  
+- Features ship with the intent trapped in a conversation log
+- Security and edge cases are addressed reactively
+- Code review has no authoritative spec to validate against
+- Six months later, no one remembers why it works this way
 - Regenerating or refactoring requires archaelogy through git history and Slack threads
 
 **The user story doesn't scale to this reality.** It was designed for human-paced iteration where requirements evolved through conversation. In AI-assisted workflows, the conversation happens in seconds, but the durability requirement remains.
@@ -90,10 +90,10 @@ RIPP makes intent explicit, reviewable, and durable. When you prompt an AI to bu
 
 **The transformation:**
 
-- Intent is captured in a structured, versioned specification  
-- Security, permissions, and failure modes are defined before code generation  
-- Code review compares implementation against an approved contract  
-- Features can be regenerated from the RIPP packet with confidence  
+- Intent is captured in a structured, versioned specification
+- Security, permissions, and failure modes are defined before code generation
+- Code review compares implementation against an approved contract
+- Features can be regenerated from the RIPP packet with confidence
 - The "why" and "how" survive beyond the original author
 
 **AI made code cheap. RIPP makes intent durable.**
@@ -138,8 +138,9 @@ So that my account details stay current
 ```
 
 **Acceptance Criteria:**
-- User can edit name and email  
-- Changes are validated before saving  
+
+- User can edit name and email
+- Changes are validated before saving
 - User sees confirmation after successful update
 
 ### RIPP Packet (Evolution)
@@ -239,16 +240,16 @@ failure_modes:
 
 **Beyond the user story:**
 
-- **Explicit data contracts** — types, validation, required fields  
-- **API specification** — endpoints, methods, response codes  
-- **Permission model** — who can update what, under which conditions  
-- **Failure modes** — edge cases and error handling defined upfront  
+- **Explicit data contracts** — types, validation, required fields
+- **API specification** — endpoints, methods, response codes
+- **Permission model** — who can update what, under which conditions
+- **Failure modes** — edge cases and error handling defined upfront
 - **Machine validation** — automated checks in CI/CD
 
 **Continuity with Agile:**
 
-- The user story's problem and value appear in `purpose`  
-- Acceptance criteria map to `ux_flow` and optionally `acceptance_tests`  
+- The user story's problem and value appear in `purpose`
+- Acceptance criteria map to `ux_flow` and optionally `acceptance_tests`
 - Reference the original user story in `purpose.references`
 
 **The result:** Teams keep the conversational benefits of user stories while gaining the execution rigor needed for AI-assisted and production-grade development.

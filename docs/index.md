@@ -80,8 +80,8 @@ RIPP doesn't replace user stories—it extends them. Where user stories capture 
 
 **The relationship:**
 
-- **User stories** define the problem space and business value  
-- **RIPP packets** define the solution space and implementation contract  
+- **User stories** define the problem space and business value
+- **RIPP packets** define the solution space and implementation contract
 - **Together** they provide both alignment (user story) and rigor (RIPP)
 
 **For AI-assisted teams:** RIPP provides the specification layer that prevents "fast prototype, slow production" disasters.  
