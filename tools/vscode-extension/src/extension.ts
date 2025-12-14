@@ -75,10 +75,18 @@ function getWorkspaceRoot(): string | undefined {
 function handleCommandError(error: any, commandName: string) {
 	if ((error as any).code === 'CLI_NOT_FOUND') {
 		vscode.window.showErrorMessage(
-			`RIPP CLI not found. Please verify that \`npx ripp\` works in your terminal.`,
+			`RIPP CLI not found. Install it with: npm install -D ripp-cli`,
+			'Install Locally',
 			'Open Terminal'
 		).then(selection => {
-			if (selection === 'Open Terminal') {
+			if (selection === 'Install Locally') {
+				// Open terminal and suggest install command
+				vscode.commands.executeCommand('workbench.action.terminal.new').then(() => {
+					vscode.window.showInformationMessage(
+						'Run: npm install -D ripp-cli'
+					);
+				});
+			} else if (selection === 'Open Terminal') {
 				vscode.commands.executeCommand('workbench.action.terminal.new');
 			}
 		});
