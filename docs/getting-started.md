@@ -28,6 +28,36 @@ RIPP is designed to feel familiar if you've worked with user stories, API specs,
 
 ---
 
+## Two Paths to RIPP
+
+### Path 1: Spec-First (Traditional)
+
+Write a RIPP packet BEFORE writing any code:
+
+1. Draft RIPP packet describing the feature
+2. Review with your team
+3. Approve the specification
+4. Implement code to match the RIPP spec
+5. Validate against acceptance tests
+
+**Best for**: New features with clear requirements, high-risk features, team collaboration
+
+### Path 2: Prototype-First (AI-Assisted)
+
+Start with a rapid prototype and extract the specification:
+
+1. Build a working prototype (AI-generated or rapid development)
+2. Run RIPP extraction to generate a draft specification
+3. Review the draft, fill gaps, resolve conflicts
+4. Approve the refined RIPP packet
+5. Rebuild for production using RIPP as the contract
+
+**Best for**: Rapid exploration, AI-assisted development, validating ideas quickly
+
+**Learn more**: See [From Prototype to Production]({{ '/prototype-to-production' | relative_url }}) for the complete prototype extraction workflow.
+
+---
+
 ## Step 1: Understand the Basics
 
 A RIPP packet is a structured specification for a single feature or API. It includes:
@@ -270,6 +300,79 @@ Use Level 1. Keep it simple unless there are security concerns.
 3. **Keep it accurate** — update the packet if implementation deviates
 4. **Validate in CI** — automate RIPP validation in your pipeline
 5. **Version with code** — commit RIPP packets alongside source code
+
+---
+
+## Working with Prototypes
+
+### From Prototype to RIPP
+
+If you've already built a working prototype (especially with AI assistance), you can extract a RIPP specification:
+
+**Conceptual workflow** (RIPP Extractor tooling is conceptual, not yet fully implemented):
+
+```bash
+# Generate draft RIPP from prototype (future tooling)
+ripp extract --code ./src --input ./README.md --output feature.ripp.yaml
+
+# Review the generated draft
+cat feature.ripp.yaml
+
+# Fill in gaps and resolve conflicts
+# (Edit the file to add missing permissions, failure modes, etc.)
+
+# Validate the refined packet
+ripp validate feature.ripp.yaml
+
+# Approve and use as production specification
+```
+
+### What Gets Extracted
+
+From your prototype code:
+- API endpoints and methods (from route definitions)
+- Data structures (from request/response handling)
+- User flows (from UI components and handlers)
+- Error handling (from try/catch blocks)
+
+From your inputs (README, prompts, notes):
+- Purpose and problem statement
+- Intended value and use cases
+- Stated requirements and constraints
+
+### What You Must Add
+
+Extraction cannot infer:
+- **Permissions**: Who can access what, and under which conditions
+- **Multi-tenancy**: Tenant isolation and boundary enforcement
+- **Audit requirements**: What must be logged for compliance
+- **Security constraints**: Encryption, validation rules, rate limits
+
+These must be specified explicitly before production.
+
+### Evidence and Confidence
+
+Generated RIPP packets include optional metadata showing:
+
+- **`evidence_map`**: Which code files/functions support each section
+- **`confidence`**: How certain the extraction is (high/medium/low/unknown)
+- **`open_questions`**: Conflicts, gaps, or unresolved decisions
+
+Review these carefully and resolve before approving.
+
+### When to Use Prototype-First
+
+✅ **Good fit**:
+- Rapid idea validation with AI-generated prototypes
+- Exploring feasibility before committing to full spec
+- Converting existing PoC code into formal specifications
+
+❌ **Not ideal**:
+- High-security features (write spec first)
+- Regulated environments requiring upfront compliance review
+- Unclear or experimental ideas (prototype may be too unstable)
+
+**Learn more**: [From Prototype to Production: RIPP as an Intent Compiler]({{ '/prototype-to-production' | relative_url }})
 
 ---
 

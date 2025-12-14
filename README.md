@@ -595,6 +595,88 @@ RIPP defines three conformance levels. Choose the level that matches your featur
 
 ---
 
+## From Prototype to Production: RIPP as an Intent Compiler
+
+AI coding assistants make prototyping effortless. Ideas become running code in minutes. But **prototypes are not production systems**.
+
+RIPP acts as an **intent compiler**: it transforms rapid prototypes into durable, production-grade specifications.
+
+### The Problem RIPP Solves
+
+**Rapid prototypes prove feasibility** but lack:
+- Durable intent (the "why" exists only in prompt history)
+- Security boundaries (permissions often omitted)
+- Failure handling (edge cases discovered reactively)
+- Verification criteria (no formal definition of "done")
+
+**The risk**: Speed without structure creates technical debt. Features ship with underspecified intent, leading to production incidents and maintenance nightmares.
+
+### RIPP as the Bridge
+
+**Traditional flow (high risk)**:
+```
+Idea → Prototype → "Looks good, ship it" → Production incidents
+```
+
+**RIPP flow (controlled)**:
+```
+Idea → Prototype → RIPP Extraction → Review → Production Implementation
+         ↓                                         ↑
+    Proves feasibility                    Guided by spec
+```
+
+### The Workflow: Prototype → RIPP → Production
+
+1. **Build rapid MVP**: Use AI to create a working prototype
+2. **Extract RIPP**: Generate a formal specification from prototype + stated intent
+3. **Review and resolve**: Fill gaps, resolve conflicts, answer open questions
+4. **Implement for production**: Use RIPP as the authoritative contract
+
+**Result**: The prototype proves it CAN be done. The RIPP packet defines HOW it SHOULD be done.
+
+### Optional Metadata for Prototype-Generated RIPP
+
+When RIPP packets are generated from prototypes, optional metadata provides traceability:
+
+- **`source_prototype`**: Links to prototype repo, commit, and generation tool
+- **`evidence_map`**: Maps each RIPP section to specific code files/functions
+- **`confidence`**: Indicates certainty level (high/medium/low/unknown) per section
+- **`open_questions`**: Flags unresolved decisions requiring review
+
+These fields are **optional** and do not affect RIPP v1.0 conformance. They enhance transparency when transitioning from prototype to production.
+
+### Evidence and Trust Rules
+
+To ensure teams trust RIPP packets generated from prototypes:
+
+- **Code is evidence** of what EXISTS (extracted behavior only)
+- **Inputs define** what SHOULD exist (stated requirements)
+- **Conflicts must be flagged** explicitly, never silently resolved
+- **Never infer**: Permissions, tenancy, audit, or security (mark as "proposed" or "unknown")
+
+Verification labels indicate source:
+- **VERIFIED**: Extracted from code and confirmed
+- **STATED**: From explicit requirements
+- **PROPOSED**: Inferred, requires review
+- **UNKNOWN**: Missing, must be specified
+
+### The RIPP Extractor (Conceptual)
+
+Future tooling may include a **RIPP Extractor** that:
+- Consumes: Prototype code + stated requirements
+- Produces: Draft RIPP packet + evidence map + confidence ratings
+- Flags: Gaps, conflicts, and open questions
+- Requires: Human review and approval before production use
+
+**Design principles**: Read-only, conservative (marks uncertainty), transparent (shows sources), requires human approval.
+
+### Learn More
+
+For complete details on prototype-to-production workflows, see:  
+**[From Prototype to Production: RIPP as an Intent Compiler](docs/prototype-to-production.md)**
+
+---
+
 ## What RIPP Gives You
 
 ✅ **Before code review, spec review**: Catch issues before implementation  
