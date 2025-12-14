@@ -13,77 +13,83 @@ function initRepository(options = {}) {
     errors: []
   };
 
-  // 1. Create /ripp directory
-  const rippDir = path.join(process.cwd(), 'ripp');
-  if (!fs.existsSync(rippDir)) {
-    fs.mkdirSync(rippDir, { recursive: true });
-    results.created.push('ripp/');
-  } else {
-    results.skipped.push('ripp/ (already exists)');
-  }
+  try {
+    // 1. Create /ripp directory
+    const rippDir = path.join(process.cwd(), 'ripp');
+    if (!fs.existsSync(rippDir)) {
+      fs.mkdirSync(rippDir, { recursive: true });
+      results.created.push('ripp/');
+    } else {
+      results.skipped.push('ripp/ (already exists)');
+    }
 
-  // 2. Create /ripp/README.md
-  const rippReadmePath = path.join(rippDir, 'README.md');
-  if (!fs.existsSync(rippReadmePath) || force) {
-    const rippReadme = generateRippReadme();
-    fs.writeFileSync(rippReadmePath, rippReadme);
-    results.created.push('ripp/README.md');
-  } else {
-    results.skipped.push('ripp/README.md (already exists, use --force to overwrite)');
-  }
+    // 2. Create /ripp/README.md
+    const rippReadmePath = path.join(rippDir, 'README.md');
+    if (!fs.existsSync(rippReadmePath) || force) {
+      const rippReadme = generateRippReadme();
+      fs.writeFileSync(rippReadmePath, rippReadme);
+      results.created.push('ripp/README.md');
+    } else {
+      results.skipped.push('ripp/README.md (already exists, use --force to overwrite)');
+    }
 
-  // 3. Create /ripp/features directory for feature RIPP files
-  const featuresDir = path.join(rippDir, 'features');
-  if (!fs.existsSync(featuresDir)) {
-    fs.mkdirSync(featuresDir, { recursive: true });
-    results.created.push('ripp/features/');
-  } else {
-    results.skipped.push('ripp/features/ (already exists)');
-  }
+    // 3. Create /ripp/features directory for feature RIPP files
+    const featuresDir = path.join(rippDir, 'features');
+    if (!fs.existsSync(featuresDir)) {
+      fs.mkdirSync(featuresDir, { recursive: true });
+      results.created.push('ripp/features/');
+    } else {
+      results.skipped.push('ripp/features/ (already exists)');
+    }
 
-  // 4. Create /ripp/features/.gitkeep
-  const gitkeepPath = path.join(featuresDir, '.gitkeep');
-  if (!fs.existsSync(gitkeepPath)) {
-    fs.writeFileSync(gitkeepPath, '');
-    results.created.push('ripp/features/.gitkeep');
-  }
+    // 4. Create /ripp/features/.gitkeep
+    const gitkeepPath = path.join(featuresDir, '.gitkeep');
+    if (!fs.existsSync(gitkeepPath) || force) {
+      fs.writeFileSync(gitkeepPath, '');
+      results.created.push('ripp/features/.gitkeep');
+    } else {
+      results.skipped.push('ripp/features/.gitkeep (already exists, use --force to overwrite)');
+    }
 
-  // 5. Create /ripp/intent-packages directory
-  const intentPackagesDir = path.join(rippDir, 'intent-packages');
-  if (!fs.existsSync(intentPackagesDir)) {
-    fs.mkdirSync(intentPackagesDir, { recursive: true });
-    results.created.push('ripp/intent-packages/');
-  } else {
-    results.skipped.push('ripp/intent-packages/ (already exists)');
-  }
+    // 5. Create /ripp/intent-packages directory
+    const intentPackagesDir = path.join(rippDir, 'intent-packages');
+    if (!fs.existsSync(intentPackagesDir)) {
+      fs.mkdirSync(intentPackagesDir, { recursive: true });
+      results.created.push('ripp/intent-packages/');
+    } else {
+      results.skipped.push('ripp/intent-packages/ (already exists)');
+    }
 
-  // 6. Create /ripp/intent-packages/README.md
-  const intentReadmePath = path.join(intentPackagesDir, 'README.md');
-  if (!fs.existsSync(intentReadmePath) || force) {
-    const intentReadme = generateIntentPackageReadme();
-    fs.writeFileSync(intentReadmePath, intentReadme);
-    results.created.push('ripp/intent-packages/README.md');
-  } else {
-    results.skipped.push('ripp/intent-packages/README.md (already exists, use --force to overwrite)');
-  }
+    // 6. Create /ripp/intent-packages/README.md
+    const intentReadmePath = path.join(intentPackagesDir, 'README.md');
+    if (!fs.existsSync(intentReadmePath) || force) {
+      const intentReadme = generateIntentPackageReadme();
+      fs.writeFileSync(intentReadmePath, intentReadme);
+      results.created.push('ripp/intent-packages/README.md');
+    } else {
+      results.skipped.push('ripp/intent-packages/README.md (already exists, use --force to overwrite)');
+    }
 
-  // 7. Create .github/workflows directory
-  const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
-  if (!fs.existsSync(workflowsDir)) {
-    fs.mkdirSync(workflowsDir, { recursive: true });
-    results.created.push('.github/workflows/');
-  } else {
-    results.skipped.push('.github/workflows/ (already exists)');
-  }
+    // 7. Create .github/workflows directory
+    const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
+    if (!fs.existsSync(workflowsDir)) {
+      fs.mkdirSync(workflowsDir, { recursive: true });
+      results.created.push('.github/workflows/');
+    } else {
+      results.skipped.push('.github/workflows/ (already exists)');
+    }
 
-  // 8. Create GitHub Action workflow
-  const workflowPath = path.join(workflowsDir, 'ripp-validate.yml');
-  if (!fs.existsSync(workflowPath) || force) {
-    const workflow = generateGitHubActionWorkflow();
-    fs.writeFileSync(workflowPath, workflow);
-    results.created.push('.github/workflows/ripp-validate.yml');
-  } else {
-    results.skipped.push('.github/workflows/ripp-validate.yml (already exists, use --force to overwrite)');
+    // 8. Create GitHub Action workflow
+    const workflowPath = path.join(workflowsDir, 'ripp-validate.yml');
+    if (!fs.existsSync(workflowPath) || force) {
+      const workflow = generateGitHubActionWorkflow();
+      fs.writeFileSync(workflowPath, workflow);
+      results.created.push('.github/workflows/ripp-validate.yml');
+    } else {
+      results.skipped.push('.github/workflows/ripp-validate.yml (already exists, use --force to overwrite)');
+    }
+  } catch (error) {
+    results.errors.push(`Failed to create files: ${error.message}`);
   }
 
   return results;

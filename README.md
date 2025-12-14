@@ -341,7 +341,7 @@ data_contracts:
           description: 'Registration status (pending_verification)'
 ```
 
-### 2. Validate It
+### 3. Validate It
 
 Validate your packet:
 
@@ -352,7 +352,7 @@ ripp validate ripp/features/my-feature.ripp.yaml
 ripp validate ripp/features/
 ```
 
-### 3. Learn More
+### 4. Learn More
 
 - **Full Specification**: [SPEC.md](SPEC.md)
 - **Examples**: [examples/](examples/)
