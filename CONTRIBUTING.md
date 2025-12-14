@@ -17,6 +17,25 @@ Thank you for your interest in contributing to the Regenerative Intent Prompting
 2. Check existing issues and pull requests to avoid duplication
 3. For major changes, open an issue first to discuss your proposal
 
+## Governance
+
+The RIPP™ repository enforces intentional, reviewed contributions through branch protection and required workflows.
+
+**Branch Protection:**
+
+- The `main` branch is protected
+- All changes must be made via pull requests
+- Direct pushes to `main` are not permitted
+- Force pushes to `main` are not permitted
+
+**Review Requirements:**
+
+- Pull requests require review before merging
+- CODEOWNERS approvals may be required for certain paths
+- Automated validation may be required as tooling evolves
+
+This governance ensures that RIPP maintains its commitment to explicit, reviewed intent at every level—from specification to contribution workflow.
+
 ## Contribution Process
 
 ### For Documentation or Minor Changes
