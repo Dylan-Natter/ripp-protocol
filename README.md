@@ -10,6 +10,8 @@ RIPP is an open standard for capturing feature requirements as structured, machi
 
 RIPP solves **intent erosion**: the problem where clear ideas degrade into fragmented requirements, undocumented edge cases, and production surprises. By making the specification the primary artifact, RIPP enables teams to review, validate, and ship features with confidence.
 
+**RIPP is an intent-as-protocol specification layer**—not an IaC tool, not a policy engine, not a code generator. It sits above implementation, defining the "why" and "what" that other tools execute and enforce. [Learn more about RIPP's category and positioning →](docs/category/)
+
 ### RIPP as the Next-Generation User Story
 
 In an era where AI can generate entire features from prompts, the traditional user story—optimized for human conversation—no longer captures what modern teams need: **executable intent**.
@@ -265,6 +267,29 @@ failure_modes:
 - Reference the original user story in `purpose.references`
 
 **The result:** Teams keep the conversational benefits of user stories while gaining the execution rigor needed for AI-assisted and production-grade development.
+
+---
+
+## Understanding RIPP's Category and Position
+
+RIPP is often misunderstood as an IaC tool, policy engine, or code generator. It is none of these. RIPP is an **intent specification protocol layer** that complements—not replaces—existing tools.
+
+**Essential reading for new adopters:**
+
+- **[Intent as Protocol](docs/category/INTENT-AS-PROTOCOL.md)** — Why intent must be a first-class protocol artifact
+- **[What RIPP Is and Is Not](docs/category/WHAT-RIPP-IS-AND-IS-NOT.md)** — Explicit boundaries, scope, and common misconceptions
+- **[RIPP vs Existing Paradigms](docs/category/RIPP-VS-EXISTING-PARADIGMS.md)** — How RIPP relates to IaC, GitOps, Policy-as-Code, and AI frameworks
+- **[Who RIPP Is For](docs/category/WHO-RIPP-IS-FOR.md)** — Ideal adopters, use cases, and team readiness criteria
+
+**Quick answers:**
+
+| Question | Answer |
+| -------- | ------ |
+| Is RIPP a code generator? | No. RIPP is a specification format. Code generation is optional tooling. |
+| Does RIPP replace IaC/Terraform? | No. RIPP documents intent; IaC provisions infrastructure. They coexist. |
+| Does RIPP enforce policies at runtime? | No. RIPP documents permissions; policy engines (OPA, etc.) enforce them. |
+| Is RIPP only for AI-assisted development? | No. RIPP solves intent erosion for all teams, with or without AI. |
+| Do I need Level 3 for everything? | No. Choose Level 1 (simple), 2 (production), or 3 (high-risk) based on your feature. |
 
 ---
 
