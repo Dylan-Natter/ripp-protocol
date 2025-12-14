@@ -28,6 +28,7 @@ npm install
 ```
 
 This will install:
+
 - TypeScript compiler
 - VS Code extension API types
 - Development dependencies
@@ -227,6 +228,7 @@ Expected: Draft RIPP packet generated with warning to review
 ### View Console Output
 
 Extension logs appear in:
+
 - **Output** panel → **RIPP** channel (user-facing output)
 - **Debug Console** (when debugging)
 
@@ -238,7 +240,8 @@ Extension logs appear in:
 
 **Cause**: RIPP CLI not installed or not in PATH
 
-**Solution**: 
+**Solution**:
+
 - Ensure `npx ripp` works in workspace terminal
 - Or install globally: `npm install -g ripp-cli`
 - Or use npm scripts mode with local install
@@ -248,6 +251,7 @@ Extension logs appear in:
 **Cause**: No `*.ripp.yaml` or `*.ripp.json` files match configured paths
 
 **Solution**:
+
 - Check file naming convention
 - Verify `ripp.paths` configuration
 - Ensure files are in workspace (not excluded by `.gitignore`)
@@ -257,6 +261,7 @@ Extension logs appear in:
 **Cause**: Compilation errors or activation event not triggered
 
 **Solution**:
+
 - Run `npm run compile` and check for errors
 - Ensure a workspace is open
 - Try running a command manually to trigger activation
@@ -266,6 +271,7 @@ Extension logs appear in:
 ## Automated Testing
 
 Currently, this extension uses manual testing. Future versions may include:
+
 - Unit tests for command logic
 - Integration tests for CLI execution
 - End-to-end tests using `@vscode/test-electron`

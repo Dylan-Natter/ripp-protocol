@@ -164,6 +164,7 @@ vsce ls
 ```
 
 This lists all files included in the package. Verify:
+
 - No source files (`src/`, `*.ts`)
 - No dev files (`node_modules`, `.git`)
 - Includes `out/`, `README.md`, `icon.png`, `LICENSE`
@@ -179,6 +180,7 @@ vsce publish
 ```
 
 This:
+
 1. Compiles the extension (runs `vscode:prepublish` script)
 2. Packages the extension
 3. Uploads to VS Code Marketplace
@@ -211,6 +213,7 @@ Test the published version:
 ### Version Management
 
 Follow semantic versioning (semver):
+
 - **Patch**: Bug fixes, minor changes (0.1.0 → 0.1.1)
 - **Minor**: New features, backward-compatible (0.1.0 → 0.2.0)
 - **Major**: Breaking changes (0.1.0 → 1.0.0)
@@ -231,6 +234,7 @@ Follow semantic versioning (semver):
 
    ```markdown
    ### 0.2.0
+
    - Added feature X
    - Fixed bug Y
    ```
@@ -260,6 +264,7 @@ Follow semantic versioning (semver):
 ### README Quality
 
 The `README.md` is your Marketplace listing:
+
 - Clear feature list
 - Screenshots/GIFs of commands in action
 - Installation instructions
@@ -279,11 +284,7 @@ Set appropriate categories in `package.json`:
 
 ```json
 {
-  "categories": [
-    "Linters",
-    "Formatters",
-    "Other"
-  ]
+  "categories": ["Linters", "Formatters", "Other"]
 }
 ```
 
@@ -293,14 +294,7 @@ Include searchable keywords:
 
 ```json
 {
-  "keywords": [
-    "ripp",
-    "protocol",
-    "specification",
-    "validation",
-    "yaml",
-    "json"
-  ]
+  "keywords": ["ripp", "protocol", "specification", "validation", "yaml", "json"]
 }
 ```
 
@@ -315,6 +309,7 @@ vsce unpublish RIPP.ripp-protocol
 ```
 
 **WARNING**: Unpublishing affects all users. Only use for:
+
 - Critical security issues
 - Legal/compliance problems
 - Permanent discontinuation
@@ -349,12 +344,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      
+
       - name: Install dependencies
         run: |
           cd tools/vscode-extension
           npm install
-      
+
       - name: Publish to Marketplace
         run: |
           cd tools/vscode-extension
@@ -370,6 +365,7 @@ jobs:
 ### Download Statistics
 
 View extension metrics:
+
 1. Go to [Marketplace Publisher Management](https://marketplace.visualstudio.com/manage)
 2. Select "RIPP" publisher
 3. View statistics:
@@ -381,6 +377,7 @@ View extension metrics:
 ### User Feedback
 
 Monitor:
+
 - Marketplace reviews and ratings
 - [GitHub Issues](https://github.com/Dylan-Natter/ripp-protocol/issues)
 - User questions in discussions
@@ -392,6 +389,7 @@ Monitor:
 ### Never Log Secrets
 
 The extension must never:
+
 - Log environment variables
 - Display sensitive file contents
 - Transmit user data externally
@@ -399,6 +397,7 @@ The extension must never:
 ### Secure CLI Execution
 
 The extension uses safe execution:
+
 - `shell: false` (no shell injection)
 - Args array (no command string parsing)
 - `cwd` set to workspace root
@@ -426,6 +425,7 @@ npm update
 ### Maintenance Checklist
 
 Regular tasks:
+
 - [ ] Update dependencies quarterly
 - [ ] Test with latest VS Code versions
 - [ ] Review and respond to user issues
@@ -451,7 +451,8 @@ Regular tasks:
 
 ### "Personal Access Token verification failed"
 
-**Solution**: 
+**Solution**:
+
 - Ensure PAT has **Marketplace → Manage** scope
 - Token not expired
 - Correct organization selected
@@ -477,5 +478,6 @@ cp ../../LICENSE ./LICENSE
 ## Contact
 
 For publishing issues:
+
 - Open a GitHub Issue: https://github.com/Dylan-Natter/ripp-protocol/issues
 - Tag with `vscode-extension` label

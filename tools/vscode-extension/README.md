@@ -18,6 +18,7 @@ All commands are available via the Command Palette (Ctrl+Shift+P / Cmd+Shift+P):
 ## Requirements
 
 This extension requires the RIPP CLI to be available via:
+
 - `npx ripp ...` (default mode), or
 - Workspace npm scripts (e.g., `npm run ripp:validate`)
 
@@ -29,7 +30,7 @@ This extension requires the RIPP CLI to be available via:
 
 ## Security Notes
 
-- **Read-only:** The extension does not mutate RIPP packet files (*.ripp.yaml, *.ripp.json)
+- **Read-only:** The extension does not mutate RIPP packet files (_.ripp.yaml, _.ripp.json)
 - **Local processing:** All validation, linting, and analysis happens locally via the RIPP CLI
 - **No credentials collected:** No secrets, tokens, or environment variables are collected or stored
 
@@ -56,6 +57,7 @@ Configure the extension via VS Code settings (File → Preferences → Settings)
 ### `ripp.cliMode`
 
 How to execute the RIPP CLI:
+
 - `"npx"` (default): Runs `npx ripp` commands
 - `"npmScript"`: Uses workspace npm scripts (requires scripts like `ripp:validate`, `ripp:lint`, etc.)
 
@@ -81,20 +83,19 @@ Glob patterns for discovering RIPP packet files:
 
 ```json
 {
-  "ripp.paths": [
-    "**/*.ripp.yaml",
-    "**/*.ripp.json"
-  ]
+  "ripp.paths": ["**/*.ripp.yaml", "**/*.ripp.json"]
 }
 ```
 
 ## File Naming Convention
 
 RIPP packet files must follow the naming convention:
+
 - `*.ripp.yaml` or `*.ripp.yml`
 - `*.ripp.json`
 
 Examples:
+
 - `user-registration.ripp.yaml`
 - `api-feature.ripp.json`
 
@@ -120,6 +121,7 @@ MIT
 ### 0.1.0
 
 Initial release:
+
 - Validate command
 - Lint command
 - Package command
