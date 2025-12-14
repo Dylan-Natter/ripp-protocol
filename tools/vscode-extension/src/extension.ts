@@ -20,8 +20,15 @@ const execFileAsync = promisify(execFile);
  * - Never mutates *.ripp.yaml or *.ripp.json files
  */
 
+// Shared output channel
+let outputChannel: vscode.OutputChannel;
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('RIPP Protocol extension is now active');
+	
+	// Create shared output channel
+	outputChannel = vscode.window.createOutputChannel('RIPP');
+	context.subscriptions.push(outputChannel);
 
 	// Register commands
 	context.subscriptions.push(
@@ -94,7 +101,6 @@ async function executeRippCommand(
 	showOutput: boolean = true
 ): Promise<{ stdout: string; stderr: string }> {
 	const config = getConfig();
-	const outputChannel = vscode.window.createOutputChannel('RIPP');
 
 	if (showOutput) {
 		outputChannel.show();
@@ -118,10 +124,20 @@ async function executeRippCommand(
 			commandArgs = ['run', scriptName, '--', ...args.slice(1)];
 		}
 
+		// Filter environment to only include safe variables
+		// Never pass sensitive env vars like tokens, keys, passwords
+		const safeEnv = {
+			PATH: process.env.PATH,
+			HOME: process.env.HOME,
+			NODE_ENV: process.env.NODE_ENV,
+			LANG: process.env.LANG,
+			LC_ALL: process.env.LC_ALL
+		};
+
 		const result = await execFileAsync(command, commandArgs, {
 			cwd: workspaceRoot,
 			maxBuffer: 10 * 1024 * 1024, // 10MB
-			env: { ...process.env }
+			env: safeEnv
 		});
 
 		if (showOutput) {
