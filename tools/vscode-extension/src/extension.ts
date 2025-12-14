@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { promisify } from 'util';
+import * as fs from 'fs';
 
 const execFileAsync = promisify(execFile);
 
@@ -135,9 +136,25 @@ async function executeRippCommand(
 		let commandArgs: string[];
 
 		if (config.cliMode === 'npx') {
-			// Use npx ripp
-			command = 'npx';
-			commandArgs = ['ripp', ...args];
+			// Try to use local binary first (prefer devDependency)
+			const binName = process.platform === 'win32' ? 'ripp.cmd' : 'ripp';
+			const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
+			
+			if (fs.existsSync(localBinary)) {
+				// Use local binary directly
+				command = localBinary;
+				commandArgs = args;
+				if (showOutput) {
+					outputChannel.appendLine('Using local RIPP CLI from node_modules');
+				}
+			} else {
+				// Fallback to npx
+				command = 'npx';
+				commandArgs = ['ripp', ...args];
+				if (showOutput) {
+					outputChannel.appendLine('Using npx (no local RIPP CLI found)');
+				}
+			}
 		} else {
 			// Use npm run script
 			// Assumes workspace has npm scripts like "ripp:validate", "ripp:lint", etc.
