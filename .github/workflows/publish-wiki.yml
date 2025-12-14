@@ -1,0 +1,78 @@
+name: Publish Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/wiki/**'
+  workflow_dispatch:
+
+jobs:
+  publish-wiki:
+    name: Sync Wiki from Repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: Checkout wiki repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync wiki content
+        run: |
+          echo "Syncing wiki content from /docs/wiki/ to wiki repository..."
+          
+          # Copy all wiki markdown files except README and internal logs
+          cd repo/docs/wiki
+          for file in *.md; do
+            if [ "$file" != "README.md" ] && [ "$file" != "RIPP-Tooling-Evolution-Log.md" ]; then
+              echo "  Copying $file"
+              cp "$file" "../../wiki/$file"
+            fi
+          done
+          
+          cd ../../wiki
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          cd wiki
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to publish"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected"
+            git status --short
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push to wiki
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "docs: sync wiki from main repository
+
+          Auto-synced from /docs/wiki/ on commit ${{ github.sha }}
+          
+          Source: ${{ github.repository }}@${{ github.ref_name }}"
+          git push
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.check-changes.outputs.has_changes }}" = "true" ]; then
+            echo "✅ Wiki published successfully"
+          else
+            echo "✅ Wiki is already up to date"
+          fi

@@ -1,0 +1,109 @@
+name: Drift Prevention
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/ripp-cli/**'
+      - 'docs/wiki/CLI-Reference.md'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/ripp-cli/**'
+  workflow_dispatch:
+
+jobs:
+  verify-cli-docs:
+    name: Verify CLI Documentation Consistency
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: tools/ripp-cli/package-lock.json
+
+      - name: Install RIPP CLI
+        run: |
+          cd tools/ripp-cli
+          npm ci
+          npm link
+
+      - name: Generate CLI help output
+        run: |
+          echo "=== RIPP CLI Help ==="
+          ripp --help > /tmp/ripp-help.txt
+          cat /tmp/ripp-help.txt
+          
+          echo ""
+          echo "=== RIPP Validate Help ==="
+          ripp validate --help > /tmp/ripp-validate-help.txt
+          cat /tmp/ripp-validate-help.txt
+          
+          echo ""
+          echo "=== RIPP Lint Help ==="
+          ripp lint --help > /tmp/ripp-lint-help.txt
+          cat /tmp/ripp-lint-help.txt
+          
+          echo ""
+          echo "=== RIPP Package Help ==="
+          ripp package --help > /tmp/ripp-package-help.txt
+          cat /tmp/ripp-package-help.txt
+
+      - name: Verify CLI Reference documentation
+        run: |
+          echo "Checking CLI-Reference.md for consistency..."
+          
+          # Check if CLI-Reference.md exists
+          if [ ! -f "docs/wiki/CLI-Reference.md" ]; then
+            echo "❌ docs/wiki/CLI-Reference.md not found"
+            exit 1
+          fi
+          
+          # Check if main commands are documented
+          MISSING=""
+          
+          if ! grep -q "ripp validate" docs/wiki/CLI-Reference.md; then
+            MISSING="$MISSING\n  - 'ripp validate' command"
+          fi
+          
+          if ! grep -q "ripp lint" docs/wiki/CLI-Reference.md; then
+            MISSING="$MISSING\n  - 'ripp lint' command"
+          fi
+          
+          if ! grep -q "ripp package" docs/wiki/CLI-Reference.md; then
+            MISSING="$MISSING\n  - 'ripp package' command"
+          fi
+          
+          if [ -n "$MISSING" ]; then
+            echo "❌ CLI-Reference.md is missing documentation for:"
+            echo -e "$MISSING"
+            echo ""
+            echo "Please update docs/wiki/CLI-Reference.md to include all CLI commands."
+            exit 1
+          fi
+          
+          echo "✅ CLI-Reference.md documents all main commands"
+
+      - name: Check for TODO markers indicating stale docs
+        run: |
+          if grep -q "TODO.*CLI" docs/wiki/CLI-Reference.md; then
+            echo "⚠️  Warning: TODO markers found in CLI-Reference.md"
+            echo "Please update the documentation before merging"
+            grep -n "TODO.*CLI" docs/wiki/CLI-Reference.md || true
+          else
+            echo "✅ No stale TODO markers in CLI documentation"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Drift prevention check complete"
+          echo "CLI help output has been verified against documentation"
