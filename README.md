@@ -80,7 +80,7 @@ AI coding assistants have made prototyping nearly frictionless. Ideas become run
 - Security and edge cases are addressed reactively
 - Code review has no authoritative spec to validate against
 - Six months later, no one remembers why it works this way
-- Regenerating or refactoring requires archaelogy through git history and Slack threads
+- Regenerating or refactoring requires archaeology through git history and Slack threads
 
 **The user story doesn't scale to this reality.** It was designed for human-paced iteration where requirements evolved through conversation. In AI-assisted workflows, the conversation happens in seconds, but the durability requirement remains.
 
@@ -159,7 +159,8 @@ purpose:
   solution: 'Provide a profile editing form with server-side validation'
   value: 'Improves user experience and data accuracy'
   references:
-    - 'User Story US-4521: Profile Management'
+    - title: 'User Story US-4521: Profile Management'
+      url: 'https://example.com/jira/US-4521'
 
 ux_flow:
   - step: 1
@@ -203,31 +204,42 @@ data_contracts:
           type: 'string'
           required: true
           description: 'ISO 8601 timestamp of update'
+    - name: 'ValidationError'
+      fields:
+        - name: 'error'
+          type: 'string'
+          required: true
+          description: 'Error message'
+        - name: 'field'
+          type: 'string'
+          required: false
+          description: 'Field that caused the error'
 
 api_contracts:
   - endpoint: '/api/users/{user_id}/profile'
     method: 'PATCH'
-    description: 'Update user profile information'
+    purpose: 'Update user profile information'
     request:
+      content_type: 'application/json'
       schema_ref: 'ProfileUpdateRequest'
-    responses:
-      - status_code: 200
-        description: 'Profile updated successfully'
+    response:
+      success:
+        status: 200
         schema_ref: 'ProfileUpdateResponse'
-      - status_code: 400
-        description: 'Validation error'
-        schema_ref: 'ValidationError'
-      - status_code: 401
-        description: 'User not authenticated'
-      - status_code: 403
-        description: 'User cannot update another user profile'
+        content_type: 'application/json'
+      errors:
+        - status: 400
+          description: 'Validation error (invalid email format or missing required field)'
+        - status: 401
+          description: 'User not authenticated'
+        - status: 403
+          description: 'User cannot update another user profile'
 
 permissions:
-  - role: 'authenticated_user'
-    resource: 'own_profile'
-    actions: ['read', 'update']
-    conditions:
-      - 'user_id in request matches authenticated user_id'
+  - action: 'update:profile'
+    required_roles: ['authenticated_user']
+    resource_scope: 'own_profile'
+    description: 'User must be authenticated and can only update their own profile (user_id in request matches authenticated user_id)'
 
 failure_modes:
   - scenario: 'Email already in use by another account'
