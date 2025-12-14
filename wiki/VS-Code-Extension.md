@@ -480,7 +480,7 @@ Currently, the extension has **no configurable settings**. All behavior is deter
 
 ## Next Steps
 
-- Install the extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/)
+- Install the extension from the VS Code Marketplace (search for "RIPP Protocol" when available)
 - Read [Getting Started](Getting-Started) for RIPP basics
 - See [CLI Reference](CLI-Reference) for command details
 - Check [GitHub Integration](GitHub-Integration) for CI/CD setup

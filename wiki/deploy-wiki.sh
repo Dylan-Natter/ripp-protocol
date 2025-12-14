@@ -12,10 +12,10 @@ echo "Deploying RIPP wiki pages..."
 # Clone wiki repo if it doesn't exist
 if [ ! -d "$WIKI_DIR" ]; then
   echo "Cloning wiki repository..."
-  git clone $WIKI_REPO
+  git clone "$WIKI_REPO"
 fi
 
-cd $WIKI_DIR
+cd "$WIKI_DIR"
 
 # Pull latest changes
 echo "Pulling latest wiki changes..."
