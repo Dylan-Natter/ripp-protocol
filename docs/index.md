@@ -4,7 +4,6 @@ title: 'RIPP - Regenerative Intent Prompting Protocol'
 ---
 
 <div class="hero">
-  <img src="{{ '/assets/icon.png' | relative_url }}" alt="RIPP Logo" class="hero-logo">
   <h1>Regenerative Intent Prompting Protocol</h1>
   <p>An open standard for structured feature specifications that preserve intent from concept to production.</p>
   <span class="status-badge">v1.0 Stable</span>

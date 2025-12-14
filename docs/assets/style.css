@@ -56,22 +56,7 @@ body {
   gap: 16px;
 }
 
-.logo-link {
-  display: block;
-  line-height: 0;
-}
 
-.site-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.site-logo:hover {
-  transform: scale(1.05);
-}
 
 .header-text {
   display: flex;
@@ -251,14 +236,7 @@ hr {
   margin-bottom: 48px;
 }
 
-.hero-logo {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 24px;
-  border-radius: 12px;
-  display: block;
-  box-shadow: 0 4px 12px var(--accent-glow);
-}
+
 
 .hero h1 {
   font-size: 48px;
@@ -378,16 +356,7 @@ hr {
     font-size: 18px;
   }
 
-  .hero-logo {
-    width: 72px;
-    height: 72px;
-    margin-bottom: 16px;
-  }
 
-  .site-logo {
-    width: 40px;
-    height: 40px;
-  }
 
   .header-branding {
     gap: 12px;
