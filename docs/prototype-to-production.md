@@ -157,6 +157,7 @@ RIPP solves the Prototype Repo → Production problem by changing the artifact t
 **For production engineers:**
 
 RIPP provides a complete, reviewable specification that answers:
+
 - What are we building and why?
 - What are the data structures and API contracts?
 - Who is allowed to access this feature?
@@ -166,6 +167,7 @@ RIPP provides a complete, reviewable specification that answers:
 **For AI coding agents:**
 
 RIPP provides structured, machine-readable context that enables:
+
 - Accurate code generation aligned with requirements
 - Consistent implementation of permissions and error handling
 - Verification that generated code matches the specification
@@ -174,6 +176,7 @@ RIPP provides structured, machine-readable context that enables:
 **For security and compliance reviewers:**
 
 RIPP provides explicit documentation of:
+
 - Authorization model and permission boundaries
 - Audit events and logging requirements
 - Failure modes and their impact
@@ -322,26 +325,31 @@ RIPP provides explicit documentation of:
 To prevent misuse and misinterpretation, it's critical to understand what RIPP does NOT do:
 
 **RIPP is not a code migration tool:**
+
 - RIPP does not transform prototype code into production code
 - RIPP does not provide lift-and-shift capabilities
 - RIPP does not attempt to automatically migrate implementations
 
 **RIPP is not a code generator:**
+
 - RIPP is a specification format, not a code generation framework
 - While tools MAY generate code from RIPP packets, this is optional and not part of the core protocol
 - RIPP does not prescribe specific implementation details or architectures
 
 **RIPP is not a refactoring assistant:**
+
 - RIPP does not analyze code for improvement opportunities
 - RIPP does not suggest architectural changes to existing systems
 - RIPP does not provide automated code transformation
 
 **RIPP is not a production hardening helper:**
+
 - RIPP does not scan code for vulnerabilities
 - RIPP does not inject security controls into existing code
 - RIPP does not automatically make prototype code production-ready
 
 **RIPP does not guarantee identical implementations:**
+
 - Production implementations guided by RIPP may use completely different:
   - Programming languages (prototype in JavaScript, production in Go)
   - Frameworks and libraries (prototype in Next.js, production in Java Spring)
@@ -350,11 +358,13 @@ To prevent misuse and misinterpretation, it's critical to understand what RIPP d
   - Deployment platforms (prototype on Vercel, production on Kubernetes)
 
 **RIPP does not eliminate the need for engineering judgment:**
+
 - Engineers must still make architectural decisions
 - Trade-offs between performance, cost, and complexity remain human choices
 - RIPP facilitates better decisions by making requirements explicit, not by automating them
 
 **What RIPP actually is:**
+
 - A specification format that captures feature intent
 - A handoff artifact between prototyping and production teams
 - A contract that preserves decisions, constraints, and outcomes—not code
@@ -446,6 +456,7 @@ This stage is now **frictionless** thanks to modern AI prototyping tools:
 **Tools:** GitHub Spark, Bolt, v0, Replit, Cursor, Windsurf, etc.
 
 **Process:**
+
 1. Describe feature in natural language
 2. AI generates working prototype code
 3. Iterate rapidly based on visual feedback
@@ -454,6 +465,7 @@ This stage is now **frictionless** thanks to modern AI prototyping tools:
 **Duration:** Minutes to hours
 
 **Output:** Prototype Repo containing:
+
 - Working code demonstrating core functionality
 - Basic README or usage notes
 - Minimal configuration and dependencies
@@ -467,6 +479,7 @@ This stage is where teams consistently get stuck:
 **The challenge:** Prototype code proves feasibility but lacks production requirements.
 
 **What's missing:**
+
 - Security boundaries (authentication, authorization, input validation)
 - Multi-tenancy and data isolation
 - Audit trails and compliance logging
@@ -476,6 +489,7 @@ This stage is where teams consistently get stuck:
 - Durable documentation of intent and decisions
 
 **Why traditional approaches fail:**
+
 - **Hardening prototype code** is expensive and error-prone (security retrofitting rarely works)
 - **Copying code into production** spreads anti-patterns and technical debt
 - **Bolting on security later** exposes vulnerabilities and violates compliance
@@ -512,12 +526,14 @@ RIPP is the bridge between these two stages:
 - **Stage 2 rebuilds implementation** (using production standards)
 
 **Production implementations may:**
+
 - Share no code with the prototype (complete rewrite in different language)
 - Use different architectures (microservices instead of monolith)
 - Use different frameworks (production framework instead of prototype framework)
 - Use different platforms (Kubernetes instead of Vercel)
 
 **What remains constant across stages:**
+
 - The problem being solved
 - The value delivered to users
 - The data contracts (inputs, outputs, transformations)
