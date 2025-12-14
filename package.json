@@ -5,6 +5,7 @@
   "scripts": {
     "test": "cd tools/ripp-cli && npm ci && npm link && cd ../.. && ripp validate examples/",
     "lint": "eslint tools/ripp-cli/index.js",
+    "lint:fix": "eslint --fix tools/ripp-cli/index.js",
     "format": "prettier --write \"**/*.{js,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\""
   },
