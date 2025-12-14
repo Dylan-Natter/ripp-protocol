@@ -87,3 +87,5 @@ RIPP fixes this by making the feature specification the **primary artifact**—r
 ---
 
 **RIPP™ is an open standard.** See [GOVERNANCE.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/GOVERNANCE.md) for protocol evolution details.
+
+<!-- Wiki pages last updated: 2025-12-14 -->
