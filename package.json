@@ -7,7 +7,10 @@
     "lint": "eslint tools/ripp-cli/index.js",
     "lint:fix": "eslint --fix tools/ripp-cli/index.js",
     "format": "prettier --write \"**/*.{js,json,md,yaml,yml}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\""
+    "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\"",
+    "ripp:lint": "ripp lint examples/",
+    "ripp:lint:strict": "ripp lint examples/ --strict",
+    "ripp:package:example": "ripp package --in examples/item-creation.ripp.yaml --out /tmp/handoff.md"
   },
   "keywords": [
     "ripp",

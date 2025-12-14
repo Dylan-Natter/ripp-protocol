@@ -33,6 +33,7 @@ GitHub wikis are separate git repositories that must be enabled through the GitH
 ## Wiki Structure
 
 The wiki is a **decision log**, not a specification. It documents:
+
 - Design decisions for tooling extensions
 - Rationale and trade-offs
 - Historical context for current behavior
@@ -43,6 +44,7 @@ The wiki is a **decision log**, not a specification. It documents:
 ## Contributing to the Wiki
 
 Follow the contribution guidelines in the main wiki page. All wiki entries should:
+
 - Include timestamps and status (Draft/Approved/Implemented)
 - Link to authoritative sources
 - Preserve historical context

@@ -1,9 +1,9 @@
 /**
  * RIPP Linter
- * 
+ *
  * Best-practice checker that runs AFTER schema validation.
  * Performs deterministic checks NOT covered by the JSON Schema.
- * 
+ *
  * Guardrails:
  * - Does NOT reimplement schema validation
  * - Does NOT modify source packets
@@ -54,7 +54,8 @@ function checkCriticalSections(packet, warnings) {
     warnings.push({
       rule: 'missing-out-of-scope',
       severity: 'warn',
-      message: "Missing 'purpose.out_of_scope' - explicitly defining what is NOT included improves clarity",
+      message:
+        "Missing 'purpose.out_of_scope' - explicitly defining what is NOT included improves clarity",
       location: 'purpose.out_of_scope'
     });
   }
@@ -206,7 +207,7 @@ function checkVerification(packet, warnings) {
       } else {
         // Check for vague verification steps
         test.verification.forEach((step, stepIdx) => {
-          if (step.length < 10 || /\b(check|verify|ensure)\b/i.test(step) && step.length < 20) {
+          if (step.length < 10 || (/\b(check|verify|ensure)\b/i.test(step) && step.length < 20)) {
             warnings.push({
               rule: 'vague-verification',
               severity: 'warn',
@@ -224,22 +225,26 @@ function checkVerification(packet, warnings) {
  * Generate a lint report in JSON format
  */
 function generateJsonReport(results) {
-  return JSON.stringify({
-    summary: {
-      totalFiles: results.length,
-      filesWithErrors: results.filter(r => r.errorCount > 0).length,
-      filesWithWarnings: results.filter(r => r.warningCount > 0).length,
-      totalErrors: results.reduce((sum, r) => sum + r.errorCount, 0),
-      totalWarnings: results.reduce((sum, r) => sum + r.warningCount, 0)
+  return JSON.stringify(
+    {
+      summary: {
+        totalFiles: results.length,
+        filesWithErrors: results.filter(r => r.errorCount > 0).length,
+        filesWithWarnings: results.filter(r => r.warningCount > 0).length,
+        totalErrors: results.reduce((sum, r) => sum + r.errorCount, 0),
+        totalWarnings: results.reduce((sum, r) => sum + r.warningCount, 0)
+      },
+      results: results.map(r => ({
+        file: r.file,
+        errorCount: r.errorCount,
+        warningCount: r.warningCount,
+        errors: r.errors,
+        warnings: r.warnings
+      }))
     },
-    results: results.map(r => ({
-      file: r.file,
-      errorCount: r.errorCount,
-      warningCount: r.warningCount,
-      errors: r.errors,
-      warnings: r.warnings
-    }))
-  }, null, 2);
+    null,
+    2
+  );
 }
 
 /**
@@ -247,7 +252,7 @@ function generateJsonReport(results) {
  */
 function generateMarkdownReport(results) {
   let md = '# RIPP Lint Report\n\n';
-  
+
   const totalFiles = results.length;
   const filesWithErrors = results.filter(r => r.errorCount > 0).length;
   const filesWithWarnings = results.filter(r => r.warningCount > 0).length;
@@ -267,7 +272,7 @@ function generateMarkdownReport(results) {
 
   results.forEach(result => {
     md += `### ${result.file}\n\n`;
-    
+
     if (result.errorCount === 0 && result.warningCount === 0) {
       md += '✅ No issues found\n\n';
     } else {

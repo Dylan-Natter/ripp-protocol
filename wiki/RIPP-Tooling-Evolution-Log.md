@@ -9,12 +9,14 @@
 This wiki serves as a **decision log** for tooling extensions, design discussions, and evolution of the RIPP ecosystem. It documents the "why" behind tooling choices and captures context for future contributors.
 
 ### What This Wiki Is
+
 - A historical record of design decisions
 - A discussion space for proposed tooling extensions
 - A log of implementation rationale and trade-offs
 - A collaborative workspace for contributors
 
 ### What This Wiki Is NOT
+
 - **NOT a specification**: The specification lives in `SPEC.md` and `schema/ripp-1.0.schema.json`
 - **NOT authoritative**: If wiki content conflicts with schema, code, or public docs, the wiki is wrong
 - **NOT a protocol definition**: RIPP protocol behavior is defined in the main repository only
@@ -43,9 +45,11 @@ If the wiki contradicts any of the above, **the wiki is wrong** and should be co
 **Context**: RIPP v1.0 is stable and in production use. The community has requested additional tooling to enhance workflows.
 
 ### Intent
+
 Add tooling capabilities (linting, packaging, analysis) to RIPP while preserving the protocol as a stable, trusted specification.
 
 ### Guardrails Established
+
 To prevent tooling from destabilizing the protocol, we have established:
 
 1. **Extension Guardrails** (`docs/EXTENSIONS.md`)
@@ -64,6 +68,7 @@ To prevent tooling from destabilizing the protocol, we have established:
    - No rewrites of existing concepts
 
 ### Principles
+
 - **Protocol First**: RIPP is a specification, tooling second
 - **Additive Only**: Enhancements, not replacements
 - **Backward Compatibility**: Existing packets must remain valid
@@ -71,7 +76,9 @@ To prevent tooling from destabilizing the protocol, we have established:
 - **Extractive Analysis**: Analyzers extract observable facts, never invent intent
 
 ### Next Steps
+
 Future tooling additions will be logged here with:
+
 - Rationale for the feature
 - How it maintains backward compatibility
 - Design trade-offs considered
@@ -82,18 +89,21 @@ Future tooling additions will be logged here with:
 ## How to Use This Wiki
 
 ### For Contributors
+
 - Document your design decisions here before implementing
 - Link to RFC discussions or issues
 - Capture trade-offs and alternatives considered
 - Update entries when implementations diverge from original plans
 
 ### For Maintainers
+
 - Review wiki entries during code review
 - Ensure alignment with `docs/EXTENSIONS.md` guardrails
 - Flag conflicts between wiki and authoritative sources
 - Archive outdated entries rather than deleting them
 
 ### For Users
+
 - Understand the reasoning behind tooling choices
 - See historical context for current behavior
 - Propose new tooling extensions with design rationale
@@ -103,6 +113,7 @@ Future tooling additions will be logged here with:
 ## Contribution Guidelines
 
 When adding to this wiki:
+
 1. **Be clear about status**: Mark proposals as "Draft", "Under Discussion", "Approved", or "Implemented"
 2. **Link to authoritative sources**: Reference SPEC.md, schema, or code where applicable
 3. **Timestamp entries**: Include date for historical context

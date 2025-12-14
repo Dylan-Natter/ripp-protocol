@@ -235,7 +235,6 @@ async function main() {
 }
 
 async function handleValidateCommand(args) {
-
   const pathArg = args[1];
 
   if (!pathArg) {
@@ -353,19 +352,21 @@ async function handleLintCommand(args) {
   for (const file of files) {
     try {
       const packet = loadPacket(file);
-      
+
       // First validate against schema
       const validation = validatePacket(packet, schema, file);
-      
+
       if (!validation.valid) {
         // Skip linting if schema validation fails
-        console.log(`${colors.yellow}⚠${colors.reset} ${path.relative(process.cwd(), file)} - Skipped (schema validation failed)`);
+        console.log(
+          `${colors.yellow}⚠${colors.reset} ${path.relative(process.cwd(), file)} - Skipped (schema validation failed)`
+        );
         continue;
       }
 
       // Run linter on valid packets
       const lintResult = lintPacket(packet, file);
-      
+
       results.push({
         file: path.relative(process.cwd(), file),
         errors: lintResult.errors,
@@ -382,14 +383,23 @@ async function handleLintCommand(args) {
         log(colors.green, '✓', `${path.relative(process.cwd(), file)} - No issues`);
       } else {
         if (lintResult.errorCount > 0) {
-          log(colors.red, '✗', `${path.relative(process.cwd(), file)} - ${lintResult.errorCount} error(s), ${lintResult.warningCount} warning(s)`);
+          log(
+            colors.red,
+            '✗',
+            `${path.relative(process.cwd(), file)} - ${lintResult.errorCount} error(s), ${lintResult.warningCount} warning(s)`
+          );
         } else {
-          log(colors.yellow, '⚠', `${path.relative(process.cwd(), file)} - ${lintResult.warningCount} warning(s)`);
+          log(
+            colors.yellow,
+            '⚠',
+            `${path.relative(process.cwd(), file)} - ${lintResult.warningCount} warning(s)`
+          );
         }
       }
-
     } catch (error) {
-      console.log(`${colors.red}✗${colors.reset} ${path.relative(process.cwd(), file)} - Parse error: ${error.message}`);
+      console.log(
+        `${colors.red}✗${colors.reset} ${path.relative(process.cwd(), file)} - Parse error: ${error.message}`
+      );
     }
   }
 
@@ -482,14 +492,18 @@ async function handlePackageCommand(args) {
     } else if (ext === '.md') {
       options.format = 'md';
     } else {
-      console.error(`${colors.red}Error: Unable to detect format from extension. Use --format <json|yaml|md>${colors.reset}`);
+      console.error(
+        `${colors.red}Error: Unable to detect format from extension. Use --format <json|yaml|md>${colors.reset}`
+      );
       process.exit(1);
     }
   }
 
   // Validate format
   if (!['json', 'yaml', 'md'].includes(options.format)) {
-    console.error(`${colors.red}Error: Invalid format '${options.format}'. Must be json, yaml, or md${colors.reset}`);
+    console.error(
+      `${colors.red}Error: Invalid format '${options.format}'. Must be json, yaml, or md${colors.reset}`
+    );
     process.exit(1);
   }
 
@@ -531,7 +545,6 @@ async function handlePackageCommand(args) {
     console.log('');
 
     process.exit(0);
-
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
     process.exit(1);
@@ -577,7 +590,9 @@ async function handleAnalyzeCommand(args) {
   }
 
   console.log(`${colors.blue}Analyzing input...${colors.reset}`);
-  console.log(`${colors.yellow}⚠${colors.reset} Generated packets are DRAFTS and require human review\n`);
+  console.log(
+    `${colors.yellow}⚠${colors.reset} Generated packets are DRAFTS and require human review\n`
+  );
 
   try {
     // Analyze the input
@@ -586,7 +601,7 @@ async function handleAnalyzeCommand(args) {
     // Auto-detect output format
     const ext = path.extname(options.output).toLowerCase();
     let output;
-    
+
     if (ext === '.yaml' || ext === '.yml') {
       output = yaml.dump(draftPacket, { indent: 2, lineWidth: 100 });
     } else if (ext === '.json') {
@@ -603,7 +618,7 @@ async function handleAnalyzeCommand(args) {
     console.log(`  ${colors.gray}Status: draft (requires human review)${colors.reset}`);
     console.log(`  ${colors.gray}Level: ${draftPacket.level}${colors.reset}`);
     console.log('');
-    
+
     console.log(`${colors.yellow}⚠ IMPORTANT:${colors.reset}`);
     console.log('  This is a DRAFT generated from observable code/schema facts.');
     console.log('  Review and refine all TODO items before use.');
@@ -614,7 +629,6 @@ async function handleAnalyzeCommand(args) {
     console.log('');
 
     process.exit(0);
-
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
     process.exit(1);

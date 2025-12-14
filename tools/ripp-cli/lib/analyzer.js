@@ -1,8 +1,8 @@
 /**
  * RIPP Analyzer
- * 
+ *
  * Extractive-only tool that generates DRAFT RIPP packets from existing code/schemas.
- * 
+ *
  * CRITICAL GUARDRAILS:
  * - Extracts ONLY observable facts from code/schemas/APIs
  * - NEVER guesses or invents intent, business logic, or failure modes
@@ -206,9 +206,15 @@ function extractDataContractsFromOpenAPI(spec) {
 
     if (entity.fields.length > 0) {
       // Heuristic: request-like names go to inputs, response-like to outputs
-      if (schemaName.toLowerCase().includes('request') || schemaName.toLowerCase().includes('input')) {
+      if (
+        schemaName.toLowerCase().includes('request') ||
+        schemaName.toLowerCase().includes('input')
+      ) {
         inputs.push(entity);
-      } else if (schemaName.toLowerCase().includes('response') || schemaName.toLowerCase().includes('output')) {
+      } else if (
+        schemaName.toLowerCase().includes('response') ||
+        schemaName.toLowerCase().includes('output')
+      ) {
         outputs.push(entity);
       } else {
         // Default to outputs if unclear

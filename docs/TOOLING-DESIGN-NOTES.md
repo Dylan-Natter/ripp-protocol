@@ -12,12 +12,14 @@
 #### 1. Core CLI (`tools/ripp-cli/index.js`)
 
 **Current Commands:**
+
 - `ripp validate <path>` — Schema validation against `ripp-1.0.schema.json`
 - `ripp validate <path> --min-level <1|2|3>` — Level enforcement
 - `ripp --help` — Help output
 - `ripp --version` — Version display
 
 **Current Functionality:**
+
 - Loads RIPP packets from YAML or JSON
 - Validates against JSON Schema using AJV
 - Checks file naming conventions (`.ripp.yaml`, `.ripp.json`)
@@ -27,6 +29,7 @@
 - Returns exit codes (0 = success, 1 = failure)
 
 **Key Implementation Details:**
+
 - Uses `glob` to find files recursively
 - Uses `js-yaml` for YAML parsing
 - Uses `ajv` + `ajv-formats` for schema validation
@@ -38,6 +41,7 @@
 **Purpose:** Authoritative structure definition for RIPP packets
 
 **Key Validations:**
+
 - Required metadata fields (ripp_version, packet_id, title, etc.)
 - Level 1 requirements: purpose, ux_flow, data_contracts
 - Level 2 requirements: + api_contracts, permissions, failure_modes
@@ -50,10 +54,12 @@
 #### 3. Existing Workflows
 
 **GitHub Actions:**
+
 - `.github/workflows/ripp-validate.yml` — Validates example packets on PR/push
 - `.github/workflows/code-quality.yml` — ESLint and Prettier checks
 
 **npm Scripts (package.json):**
+
 - `npm test` — Validates examples using ripp-cli
 - `npm run lint` — ESLint on ripp-cli
 - `npm run format` — Prettier formatting
@@ -61,12 +67,14 @@
 #### 4. Documentation Structure
 
 **Authoritative Documents (MUST NOT CHANGE SEMANTICS):**
+
 - `SPEC.md` — Protocol specification and behavior
 - `schema/ripp-1.0.schema.json` — Packet structure
 - `README.md` — Public API and usage guide
 - `docs/EXTENSIONS.md` — Extension guardrails
 
 **Supporting Documentation:**
+
 - `docs/` — User-facing guides
 - `wiki/` — Design decision log (non-authoritative)
 - `tools/ripp-cli/README.md` — CLI documentation
@@ -74,6 +82,7 @@
 #### 5. Example Packets
 
 **Location:** `examples/`
+
 - `item-creation.ripp.yaml` — Level 3 example
 - `api-only-feature.ripp.yaml` — API-focused example
 - `multi-tenant-feature.ripp.yaml` — Multi-tenancy example
@@ -89,6 +98,7 @@ These serve as test fixtures and documentation.
 **Attachment Point:** New command in `tools/ripp-cli/index.js`
 
 **Integration Strategy:**
+
 - Add new command: `ripp lint <path>`
 - **Runs AFTER schema validation** (calls existing `validatePacket()`)
 - Only lints packets that pass schema validation
@@ -97,12 +107,14 @@ These serve as test fixtures and documentation.
 - Outputs to `reports/` directory (gitignored)
 
 **What It Uses:**
+
 - Existing `loadPacket()` function
 - Existing `validatePacket()` function
 - Existing `findRippFiles()` function
 - New linting rules (separate from schema validation)
 
 **What It Does NOT Touch:**
+
 - Schema validation logic
 - Existing `validate` command
 - Schema files
@@ -113,6 +125,7 @@ These serve as test fixtures and documentation.
 **Attachment Point:** New command in `tools/ripp-cli/index.js`
 
 **Integration Strategy:**
+
 - Add new command: `ripp package --in <file> --out <file>`
 - Read-only operation (never modifies source)
 - Validates input before packaging
@@ -120,11 +133,13 @@ These serve as test fixtures and documentation.
 - Supports multiple formats (JSON, YAML, Markdown)
 
 **What It Uses:**
+
 - Existing `loadPacket()` function
 - Existing `validatePacket()` function
 - New formatting/export logic
 
 **What It Does NOT Touch:**
+
 - Source RIPP files
 - Validation logic
 - Schema definitions
@@ -134,6 +149,7 @@ These serve as test fixtures and documentation.
 **Attachment Point:** New command in `tools/ripp-cli/index.js`
 
 **Integration Strategy:**
+
 - Add new command: `ripp analyze <input> --output <file>`
 - Extractive-only (no intent guessing)
 - Generates DRAFT packets (clearly marked)
@@ -141,11 +157,13 @@ These serve as test fixtures and documentation.
 - Analyzes code/API/schema to extract observable facts
 
 **What It Uses:**
+
 - Existing schema as template structure
 - New analysis/extraction logic
 - File system readers (read-only)
 
 **What It Does NOT Touch:**
+
 - Existing RIPP packets
 - Validation logic
 - Schema definitions
@@ -163,6 +181,7 @@ These serve as test fixtures and documentation.
 ### 2. Existing CLI Behavior (Backward Compatible Only)
 
 **MUST NOT CHANGE:**
+
 - `ripp validate` command behavior
 - Exit codes for existing commands
 - Output format for existing commands (can add options)
@@ -170,6 +189,7 @@ These serve as test fixtures and documentation.
 - File discovery logic
 
 **CAN ADD:**
+
 - New optional flags (e.g., `--format json`)
 - New commands (lint, package, analyze)
 - New output destinations (reports/)
@@ -177,11 +197,13 @@ These serve as test fixtures and documentation.
 ### 3. Existing Workflows
 
 **MUST NOT BREAK:**
+
 - `.github/workflows/ripp-validate.yml` — Must continue to pass
 - `.github/workflows/code-quality.yml` — Must continue to pass
 - `npm test` — Must continue to pass
 
 **CAN ADD:**
+
 - New optional workflow steps
 - New npm scripts
 - New CI checks (non-blocking)
@@ -189,11 +211,13 @@ These serve as test fixtures and documentation.
 ### 4. Documentation Semantics
 
 **MUST NOT CHANGE:**
+
 - Protocol definitions in SPEC.md
 - Schema property meanings
 - Extension guardrails in EXTENSIONS.md
 
 **CAN ADD:**
+
 - New sections documenting tooling
 - New examples
 - New guides
@@ -207,11 +231,13 @@ These serve as test fixtures and documentation.
 **Location:** `tools/ripp-cli/index.js` (extend existing file)
 
 **New Components:**
+
 - `lintPacket(packet, filePath)` — Linting logic
 - `generateLintReport(results, format)` — Report generation
 - Command handler for `ripp lint`
 
 **Lint Rules:**
+
 1. Missing critical sections (intent, security, verification)
 2. Missing `non_goals` (best practice)
 3. Undefined ID references (cross-references)
@@ -219,12 +245,14 @@ These serve as test fixtures and documentation.
 5. Missing `verification.done_when` (incomplete acceptance tests)
 
 **Output:**
+
 - `reports/lint.json` — Machine-readable
 - `reports/lint.md` — Human-readable
 - Severity: `error` | `warn`
 - `--strict` flag promotes warnings to errors
 
 **Exit Codes:**
+
 - 0: No errors (warnings allowed unless --strict)
 - 1: Errors found (or warnings in strict mode)
 
@@ -233,11 +261,13 @@ These serve as test fixtures and documentation.
 **Location:** `tools/ripp-cli/index.js` (extend existing file)
 
 **New Components:**
+
 - `packagePacket(packet, options)` — Packaging logic
 - Format generators (JSON, YAML, Markdown, HTML)
 - Command handler for `ripp package`
 
 **Features:**
+
 - Normalize packet structure
 - Remove optional empty fields
 - Validate before packaging
@@ -245,6 +275,7 @@ These serve as test fixtures and documentation.
 - Read-only operation (never modifies source)
 
 **Output Formats:**
+
 - JSON: Normalized, minified, or pretty
 - YAML: Clean, normalized output
 - Markdown: Human-readable handoff doc
@@ -255,18 +286,21 @@ These serve as test fixtures and documentation.
 **Location:** `tools/ripp-cli/index.js` (extend existing file)
 
 **New Components:**
+
 - `analyzeCode(input, options)` — Code analysis
 - `extractDataContracts(schema)` — Schema extraction
 - `extractApiContracts(openapi)` — OpenAPI extraction
 - Command handler for `ripp analyze`
 
 **Capabilities:**
+
 - Extract API contracts from OpenAPI specs
 - Extract data contracts from JSON schemas
 - Extract UX flow from route definitions (basic)
 - Generate DRAFT packet (clearly marked with status: 'draft')
 
 **Guardrails:**
+
 - Only extract observable facts
 - Never invent intent or business logic
 - Never guess failure modes beyond try/catch
@@ -280,6 +314,7 @@ These serve as test fixtures and documentation.
 ### npm Scripts
 
 Add new scripts to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -313,6 +348,7 @@ ripp-protocol/
 ### gitignore Updates
 
 Add to `.gitignore`:
+
 ```
 reports/
 *.ripp.packaged.*
@@ -375,6 +411,7 @@ ripp analyze openapi.json --output draft-api.ripp.yaml
 ## Summary
 
 This design ensures:
+
 - **Additive only**: New commands, no changes to existing ones
 - **Backward compatible**: All existing workflows continue to function
 - **Read-only tooling**: No mutation of source packets

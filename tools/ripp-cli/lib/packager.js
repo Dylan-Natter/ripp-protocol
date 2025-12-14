@@ -1,8 +1,8 @@
 /**
  * RIPP Packager
- * 
+ *
  * Read-only artifact generator that creates normalized handoff artifacts.
- * 
+ *
  * Guardrails:
  * - Does NOT modify source RIPP packets
  * - Validates input before packaging
@@ -20,7 +20,7 @@ const yaml = require('js-yaml');
  */
 function packagePacket(packet, options = {}) {
   const normalized = normalizePacket(packet);
-  
+
   const packaged = {
     _meta: {
       packaged_at: new Date().toISOString(),
@@ -67,7 +67,9 @@ function normalizePacket(packet) {
     normalized.data_contracts.inputs = packet.data_contracts.inputs.map(entity => ({ ...entity }));
   }
   if (packet.data_contracts.outputs) {
-    normalized.data_contracts.outputs = packet.data_contracts.outputs.map(entity => ({ ...entity }));
+    normalized.data_contracts.outputs = packet.data_contracts.outputs.map(entity => ({
+      ...entity
+    }));
   }
 
   // Copy Level 2+ fields if present
@@ -131,7 +133,7 @@ function formatAsMarkdown(packaged, options = {}) {
   md += `**Status**: ${packaged.status}  \n`;
   md += `**Created**: ${packaged.created}  \n`;
   md += `**Updated**: ${packaged.updated}  \n`;
-  
+
   if (packaged.version) {
     md += `**Version**: ${packaged.version}  \n`;
   }
@@ -148,7 +150,7 @@ function formatAsMarkdown(packaged, options = {}) {
   md += `### Problem\n${packaged.purpose.problem}\n\n`;
   md += `### Solution\n${packaged.purpose.solution}\n\n`;
   md += `### Value\n${packaged.purpose.value}\n\n`;
-  
+
   if (packaged.purpose.out_of_scope) {
     md += `### Out of Scope\n${packaged.purpose.out_of_scope}\n\n`;
   }
@@ -181,7 +183,7 @@ function formatAsMarkdown(packaged, options = {}) {
 
   // Data Contracts
   md += '## Data Contracts\n\n';
-  
+
   if (packaged.data_contracts.inputs && packaged.data_contracts.inputs.length > 0) {
     md += '### Inputs\n\n';
     packaged.data_contracts.inputs.forEach(entity => {
@@ -216,7 +218,7 @@ function formatAsMarkdown(packaged, options = {}) {
     packaged.api_contracts.forEach(api => {
       md += `### ${api.method} ${api.endpoint}\n\n`;
       md += `**Purpose**: ${api.purpose}\n\n`;
-      
+
       if (api.request) {
         md += '**Request**:\n';
         if (api.request.content_type) md += `- Content-Type: ${api.request.content_type}\n`;
@@ -274,7 +276,7 @@ function formatAsMarkdown(packaged, options = {}) {
   // NFRs (Level 3)
   if (packaged.nfrs) {
     md += '## Non-Functional Requirements\n\n';
-    
+
     if (packaged.nfrs.performance) {
       md += '### Performance\n\n';
       Object.keys(packaged.nfrs.performance).forEach(key => {
