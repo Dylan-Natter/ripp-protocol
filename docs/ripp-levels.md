@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "RIPP Levels Explained"
+title: 'RIPP Levels Explained'
 ---
 
 ## RIPP Levels Explained
@@ -14,6 +14,7 @@ RIPP defines three conformance levels. Each level adds more rigor and structure.
 **Status**: Ad-hoc documentation
 
 This is where most teams start. Requirements are scattered across:
+
 - Jira tickets
 - Slack conversations
 - Email threads
@@ -22,12 +23,14 @@ This is where most teams start. Requirements are scattered across:
 - Tribal knowledge
 
 **Problems:**
+
 - No single source of truth
 - Intent erodes during implementation
 - Security and edge cases discovered too late
 - Onboarding is difficult
 
 **When it's acceptable:**
+
 - Trivial bug fixes
 - Documentation-only changes
 - Spikes and experiments
@@ -39,18 +42,21 @@ This is where most teams start. Requirements are scattered across:
 **Status**: Minimum viable RIPP
 
 **Required Sections:**
+
 - Metadata (version, ID, title, status, level)
 - Purpose (problem, solution, value)
 - UX Flow (step-by-step interaction)
 - Data Contracts (inputs and outputs)
 
 **What it gives you:**
+
 - Clear understanding of what and why
 - Reviewable specification before code
 - Data structure documentation
 - Single file with core requirements
 
 **When to use Level 1:**
+
 - Simple features
 - Internal tools
 - Low-risk changes
@@ -58,6 +64,7 @@ This is where most teams start. Requirements are scattered across:
 - Features that don't touch permissions or PII
 
 **Example Use Cases:**
+
 - Adding a new field to a form
 - Internal analytics dashboard
 - Read-only API endpoint for public data
@@ -72,12 +79,14 @@ This is where most teams start. Requirements are scattered across:
 **Status**: Production-ready specification
 
 **Required Sections:**
+
 - All Level 1 sections
 - **API Contracts** (endpoints, methods, errors)
 - **Permissions** (who can do what)
 - **Failure Modes** (what can go wrong)
 
 **What it gives you:**
+
 - Full API specification
 - Explicit permission model
 - Error handling documentation
@@ -85,6 +94,7 @@ This is where most teams start. Requirements are scattered across:
 - Reviewable before implementation
 
 **When to use Level 2:**
+
 - Production features
 - Customer-facing APIs
 - Features that modify data
@@ -92,6 +102,7 @@ This is where most teams start. Requirements are scattered across:
 - Anything with authentication
 
 **Example Use Cases:**
+
 - REST API for resource management
 - User-facing CRUD operations
 - Third-party integrations
@@ -107,12 +118,14 @@ This is where most teams start. Requirements are scattered across:
 **Status**: High-assurance specification
 
 **Required Sections:**
+
 - All Level 2 sections
 - **Audit Events** (what gets logged)
 - **Non-Functional Requirements** (performance, security)
 - **Acceptance Tests** (verification criteria)
 
 **What it gives you:**
+
 - Compliance-ready audit trail
 - Performance and scalability targets
 - Security requirements explicit
@@ -120,6 +133,7 @@ This is where most teams start. Requirements are scattered across:
 - Full lifecycle documentation
 
 **When to use Level 3:**
+
 - Payment processing
 - Authentication and authorization
 - Personal identifiable information (PII)
@@ -129,6 +143,7 @@ This is where most teams start. Requirements are scattered across:
 - Mission-critical features
 
 **Example Use Cases:**
+
 - Payment gateway integration
 - Multi-tenant SaaS features
 - Healthcare data handling (HIPAA)
@@ -142,20 +157,20 @@ This is where most teams start. Requirements are scattered across:
 
 ## Comparison Matrix
 
-| Aspect | Level 1 | Level 2 | Level 3 |
-|--------|---------|---------|---------|
-| **Purpose** | ✓ | ✓ | ✓ |
-| **UX Flow** | ✓ | ✓ | ✓ |
-| **Data Contracts** | ✓ | ✓ | ✓ |
-| **API Contracts** | — | ✓ | ✓ |
-| **Permissions** | — | ✓ | ✓ |
-| **Failure Modes** | — | ✓ | ✓ |
-| **Audit Events** | — | — | ✓ |
-| **NFRs** | — | — | ✓ |
-| **Acceptance Tests** | — | — | ✓ |
-| **Time to Write** | 30-60 min | 1-2 hrs | 2-4 hrs |
-| **Review Depth** | Light | Moderate | Thorough |
-| **Compliance** | No | Partial | Full |
+| Aspect               | Level 1   | Level 2  | Level 3  |
+| -------------------- | --------- | -------- | -------- |
+| **Purpose**          | ✓         | ✓        | ✓        |
+| **UX Flow**          | ✓         | ✓        | ✓        |
+| **Data Contracts**   | ✓         | ✓        | ✓        |
+| **API Contracts**    | —         | ✓        | ✓        |
+| **Permissions**      | —         | ✓        | ✓        |
+| **Failure Modes**    | —         | ✓        | ✓        |
+| **Audit Events**     | —         | —        | ✓        |
+| **NFRs**             | —         | —        | ✓        |
+| **Acceptance Tests** | —         | —        | ✓        |
+| **Time to Write**    | 30-60 min | 1-2 hrs  | 2-4 hrs  |
+| **Review Depth**     | Light     | Moderate | Thorough |
+| **Compliance**       | No        | Partial  | Full     |
 
 ---
 
@@ -164,6 +179,7 @@ This is where most teams start. Requirements are scattered across:
 ### Start with Risk Assessment
 
 Ask yourself:
+
 1. **Does it touch user permissions or auth?** → Level 2 minimum
 2. **Does it handle PII or payment data?** → Level 3
 3. **Is it customer-facing?** → Level 2 minimum

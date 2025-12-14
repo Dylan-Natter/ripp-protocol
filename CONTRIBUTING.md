@@ -56,6 +56,7 @@ This repository uses ESLint for linting and Prettier for code formatting.
 - **Tests**: `npm test`
 
 Configuration files:
+
 - `.eslintrc.json` - ESLint rules
 - `.prettierrc` - Prettier formatting rules
 - `.editorconfig` - Editor settings for consistent styling

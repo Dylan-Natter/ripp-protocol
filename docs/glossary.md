@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Glossary"
+title: 'Glossary'
 ---
 
 ## Glossary
@@ -46,6 +46,7 @@ The degradation of feature clarity during implementation. Occurs when requiremen
 ### Purpose
 
 A required RIPP section that describes why a feature exists. Includes:
+
 - **problem**: What problem is being solved
 - **solution**: How it's being solved
 - **value**: What value is delivered
@@ -109,6 +110,7 @@ A required metadata field. A unique identifier for the RIPP packet, typically in
 ### status
 
 A required metadata field indicating the lifecycle stage of the feature:
+
 - **draft**: Work in progress, not yet reviewed
 - **approved**: Reviewed and ready for implementation
 - **implemented**: Code is in production

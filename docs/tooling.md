@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Tooling"
+title: 'Tooling'
 ---
 
 ## RIPP Tooling
@@ -61,7 +61,7 @@ ripp validate --min-level 2 api/
 ✓ **Required Sections**: Ensures all required sections for declared level are present  
 ✓ **File Naming**: Checks `.ripp.yaml` or `.ripp.json` extension  
 ✓ **Data Integrity**: Validates packet_id format, date formats, status values  
-✓ **Level Conformance**: Ensures Level 2/3 sections are present when declared  
+✓ **Level Conformance**: Ensures Level 2/3 sections are present when declared
 
 ### Example Output
 
@@ -112,15 +112,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install RIPP CLI
         run: npm install -g ripp-cli
-      
+
       - name: Validate RIPP Packets
         run: ripp validate .
 ```
@@ -195,9 +195,7 @@ Add to `.vscode/settings.json`:
 ```json
 {
   "yaml.schemas": {
-    "https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json": [
-      "**/*.ripp.yaml"
-    ]
+    "https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json": ["**/*.ripp.yaml"]
   },
   "json.schemas": [
     {
@@ -274,14 +272,14 @@ import (
 
 func main() {
     schemaLoader := gojsonschema.NewReferenceLoader("file://./schema/ripp-1.0.schema.json")
-    
+
     data, _ := ioutil.ReadFile("my-feature.ripp.yaml")
     var packet map[string]interface{}
     yaml.Unmarshal(data, &packet)
-    
+
     documentLoader := gojsonschema.NewGoLoader(packet)
     result, _ := gojsonschema.Validate(schemaLoader, documentLoader)
-    
+
     if !result.Valid() {
         for _, err := range result.Errors() {
             println(err.String())
@@ -313,6 +311,7 @@ Show semantic differences between RIPP packet versions.
 RIPP is an open standard. You can build tools on top of it:
 
 **Ideas:**
+
 - Code generators (scaffolding from RIPP packets)
 - Test generators (from acceptance_tests section)
 - Documentation generators (from RIPP to HTML/PDF)
@@ -320,6 +319,7 @@ RIPP is an open standard. You can build tools on top of it:
 - Dashboards (visualize RIPP packet status across repos)
 
 **Start here:**
+
 - Use the [JSON Schema](https://github.com/Dylan-Natter/ripp-protocol/blob/main/schema/ripp-1.0.schema.json)
 - Parse YAML/JSON packets
 - Validate with standard libraries

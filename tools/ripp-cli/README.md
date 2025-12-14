@@ -48,18 +48,18 @@ ripp validate . --quiet
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
+| Command                | Description                   |
+| ---------------------- | ----------------------------- |
 | `ripp validate <path>` | Validate RIPP packets at path |
-| `ripp --help` | Show help message |
-| `ripp --version` | Show version |
+| `ripp --help`          | Show help message             |
+| `ripp --version`       | Show version                  |
 
 ## Options
 
-| Option | Description |
-|--------|-------------|
+| Option                  | Description                       |
+| ----------------------- | --------------------------------- |
 | `--min-level <1\|2\|3>` | Enforce minimum conformance level |
-| `--quiet` | Suppress warnings |
+| `--quiet`               | Suppress warnings                 |
 
 ## Exit Codes
 
@@ -72,7 +72,7 @@ ripp validate . --quiet
 ✓ **Required Sections**: Ensures all required sections for declared level are present  
 ✓ **File Naming**: Checks `.ripp.yaml` or `.ripp.json` extension  
 ✓ **Data Integrity**: Validates packet_id format, date formats, status values  
-✓ **Level Conformance**: Ensures Level 2/3 sections are present when declared  
+✓ **Level Conformance**: Ensures Level 2/3 sections are present when declared
 
 ## Example Output
 

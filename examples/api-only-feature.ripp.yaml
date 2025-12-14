@@ -1,216 +1,216 @@
-ripp_version: "1.0"
-packet_id: "api-only-feature"
-title: "Webhook Delivery System"
-created: "2025-12-13"
-updated: "2025-12-13"
-status: "approved"
+ripp_version: '1.0'
+packet_id: 'api-only-feature'
+title: 'Webhook Delivery System'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'approved'
 level: 2
 
 purpose:
-  problem: "Third-party integrations require real-time notifications when events occur, but current system has no webhook mechanism"
-  solution: "Build a reliable webhook delivery system with retry logic, signature verification, and delivery logs"
-  value: "Enables ecosystem integrations, reduces polling overhead, improves real-time data synchronization"
-  out_of_scope: "Webhook subscription UI (API-only for v1), webhook templating, custom event transformations"
+  problem: 'Third-party integrations require real-time notifications when events occur, but current system has no webhook mechanism'
+  solution: 'Build a reliable webhook delivery system with retry logic, signature verification, and delivery logs'
+  value: 'Enables ecosystem integrations, reduces polling overhead, improves real-time data synchronization'
+  out_of_scope: 'Webhook subscription UI (API-only for v1), webhook templating, custom event transformations'
   assumptions:
-    - "Webhook endpoints are HTTPS only"
-    - "Subscribers handle at-least-once delivery semantics"
-    - "Event payloads are JSON"
+    - 'Webhook endpoints are HTTPS only'
+    - 'Subscribers handle at-least-once delivery semantics'
+    - 'Event payloads are JSON'
 
 ux_flow:
   - step: 1
-    actor: "Third-Party System"
-    action: "Registers webhook endpoint via API"
-    trigger: "POST /api/v1/webhooks with URL and event types"
+    actor: 'Third-Party System'
+    action: 'Registers webhook endpoint via API'
+    trigger: 'POST /api/v1/webhooks with URL and event types'
   - step: 2
-    actor: "System"
-    action: "Validates endpoint URL, saves webhook subscription"
-    result: "Returns webhook_id and secret key for signature verification"
+    actor: 'System'
+    action: 'Validates endpoint URL, saves webhook subscription'
+    result: 'Returns webhook_id and secret key for signature verification'
   - step: 3
-    actor: "System"
-    action: "Event occurs (e.g., order.created)"
-    trigger: "Internal application event"
+    actor: 'System'
+    action: 'Event occurs (e.g., order.created)'
+    trigger: 'Internal application event'
   - step: 4
-    actor: "System"
-    action: "Identifies all webhook subscriptions for this event type"
-    condition: "Filters by event type and active status"
+    actor: 'System'
+    action: 'Identifies all webhook subscriptions for this event type'
+    condition: 'Filters by event type and active status'
   - step: 5
-    actor: "System"
-    action: "Constructs webhook payload with event data"
-    result: "JSON payload with event type, timestamp, and data"
+    actor: 'System'
+    action: 'Constructs webhook payload with event data'
+    result: 'JSON payload with event type, timestamp, and data'
   - step: 6
-    actor: "System"
-    action: "Signs payload with HMAC-SHA256 using secret"
-    result: "X-Webhook-Signature header"
+    actor: 'System'
+    action: 'Signs payload with HMAC-SHA256 using secret'
+    result: 'X-Webhook-Signature header'
   - step: 7
-    actor: "System"
-    action: "Sends HTTP POST to webhook endpoint"
-    condition: "If delivery fails, retry with exponential backoff (max 3 attempts)"
+    actor: 'System'
+    action: 'Sends HTTP POST to webhook endpoint'
+    condition: 'If delivery fails, retry with exponential backoff (max 3 attempts)'
   - step: 8
-    actor: "Third-Party System"
-    action: "Receives webhook, verifies signature, processes event"
-    result: "Returns HTTP 200-299 status code"
+    actor: 'Third-Party System'
+    action: 'Receives webhook, verifies signature, processes event'
+    result: 'Returns HTTP 200-299 status code'
   - step: 9
-    actor: "System"
-    action: "Logs delivery status (success or failure)"
-    result: "Webhook delivery record created"
+    actor: 'System'
+    action: 'Logs delivery status (success or failure)'
+    result: 'Webhook delivery record created'
 
 data_contracts:
   inputs:
-    - name: "WebhookSubscriptionRequest"
-      description: "Request to create a new webhook subscription"
+    - name: 'WebhookSubscriptionRequest'
+      description: 'Request to create a new webhook subscription'
       fields:
-        - name: "url"
-          type: "string"
+        - name: 'url'
+          type: 'string'
           required: true
-          description: "HTTPS endpoint to receive webhooks"
-          pattern: "^https://.*"
-        - name: "event_types"
-          type: "array"
+          description: 'HTTPS endpoint to receive webhooks'
+          pattern: '^https://.*'
+        - name: 'event_types'
+          type: 'array'
           required: true
-          description: "Array of event types to subscribe to"
-        - name: "description"
-          type: "string"
+          description: 'Array of event types to subscribe to'
+        - name: 'description'
+          type: 'string'
           required: false
-          description: "Optional description of the webhook"
+          description: 'Optional description of the webhook'
   outputs:
-    - name: "WebhookSubscriptionResponse"
-      description: "Response after creating webhook subscription"
+    - name: 'WebhookSubscriptionResponse'
+      description: 'Response after creating webhook subscription'
       fields:
-        - name: "webhook_id"
-          type: "string"
+        - name: 'webhook_id'
+          type: 'string'
           required: true
-          description: "UUID of the webhook subscription"
-          format: "uuid"
-        - name: "url"
-          type: "string"
+          description: 'UUID of the webhook subscription'
+          format: 'uuid'
+        - name: 'url'
+          type: 'string'
           required: true
-          description: "Registered webhook URL"
-        - name: "secret"
-          type: "string"
+          description: 'Registered webhook URL'
+        - name: 'secret'
+          type: 'string'
           required: true
-          description: "Secret key for signature verification (shown once)"
-        - name: "event_types"
-          type: "array"
+          description: 'Secret key for signature verification (shown once)'
+        - name: 'event_types'
+          type: 'array'
           required: true
-          description: "Subscribed event types"
-        - name: "status"
-          type: "string"
+          description: 'Subscribed event types'
+        - name: 'status'
+          type: 'string'
           required: true
-          description: "Webhook status (active, paused, failed)"
-          enum: ["active", "paused", "failed"]
-        - name: "created_at"
-          type: "string"
+          description: 'Webhook status (active, paused, failed)'
+          enum: ['active', 'paused', 'failed']
+        - name: 'created_at'
+          type: 'string'
           required: true
-          description: "ISO 8601 timestamp"
-          format: "date-time"
-    - name: "WebhookPayload"
-      description: "Payload sent to webhook endpoint when event occurs"
+          description: 'ISO 8601 timestamp'
+          format: 'date-time'
+    - name: 'WebhookPayload'
+      description: 'Payload sent to webhook endpoint when event occurs'
       fields:
-        - name: "event_id"
-          type: "string"
+        - name: 'event_id'
+          type: 'string'
           required: true
-          description: "Unique event identifier"
-          format: "uuid"
-        - name: "event_type"
-          type: "string"
+          description: 'Unique event identifier'
+          format: 'uuid'
+        - name: 'event_type'
+          type: 'string'
           required: true
-          description: "Type of event (e.g., order.created)"
-        - name: "timestamp"
-          type: "string"
+          description: 'Type of event (e.g., order.created)'
+        - name: 'timestamp'
+          type: 'string'
           required: true
-          description: "When the event occurred"
-          format: "date-time"
-        - name: "data"
-          type: "object"
+          description: 'When the event occurred'
+          format: 'date-time'
+        - name: 'data'
+          type: 'object'
           required: true
-          description: "Event-specific data payload"
-        - name: "organization_id"
-          type: "string"
+          description: 'Event-specific data payload'
+        - name: 'organization_id'
+          type: 'string'
           required: true
-          description: "Organization that triggered the event"
-          format: "uuid"
+          description: 'Organization that triggered the event'
+          format: 'uuid'
 
 api_contracts:
-  - endpoint: "/api/v1/webhooks"
-    method: "POST"
-    purpose: "Create a new webhook subscription"
+  - endpoint: '/api/v1/webhooks'
+    method: 'POST'
+    purpose: 'Create a new webhook subscription'
     request:
-      content_type: "application/json"
-      schema_ref: "WebhookSubscriptionRequest"
+      content_type: 'application/json'
+      schema_ref: 'WebhookSubscriptionRequest'
     response:
       success:
         status: 201
-        schema_ref: "WebhookSubscriptionResponse"
-        content_type: "application/json"
+        schema_ref: 'WebhookSubscriptionResponse'
+        content_type: 'application/json'
       errors:
         - status: 400
-          description: "Invalid URL or event types"
+          description: 'Invalid URL or event types'
         - status: 401
-          description: "Not authenticated"
+          description: 'Not authenticated'
         - status: 403
-          description: "No permission to create webhooks"
+          description: 'No permission to create webhooks'
         - status: 429
-          description: "Too many webhook subscriptions"
-  - endpoint: "/api/v1/webhooks/{webhook_id}"
-    method: "DELETE"
-    purpose: "Delete an existing webhook subscription"
+          description: 'Too many webhook subscriptions'
+  - endpoint: '/api/v1/webhooks/{webhook_id}'
+    method: 'DELETE'
+    purpose: 'Delete an existing webhook subscription'
     response:
       success:
         status: 204
       errors:
         - status: 401
-          description: "Not authenticated"
+          description: 'Not authenticated'
         - status: 403
-          description: "Webhook belongs to different organization"
+          description: 'Webhook belongs to different organization'
         - status: 404
-          description: "Webhook not found"
-  - endpoint: "/api/v1/webhooks/{webhook_id}/deliveries"
-    method: "GET"
-    purpose: "List delivery attempts for a webhook"
+          description: 'Webhook not found'
+  - endpoint: '/api/v1/webhooks/{webhook_id}/deliveries'
+    method: 'GET'
+    purpose: 'List delivery attempts for a webhook'
     response:
       success:
         status: 200
-        content_type: "application/json"
+        content_type: 'application/json'
       errors:
         - status: 401
-          description: "Not authenticated"
+          description: 'Not authenticated'
         - status: 403
-          description: "Webhook belongs to different organization"
+          description: 'Webhook belongs to different organization'
         - status: 404
-          description: "Webhook not found"
+          description: 'Webhook not found'
 
 permissions:
-  - action: "create:webhook"
-    required_roles: ["admin", "developer"]
-    resource_scope: "organization"
-    description: "Only admins and developers can register webhook endpoints"
-  - action: "delete:webhook"
-    required_roles: ["admin", "developer"]
-    resource_scope: "organization"
-    description: "Users can only delete webhooks in their own organization"
-  - action: "view:webhook_deliveries"
-    required_roles: ["admin", "developer"]
-    resource_scope: "organization"
-    description: "View delivery logs for debugging"
+  - action: 'create:webhook'
+    required_roles: ['admin', 'developer']
+    resource_scope: 'organization'
+    description: 'Only admins and developers can register webhook endpoints'
+  - action: 'delete:webhook'
+    required_roles: ['admin', 'developer']
+    resource_scope: 'organization'
+    description: 'Users can only delete webhooks in their own organization'
+  - action: 'view:webhook_deliveries'
+    required_roles: ['admin', 'developer']
+    resource_scope: 'organization'
+    description: 'View delivery logs for debugging'
 
 failure_modes:
-  - scenario: "Webhook endpoint is unreachable (network timeout)"
-    impact: "Event notification is not delivered"
-    handling: "Retry up to 3 times with exponential backoff (1s, 4s, 16s), then mark as failed"
-    user_message: "Webhook delivery failed after 3 attempts. Check your endpoint availability."
-  - scenario: "Webhook endpoint returns 5xx error"
-    impact: "Temporary failure at subscriber"
-    handling: "Retry with same logic as timeout, mark as failed after 3 attempts"
-    user_message: "Your webhook endpoint returned an error. Please check server logs."
-  - scenario: "Webhook endpoint returns 4xx error (client error)"
-    impact: "Permanent failure (bad configuration)"
-    handling: "Do not retry, mark as failed immediately, disable webhook after 10 consecutive failures"
-    user_message: "Webhook returned client error. Subscription auto-paused after repeated failures."
-  - scenario: "Event payload serialization fails"
-    impact: "Cannot construct valid JSON"
-    handling: "Log error, skip this delivery, alert engineering team"
-    user_message: "N/A (internal error, user not notified)"
-  - scenario: "Too many webhook deliveries queued (backpressure)"
-    impact: "System overload"
-    handling: "Apply rate limiting: max 100 deliveries/second per organization, queue excess events"
-    user_message: "Webhook delivery delayed due to high volume. Events are queued."
+  - scenario: 'Webhook endpoint is unreachable (network timeout)'
+    impact: 'Event notification is not delivered'
+    handling: 'Retry up to 3 times with exponential backoff (1s, 4s, 16s), then mark as failed'
+    user_message: 'Webhook delivery failed after 3 attempts. Check your endpoint availability.'
+  - scenario: 'Webhook endpoint returns 5xx error'
+    impact: 'Temporary failure at subscriber'
+    handling: 'Retry with same logic as timeout, mark as failed after 3 attempts'
+    user_message: 'Your webhook endpoint returned an error. Please check server logs.'
+  - scenario: 'Webhook endpoint returns 4xx error (client error)'
+    impact: 'Permanent failure (bad configuration)'
+    handling: 'Do not retry, mark as failed immediately, disable webhook after 10 consecutive failures'
+    user_message: 'Webhook returned client error. Subscription auto-paused after repeated failures.'
+  - scenario: 'Event payload serialization fails'
+    impact: 'Cannot construct valid JSON'
+    handling: 'Log error, skip this delivery, alert engineering team'
+    user_message: 'N/A (internal error, user not notified)'
+  - scenario: 'Too many webhook deliveries queued (backpressure)'
+    impact: 'System overload'
+    handling: 'Apply rate limiting: max 100 deliveries/second per organization, queue excess events'
+    user_message: 'Webhook delivery delayed due to high volume. Events are queued.'

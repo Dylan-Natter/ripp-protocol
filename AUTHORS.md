@@ -14,6 +14,7 @@ https://github.com/Dylan-Natter/ripp-protocol/graphs/contributors
 ## Acknowledgments
 
 Thank you to everyone who has contributed to RIPP through:
+
 - Code contributions
 - Documentation improvements
 - Bug reports and feature requests

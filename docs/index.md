@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "RIPP - Regenerative Intent Prompting Protocol"
+title: 'RIPP - Regenerative Intent Prompting Protocol'
 ---
 
 <div class="hero">
@@ -64,7 +64,7 @@ Teams write RIPP packets first, review them, approve them, then build the featur
 │             │      │  (Reviewed) │      │   Feature   │
 └─────────────┘      └─────────────┘      └─────────────┘
      Idea              Specification         Implementation
-                       
+
                      Single source of truth
                      preserves original intent
 ```

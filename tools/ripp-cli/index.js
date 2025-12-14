@@ -35,7 +35,7 @@ function loadSchema() {
 function loadPacket(filePath) {
   const ext = path.extname(filePath);
   const content = fs.readFileSync(filePath, 'utf8');
-  
+
   try {
     if (ext === '.yaml' || ext === '.yml') {
       return yaml.load(content);
@@ -52,13 +52,13 @@ function loadPacket(filePath) {
 function validatePacket(packet, schema, filePath, options = {}) {
   const ajv = new Ajv({ allErrors: true, strict: false });
   addFormats(ajv);
-  
+
   const validate = ajv.compile(schema);
   const valid = validate(packet);
-  
+
   const errors = [];
   const warnings = [];
-  
+
   // Schema validation errors
   if (!valid) {
     validate.errors.forEach(error => {
@@ -67,35 +67,37 @@ function validatePacket(packet, schema, filePath, options = {}) {
       errors.push(`${field}: ${message}`);
     });
   }
-  
+
   // File naming convention check
   const basename = path.basename(filePath);
   if (!basename.match(/\.ripp\.(yaml|yml|json)$/)) {
     warnings.push('File does not follow naming convention (*.ripp.yaml or *.ripp.json)');
   }
-  
+
   // packet_id format check
   if (packet.packet_id && !packet.packet_id.match(/^[a-z0-9-]+$/)) {
     errors.push('packet_id must be lowercase with hyphens only (kebab-case)');
   }
-  
+
   // Minimum level enforcement
   if (options.minLevel && packet.level < options.minLevel) {
-    errors.push(`Packet is Level ${packet.level}, but minimum Level ${options.minLevel} is required`);
+    errors.push(
+      `Packet is Level ${packet.level}, but minimum Level ${options.minLevel} is required`
+    );
   }
-  
+
   // Check template files (allow them to have placeholder values)
   const isTemplate = basename.includes('template');
   if (isTemplate) {
     warnings.push('Template file detected - validation may show expected errors');
   }
-  
+
   return { valid: errors.length === 0, errors, warnings, level: packet.level };
 }
 
 async function findRippFiles(pathArg) {
   const stats = fs.statSync(pathArg);
-  
+
   if (stats.isFile()) {
     return [pathArg];
   } else if (stats.isDirectory()) {
@@ -108,10 +110,10 @@ async function findRippFiles(pathArg) {
 
 function printResults(results, options) {
   console.log('');
-  
+
   let totalValid = 0;
   let totalInvalid = 0;
-  
+
   results.forEach(result => {
     if (result.valid) {
       totalValid++;
@@ -123,22 +125,22 @@ function printResults(results, options) {
         console.log(`  ${colors.red}•${colors.reset} ${error}`);
       });
     }
-    
+
     if (result.warnings.length > 0 && !options.quiet) {
       result.warnings.forEach(warning => {
         console.log(`  ${colors.yellow}⚠${colors.reset} ${warning}`);
       });
     }
   });
-  
+
   console.log('');
-  
+
   if (totalInvalid > 0) {
     log(colors.red, '✗', `${totalInvalid} of ${results.length} RIPP packets failed validation.`);
   } else {
     log(colors.green, '✓', `All ${totalValid} RIPP packets are valid.`);
   }
-  
+
   console.log('');
 }
 
@@ -183,39 +185,39 @@ function showVersion() {
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
     showHelp();
     process.exit(0);
   }
-  
+
   if (args.includes('--version') || args.includes('-v')) {
     showVersion();
     process.exit(0);
   }
-  
+
   const command = args[0];
-  
+
   if (command !== 'validate') {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
-    console.error('Run \'ripp --help\' for usage information.');
+    console.error("Run 'ripp --help' for usage information.");
     process.exit(1);
   }
-  
+
   const pathArg = args[1];
-  
+
   if (!pathArg) {
     console.error(`${colors.red}Error: Path argument required${colors.reset}`);
     console.error('Usage: ripp validate <path>');
     process.exit(1);
   }
-  
+
   // Parse options
   const options = {
     minLevel: null,
     quiet: args.includes('--quiet')
   };
-  
+
   const minLevelIndex = args.indexOf('--min-level');
   if (minLevelIndex !== -1 && args[minLevelIndex + 1]) {
     options.minLevel = parseInt(args[minLevelIndex + 1]);
@@ -224,25 +226,25 @@ async function main() {
       process.exit(1);
     }
   }
-  
+
   // Check if path exists
   if (!fs.existsSync(pathArg)) {
     console.error(`${colors.red}Error: Path not found: ${pathArg}${colors.reset}`);
     process.exit(1);
   }
-  
+
   console.log(`${colors.blue}Validating RIPP packets...${colors.reset}`);
-  
+
   const schema = loadSchema();
   const files = await findRippFiles(pathArg);
-  
+
   if (files.length === 0) {
     console.log(`${colors.yellow}No RIPP files found in ${pathArg}${colors.reset}`);
     process.exit(0);
   }
-  
+
   const results = [];
-  
+
   for (const file of files) {
     try {
       const packet = loadPacket(file);
@@ -264,9 +266,9 @@ async function main() {
       });
     }
   }
-  
+
   printResults(results, options);
-  
+
   const hasFailures = results.some(r => !r.valid);
   process.exit(hasFailures ? 1 : 0);
 }

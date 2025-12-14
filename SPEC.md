@@ -92,12 +92,12 @@ RIPP is "regenerative" because it:
 Every RIPP packet **must** include:
 
 ```yaml
-ripp_version: "1.0"
-packet_id: "unique-feature-identifier"
-title: "Brief feature title"
-created: "2025-12-13"
-updated: "2025-12-13"
-status: "draft | approved | implemented | deprecated"
+ripp_version: '1.0'
+packet_id: 'unique-feature-identifier'
+title: 'Brief feature title'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'draft | approved | implemented | deprecated'
 level: 1 | 2 | 3
 ```
 
@@ -126,9 +126,9 @@ Describes why the feature exists and what problem it solves.
 
 ```yaml
 purpose:
-  problem: "Clear statement of the problem being solved"
-  solution: "High-level approach to solving it"
-  value: "Business or user value delivered"
+  problem: 'Clear statement of the problem being solved'
+  solution: 'High-level approach to solving it'
+  value: 'Business or user value delivered'
 ```
 
 **Optional fields:**
@@ -149,13 +149,13 @@ Describes the user or system interaction flow.
 ```yaml
 ux_flow:
   - step: 1
-    actor: "User | System | Service Name"
-    action: "What happens in this step"
-    trigger: "What initiates this step"
+    actor: 'User | System | Service Name'
+    action: 'What happens in this step'
+    trigger: 'What initiates this step'
   - step: 2
-    actor: "System"
-    action: "System responds"
-    result: "What the user sees or receives"
+    actor: 'System'
+    action: 'System responds'
+    result: 'What the user sees or receives'
 ```
 
 **Required fields per step:**
@@ -177,19 +177,19 @@ Defines all data structures consumed or produced by the feature.
 ```yaml
 data_contracts:
   inputs:
-    - name: "InputEntityName"
+    - name: 'InputEntityName'
       fields:
-        - name: "fieldName"
-          type: "string | number | boolean | object | array"
+        - name: 'fieldName'
+          type: 'string | number | boolean | object | array'
           required: true | false
-          description: "What this field represents"
+          description: 'What this field represents'
   outputs:
-    - name: "OutputEntityName"
+    - name: 'OutputEntityName'
       fields:
-        - name: "fieldName"
-          type: "string"
+        - name: 'fieldName'
+          type: 'string'
           required: true
-          description: "What this field represents"
+          description: 'What this field represents'
 ```
 
 **Required fields:**
@@ -213,21 +213,21 @@ Defines all API endpoints or service interfaces.
 
 ```yaml
 api_contracts:
-  - endpoint: "/api/v1/resource"
-    method: "GET | POST | PUT | DELETE | PATCH"
-    purpose: "What this endpoint does"
+  - endpoint: '/api/v1/resource'
+    method: 'GET | POST | PUT | DELETE | PATCH'
+    purpose: 'What this endpoint does'
     request:
-      content_type: "application/json"
-      schema_ref: "InputEntityName"
+      content_type: 'application/json'
+      schema_ref: 'InputEntityName'
     response:
       success:
         status: 200
-        schema_ref: "OutputEntityName"
+        schema_ref: 'OutputEntityName'
       errors:
         - status: 400
-          description: "Invalid input"
+          description: 'Invalid input'
         - status: 401
-          description: "Unauthorized"
+          description: 'Unauthorized'
 ```
 
 **Required fields:**
@@ -249,10 +249,10 @@ Defines all permission requirements for the feature.
 
 ```yaml
 permissions:
-  - action: "create:resource"
-    required_roles: ["admin", "editor"]
-    resource_scope: "organization | project | global"
-    description: "Who can create resources and under what conditions"
+  - action: 'create:resource'
+    required_roles: ['admin', 'editor']
+    resource_scope: 'organization | project | global'
+    description: 'Who can create resources and under what conditions'
 ```
 
 **Required fields:**
@@ -272,14 +272,14 @@ Documents what can go wrong and how to handle it.
 
 ```yaml
 failure_modes:
-  - scenario: "Database is unavailable"
-    impact: "Users cannot save data"
-    handling: "Return 503, retry with exponential backoff"
-    user_message: "Service temporarily unavailable. Please try again."
-  - scenario: "Invalid input data"
-    impact: "Request fails validation"
-    handling: "Return 400 with detailed error messages"
-    user_message: "Please check your input and try again."
+  - scenario: 'Database is unavailable'
+    impact: 'Users cannot save data'
+    handling: 'Return 503, retry with exponential backoff'
+    user_message: 'Service temporarily unavailable. Please try again.'
+  - scenario: 'Invalid input data'
+    impact: 'Request fails validation'
+    handling: 'Return 400 with detailed error messages'
+    user_message: 'Please check your input and try again.'
 ```
 
 **Required fields:**
@@ -304,15 +304,15 @@ Specifies what events must be logged for compliance and debugging.
 
 ```yaml
 audit_events:
-  - event: "resource.created"
-    severity: "info | warn | error"
+  - event: 'resource.created'
+    severity: 'info | warn | error'
     includes:
-      - "user_id"
-      - "resource_id"
-      - "timestamp"
-      - "ip_address"
-    retention: "90 days"
-    purpose: "Track resource creation for compliance"
+      - 'user_id'
+      - 'resource_id'
+      - 'timestamp'
+      - 'ip_address'
+    retention: '90 days'
+    purpose: 'Track resource creation for compliance'
 ```
 
 **Required fields:**
@@ -334,15 +334,15 @@ Defines performance, scalability, and operational requirements.
 ```yaml
 nfrs:
   performance:
-    response_time_p95: "200ms"
-    throughput: "1000 requests/second"
+    response_time_p95: '200ms'
+    throughput: '1000 requests/second'
   scalability:
     max_concurrent_users: 10000
-    data_growth: "1TB/year"
+    data_growth: '1TB/year'
   availability:
-    uptime_target: "99.9%"
-    rpo: "1 hour"
-    rto: "4 hours"
+    uptime_target: '99.9%'
+    rpo: '1 hour'
+    rto: '4 hours'
   security:
     encryption_at_rest: true
     encryption_in_transit: true
@@ -363,15 +363,15 @@ Defines how to verify the feature works correctly.
 
 ```yaml
 acceptance_tests:
-  - test_id: "TC-001"
-    title: "User can create a new resource"
-    given: "User is authenticated with editor role"
-    when: "User submits valid resource data"
-    then: "Resource is created and ID is returned"
+  - test_id: 'TC-001'
+    title: 'User can create a new resource'
+    given: 'User is authenticated with editor role'
+    when: 'User submits valid resource data'
+    then: 'Resource is created and ID is returned'
     verification:
-      - "HTTP 201 response received"
-      - "Resource ID is present in response"
-      - "Resource is retrievable via GET"
+      - 'HTTP 201 response received'
+      - 'Resource ID is present in response'
+      - 'Resource is retrievable via GET'
 ```
 
 **Required fields:**
