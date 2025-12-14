@@ -1,0 +1,113 @@
+{
+  "name": "ripp-protocol",
+  "displayName": "RIPP Protocol",
+  "description": "VS Code integration for validating, linting, packaging, and analyzing RIPP packets.",
+  "version": "0.1.0",
+  "publisher": "RIPP",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "ripp",
+    "protocol",
+    "validation",
+    "lint",
+    "spec",
+    "handoff",
+    "specification",
+    "yaml",
+    "json"
+  ],
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dylan-Natter/ripp-protocol"
+  },
+  "bugs": {
+    "url": "https://github.com/Dylan-Natter/ripp-protocol/issues"
+  },
+  "homepage": "https://dylan-natter.github.io/ripp-protocol",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:ripp.validate",
+    "onCommand:ripp.lint",
+    "onCommand:ripp.package",
+    "onCommand:ripp.analyze"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ripp.validate",
+        "title": "RIPP: Validate Packet(s)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.lint",
+        "title": "RIPP: Lint Packet(s)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.package",
+        "title": "RIPP: Package Handoff",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.analyze",
+        "title": "RIPP: Analyze Project (Draft Packet)",
+        "category": "RIPP"
+      }
+    ],
+    "configuration": {
+      "title": "RIPP Protocol",
+      "properties": {
+        "ripp.cliMode": {
+          "type": "string",
+          "enum": [
+            "npx",
+            "npmScript"
+          ],
+          "default": "npx",
+          "description": "How to execute the RIPP CLI: 'npx' runs 'npx ripp', 'npmScript' uses workspace npm scripts."
+        },
+        "ripp.strict": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable strict mode for linting (treat warnings as errors)."
+        },
+        "ripp.paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/*.ripp.yaml",
+            "**/*.ripp.json"
+          ],
+          "description": "Glob patterns for discovering RIPP packet files."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {}
+}
