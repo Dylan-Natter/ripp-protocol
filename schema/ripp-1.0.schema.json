@@ -1,0 +1,539 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json",
+  "title": "RIPP v1.0 Packet Schema",
+  "description": "JSON Schema for Regenerative Intent Prompting Protocol v1.0 packets",
+  "type": "object",
+  "required": [
+    "ripp_version",
+    "packet_id",
+    "title",
+    "created",
+    "updated",
+    "status",
+    "level",
+    "purpose",
+    "ux_flow",
+    "data_contracts"
+  ],
+  "properties": {
+    "ripp_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "RIPP specification version"
+    },
+    "packet_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier for this packet (kebab-case)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable feature title"
+    },
+    "created": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 date when packet was created"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 date of last update"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "approved", "implemented", "deprecated"],
+      "description": "Lifecycle stage of the feature"
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "RIPP conformance level"
+    },
+    "version": {
+      "type": "string",
+      "description": "Optional packet version (semver recommended)"
+    },
+    "purpose": {
+      "type": "object",
+      "required": ["problem", "solution", "value"],
+      "properties": {
+        "problem": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Clear statement of the problem being solved"
+        },
+        "solution": {
+          "type": "string",
+          "minLength": 1,
+          "description": "High-level approach to solving it"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Business or user value delivered"
+        },
+        "out_of_scope": {
+          "type": "string",
+          "description": "What this feature explicitly does NOT do"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Known assumptions or constraints"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "url": { "type": "string", "format": "uri" }
+            },
+            "required": ["title", "url"]
+          },
+          "description": "Links to related docs, issues, or designs"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ux_flow": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step", "actor", "action"],
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Numeric order"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Who or what performs the action"
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What happens in this step"
+          },
+          "trigger": {
+            "type": "string",
+            "description": "What initiates this step"
+          },
+          "result": {
+            "type": "string",
+            "description": "What the user sees or receives"
+          },
+          "condition": {
+            "type": "string",
+            "description": "Conditional logic for this step"
+          }
+        },
+        "anyOf": [
+          { "required": ["trigger"] },
+          { "required": ["result"] },
+          { "required": ["condition"] }
+        ],
+        "additionalProperties": false
+      },
+      "description": "User or system interaction flow"
+    },
+    "data_contracts": {
+      "type": "object",
+      "anyOf": [
+        { "required": ["inputs"] },
+        { "required": ["outputs"] }
+      ],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/entity"
+          },
+          "description": "Data structures consumed by the feature"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/entity"
+          },
+          "description": "Data structures produced by the feature"
+        }
+      },
+      "additionalProperties": false
+    },
+    "api_contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["endpoint", "method", "purpose", "response"],
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "minLength": 1,
+            "description": "URL path or RPC method name"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+            "description": "HTTP method or protocol operation"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What this endpoint does"
+          },
+          "request": {
+            "type": "object",
+            "properties": {
+              "content_type": { "type": "string" },
+              "schema_ref": { "type": "string" },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "in": { "type": "string", "enum": ["path", "query", "header", "cookie"] },
+                    "required": { "type": "boolean" },
+                    "type": { "type": "string" },
+                    "description": { "type": "string" }
+                  },
+                  "required": ["name", "in", "required", "type"]
+                }
+              }
+            }
+          },
+          "response": {
+            "type": "object",
+            "required": ["success", "errors"],
+            "properties": {
+              "success": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "integer", "minimum": 200, "maximum": 299 },
+                  "schema_ref": { "type": "string" },
+                  "content_type": { "type": "string" }
+                }
+              },
+              "errors": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["status", "description"],
+                  "properties": {
+                    "status": { "type": "integer", "minimum": 400, "maximum": 599 },
+                    "description": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "API endpoints or service interfaces"
+    },
+    "permissions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["action", "required_roles", "description"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The permission being checked"
+          },
+          "required_roles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Roles that can perform this action"
+          },
+          "resource_scope": {
+            "type": "string",
+            "description": "Scope of the resource"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "When and why this permission is checked"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Permission requirements for the feature"
+    },
+    "failure_modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["scenario", "impact", "handling", "user_message"],
+        "properties": {
+          "scenario": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What goes wrong"
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Effect on users or system"
+          },
+          "handling": {
+            "type": "string",
+            "minLength": 1,
+            "description": "How the system responds"
+          },
+          "user_message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What users see or are told"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "What can go wrong and how to handle it"
+    },
+    "audit_events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["event", "severity", "includes", "purpose"],
+        "properties": {
+          "event": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Event name"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["debug", "info", "warn", "error", "critical"],
+            "description": "Log level"
+          },
+          "includes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Data fields captured in the event"
+          },
+          "retention": {
+            "type": "string",
+            "description": "How long to keep this event"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Why this event is logged"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Events that must be logged"
+    },
+    "nfrs": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "performance": {
+          "type": "object",
+          "properties": {
+            "response_time_p50": { "type": "string" },
+            "response_time_p95": { "type": "string" },
+            "response_time_p99": { "type": "string" },
+            "throughput": { "type": "string" }
+          }
+        },
+        "scalability": {
+          "type": "object",
+          "properties": {
+            "max_concurrent_users": { "type": "integer" },
+            "data_growth": { "type": "string" },
+            "horizontal_scaling": { "type": "boolean" }
+          }
+        },
+        "availability": {
+          "type": "object",
+          "properties": {
+            "uptime_target": { "type": "string" },
+            "rpo": { "type": "string" },
+            "rto": { "type": "string" }
+          }
+        },
+        "security": {
+          "type": "object",
+          "properties": {
+            "encryption_at_rest": { "type": "boolean" },
+            "encryption_in_transit": { "type": "boolean" },
+            "authentication_required": { "type": "boolean" },
+            "authorization_model": { "type": "string" }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "standards": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "data_residency": { "type": "string" },
+            "audit_requirements": { "type": "string" }
+          }
+        }
+      },
+      "additionalProperties": true,
+      "description": "Non-functional requirements"
+    },
+    "acceptance_tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["test_id", "title", "given", "when", "then", "verification"],
+        "properties": {
+          "test_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Unique test identifier"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What is being tested"
+          },
+          "given": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Preconditions"
+          },
+          "when": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Action taken"
+          },
+          "then": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Expected outcome"
+          },
+          "verification": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Specific checks to perform"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "How to verify the feature works correctly"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "level": { "const": 2 } }
+      },
+      "then": {
+        "required": ["api_contracts", "permissions", "failure_modes"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "level": { "const": 3 } }
+      },
+      "then": {
+        "required": ["api_contracts", "permissions", "failure_modes", "audit_events", "nfrs", "acceptance_tests"]
+      }
+    }
+  ],
+  "additionalProperties": true,
+  "definitions": {
+    "entity": {
+      "type": "object",
+      "required": ["name", "fields"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Entity name"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this entity represents"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "required", "description"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Field name"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["string", "number", "integer", "boolean", "object", "array", "null"],
+                "description": "Field data type"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether this field is required"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "description": "What this field represents"
+              },
+              "format": {
+                "type": "string",
+                "description": "Format hint (e.g., email, uuid, date-time)"
+              },
+              "min": {
+                "type": "number",
+                "description": "Minimum value or length"
+              },
+              "max": {
+                "type": "number",
+                "description": "Maximum value or length"
+              },
+              "pattern": {
+                "type": "string",
+                "description": "Regex pattern for validation"
+              },
+              "enum": {
+                "type": "array",
+                "description": "Allowed values"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

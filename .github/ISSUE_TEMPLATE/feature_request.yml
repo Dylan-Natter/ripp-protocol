@@ -1,0 +1,82 @@
+name: Feature Request
+description: Suggest a new feature for RIPP tooling or documentation
+title: "[Feature]: "
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe what you'd like to see.
+  
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which area would this feature enhance?
+      options:
+        - CLI Validator
+        - JSON Schema
+        - Documentation
+        - Examples
+        - Templates
+        - GitHub Actions
+        - New Tool/Integration
+        - Other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: "I'm frustrated when..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this problem solved?
+      placeholder: "I would like to..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions?
+      placeholder: "I also thought about..."
+  
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Provide examples, mockups, or use cases
+      placeholder: |
+        Example usage:
+        ```bash
+        ripp generate --from openapi.json
+        ```
+  
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Would improve workflow
+        - Critical for adoption
+    validations:
+      required: true
+  
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information about the feature request
+      placeholder: Any additional context, links, or references
