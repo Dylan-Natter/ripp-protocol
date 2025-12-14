@@ -9,5 +9,10 @@ tsconfig.json
 **/*.map
 node_modules/**
 .npmrc
-docs/TESTING.md
-docs/PUBLISHING.md
+docs/**
+EXTENSION-DRIFT-REPORT.md
+FINAL-SUMMARY.md
+MANUAL-TESTING-CHECKLIST.md
+VERIFICATION-SUMMARY.md
+**/*.log
+.editorconfig
