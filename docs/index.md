@@ -91,6 +91,8 @@ RIPP doesn't replace user stories—it extends them. Where user stories capture 
 
 ## How RIPP Works
 
+### Traditional RIPP Workflow
+
 ```
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
 │   Concept   │─────▶│ RIPP Packet │─────▶│ Production  │
@@ -108,6 +110,30 @@ RIPP doesn't replace user stories—it extends them. Where user stories capture 
 4. **Implement**: Code is written to fulfill the RIPP spec
 5. **Validate**: Acceptance tests from RIPP are executed
 6. **Ship**: Feature goes to production with full clarity
+
+### Prototype-First Workflow
+
+RIPP also supports starting with a rapid prototype and extracting the specification:
+
+```
+┌───────────┐      ┌──────────────┐      ┌─────────────┐      ┌────────────┐
+│   Idea    │─────▶│  Prototype   │─────▶│ RIPP Extract│─────▶│ Production │
+│           │      │ (AI-powered) │      │  + Review   │      │   Feature  │
+└───────────┘      └──────────────┘      └─────────────┘      └────────────┘
+  Fast ideation    Proves feasibility    Formal specification   Safe to ship
+
+                                         RIPP acts as
+                                      "intent compiler"
+```
+
+1. **Build rapid prototype**: Use AI or rapid tools to prove feasibility
+2. **Extract RIPP**: Generate draft specification from code + stated intent
+3. **Review and refine**: Fill gaps, resolve conflicts, answer open questions
+4. **Approve**: RIPP packet becomes the authoritative contract
+5. **Rebuild for production**: Implement guided by formal specification
+6. **Ship**: With confidence that intent is preserved and complete
+
+**Key insight**: Prototypes prove it CAN work. RIPP defines how it SHOULD work in production.
 
 ---
 
@@ -184,6 +210,8 @@ RIPP doesn't replace user stories—it extends them. Where user stories capture 
 3. Write your first RIPP packet
 4. Validate it: `ripp validate your-feature.ripp.yaml`
 5. Review, approve, build
+
+**Working with prototypes?** See [From Prototype to Production: RIPP as an Intent Compiler]({{ '/prototype-to-production' | relative_url }})
 
 ---
 

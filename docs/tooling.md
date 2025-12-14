@@ -292,6 +292,34 @@ func main() {
 
 ## Community Tools
 
+### RIPP Extractor (Conceptual)
+
+Generate draft RIPP packets from existing prototype code and requirements.
+
+**Status**: Documented as a concept, not yet fully implemented.
+
+**Conceptual usage**:
+
+```bash
+# Extract RIPP from prototype code and requirements
+ripp extract --code ./src --input ./README.md --output feature.ripp.yaml
+
+# Review generated draft
+cat feature.ripp.yaml
+
+# Validate the draft
+ripp validate feature.ripp.yaml
+```
+
+**What it would generate**:
+
+- Draft RIPP packet with all extractable sections
+- Evidence map showing which code files support each section
+- Confidence ratings (high/medium/low/unknown) per section
+- Open questions flagging conflicts and gaps
+
+**Learn more**: See [From Prototype to Production]({{ '/prototype-to-production' | relative_url }}) for the complete prototype extraction workflow.
+
 ### RIPP Packet Generator (Planned)
 
 Generate RIPP packet templates from OpenAPI specs.
