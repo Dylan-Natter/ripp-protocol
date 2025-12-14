@@ -9,6 +9,7 @@ const { glob } = require('glob');
 const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./lib/linter');
 const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
 const { analyzeInput } = require('./lib/analyzer');
+const { initRepository } = require('./lib/init');
 
 // ANSI color codes
 const colors = {
@@ -153,6 +154,7 @@ function showHelp() {
 ${colors.blue}RIPP CLI v${pkg.version}${colors.reset}
 
 ${colors.green}Commands:${colors.reset}
+  ripp init                         Initialize RIPP in your repository
   ripp validate <path>              Validate RIPP packets
   ripp lint <path>                  Lint RIPP packets for best practices
   ripp package --in <file> --out <file>
@@ -161,6 +163,9 @@ ${colors.green}Commands:${colors.reset}
                                     Analyze code/schema and generate DRAFT RIPP packet
   ripp --help                       Show this help message
   ripp --version                    Show version
+
+${colors.green}Init Options:${colors.reset}
+  --force                           Overwrite existing files
 
 ${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
@@ -181,6 +186,8 @@ ${colors.green}Analyze Options:${colors.reset}
   --packet-id <id>                  Packet ID for generated RIPP (default: analyzed)
 
 ${colors.green}Examples:${colors.reset}
+  ripp init
+  ripp init --force
   ripp validate my-feature.ripp.yaml
   ripp validate features/
   ripp validate api/ --min-level 2
@@ -219,7 +226,9 @@ async function main() {
 
   const command = args[0];
 
-  if (command === 'validate') {
+  if (command === 'init') {
+    await handleInitCommand(args);
+  } else if (command === 'validate') {
     await handleValidateCommand(args);
   } else if (command === 'lint') {
     await handleLintCommand(args);
@@ -230,6 +239,66 @@ async function main() {
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
+    process.exit(1);
+  }
+}
+
+async function handleInitCommand(args) {
+  const options = {
+    force: args.includes('--force')
+  };
+
+  console.log(`${colors.blue}Initializing RIPP in repository...${colors.reset}\n`);
+
+  try {
+    const results = initRepository(options);
+
+    // Print created files
+    if (results.created.length > 0) {
+      console.log(`${colors.green}✓ Created:${colors.reset}`);
+      results.created.forEach(file => {
+        console.log(`  ${colors.green}+${colors.reset} ${file}`);
+      });
+      console.log('');
+    }
+
+    // Print skipped files
+    if (results.skipped.length > 0) {
+      console.log(`${colors.yellow}ℹ Skipped:${colors.reset}`);
+      results.skipped.forEach(file => {
+        console.log(`  ${colors.yellow}•${colors.reset} ${file}`);
+      });
+      console.log('');
+    }
+
+    // Print errors
+    if (results.errors.length > 0) {
+      console.log(`${colors.red}✗ Errors:${colors.reset}`);
+      results.errors.forEach(error => {
+        console.log(`  ${colors.red}•${colors.reset} ${error}`);
+      });
+      console.log('');
+    }
+
+    // Final summary
+    if (results.errors.length > 0) {
+      log(colors.red, '✗', 'RIPP initialization completed with errors');
+      process.exit(1);
+    } else {
+      log(colors.green, '✓', 'RIPP initialization complete!');
+      console.log('');
+      console.log(`${colors.blue}Next steps:${colors.reset}`);
+      console.log('  1. Review the generated files in ripp/');
+      console.log('  2. Create your first RIPP packet in ripp/features/');
+      console.log('  3. Validate it: ripp validate ripp/features/');
+      console.log('  4. Commit the changes to your repository');
+      console.log('');
+      console.log(`${colors.gray}Learn more: https://dylan-natter.github.io/ripp-protocol${colors.reset}`);
+      console.log('');
+      process.exit(0);
+    }
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
     process.exit(1);
   }
 }

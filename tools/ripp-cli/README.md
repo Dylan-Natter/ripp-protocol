@@ -21,6 +21,38 @@ npm link
 
 ## Commands
 
+### Init
+
+Initialize RIPP in your repository with proper scaffolding.
+
+```bash
+# Initialize RIPP
+ripp init
+
+# Force overwrite existing files
+ripp init --force
+```
+
+**What it creates:**
+
+- `ripp/` - Main directory for RIPP artifacts
+- `ripp/README.md` - Documentation about RIPP in your repo
+- `ripp/features/` - Directory for feature RIPP packets
+- `ripp/intent-packages/` - Directory for packaged artifacts
+- `ripp/intent-packages/README.md` - Intent package documentation
+- `.github/workflows/ripp-validate.yml` - GitHub Action for automated validation
+
+**Options:**
+
+- `--force` - Overwrite existing files (default: skip existing files)
+
+**Features:**
+
+- Idempotent (safe to run multiple times)
+- Non-destructive by default (preserves existing files)
+- Creates complete scaffolding in one command
+- Includes GitHub Actions workflow for CI/CD
+
 ### Validate
 
 Validate RIPP packets against the JSON Schema.
