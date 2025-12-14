@@ -8,6 +8,7 @@ const addFormats = require('ajv-formats');
 const { glob } = require('glob');
 const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./lib/linter');
 const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
+const { analyzeInput } = require('./lib/analyzer');
 
 // ANSI color codes
 const colors = {
@@ -156,6 +157,8 @@ ${colors.green}Commands:${colors.reset}
   ripp lint <path>                  Lint RIPP packets for best practices
   ripp package --in <file> --out <file>
                                     Package RIPP packet into normalized artifact
+  ripp analyze <input> --output <file>
+                                    Analyze code/schema and generate DRAFT RIPP packet
   ripp --help                       Show this help message
   ripp --version                    Show version
 
@@ -172,6 +175,11 @@ ${colors.green}Package Options:${colors.reset}
   --out <file>                      Output file path (required)
   --format <json|yaml|md>           Output format (auto-detected from extension)
 
+${colors.green}Analyze Options:${colors.reset}
+  <input>                           Input file (OpenAPI, JSON Schema)
+  --output <file>                   Output DRAFT RIPP packet file (required)
+  --packet-id <id>                  Packet ID for generated RIPP (default: analyzed)
+
 ${colors.green}Examples:${colors.reset}
   ripp validate my-feature.ripp.yaml
   ripp validate features/
@@ -180,6 +188,8 @@ ${colors.green}Examples:${colors.reset}
   ripp lint examples/ --strict
   ripp package --in feature.ripp.yaml --out handoff.md
   ripp package --in feature.ripp.yaml --out packaged.json --format json
+  ripp analyze openapi.json --output draft-api.ripp.yaml
+  ripp analyze schema.json --output draft.ripp.yaml --packet-id my-api
 
 ${colors.green}Exit Codes:${colors.reset}
   0                                 All checks passed
@@ -215,6 +225,8 @@ async function main() {
     await handleLintCommand(args);
   } else if (command === 'package') {
     await handlePackageCommand(args);
+  } else if (command === 'analyze') {
+    await handleAnalyzeCommand(args);
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
@@ -516,6 +528,89 @@ async function handlePackageCommand(args) {
     log(colors.green, '✓', `Packaged successfully: ${options.output}`);
     console.log(`  ${colors.gray}Format: ${options.format}${colors.reset}`);
     console.log(`  ${colors.gray}Level: ${packet.level}${colors.reset}`);
+    console.log('');
+
+    process.exit(0);
+
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
+async function handleAnalyzeCommand(args) {
+  const inputPath = args[1];
+
+  // Parse options
+  const options = {
+    output: null,
+    packetId: 'analyzed'
+  };
+
+  const outputIndex = args.indexOf('--output');
+  if (outputIndex !== -1 && args[outputIndex + 1]) {
+    options.output = args[outputIndex + 1];
+  }
+
+  const packetIdIndex = args.indexOf('--packet-id');
+  if (packetIdIndex !== -1 && args[packetIdIndex + 1]) {
+    options.packetId = args[packetIdIndex + 1];
+  }
+
+  // Validate required options
+  if (!inputPath) {
+    console.error(`${colors.red}Error: Input file argument required${colors.reset}`);
+    console.error('Usage: ripp analyze <input> --output <file>');
+    process.exit(1);
+  }
+
+  if (!options.output) {
+    console.error(`${colors.red}Error: --output <file> is required${colors.reset}`);
+    console.error('Usage: ripp analyze <input> --output <file>');
+    process.exit(1);
+  }
+
+  // Check if input exists
+  if (!fs.existsSync(inputPath)) {
+    console.error(`${colors.red}Error: Input file not found: ${inputPath}${colors.reset}`);
+    process.exit(1);
+  }
+
+  console.log(`${colors.blue}Analyzing input...${colors.reset}`);
+  console.log(`${colors.yellow}⚠${colors.reset} Generated packets are DRAFTS and require human review\n`);
+
+  try {
+    // Analyze the input
+    const draftPacket = analyzeInput(inputPath, { packetId: options.packetId });
+
+    // Auto-detect output format
+    const ext = path.extname(options.output).toLowerCase();
+    let output;
+    
+    if (ext === '.yaml' || ext === '.yml') {
+      output = yaml.dump(draftPacket, { indent: 2, lineWidth: 100 });
+    } else if (ext === '.json') {
+      output = JSON.stringify(draftPacket, null, 2);
+    } else {
+      // Default to YAML
+      output = yaml.dump(draftPacket, { indent: 2, lineWidth: 100 });
+    }
+
+    // Write to output file
+    fs.writeFileSync(options.output, output);
+
+    log(colors.green, '✓', `DRAFT packet generated: ${options.output}`);
+    console.log(`  ${colors.gray}Status: draft (requires human review)${colors.reset}`);
+    console.log(`  ${colors.gray}Level: ${draftPacket.level}${colors.reset}`);
+    console.log('');
+    
+    console.log(`${colors.yellow}⚠ IMPORTANT:${colors.reset}`);
+    console.log('  This is a DRAFT generated from observable code/schema facts.');
+    console.log('  Review and refine all TODO items before use.');
+    console.log('  Pay special attention to:');
+    console.log('    - Purpose (problem, solution, value)');
+    console.log('    - UX Flow (user-facing steps)');
+    console.log('    - Permissions and failure modes');
     console.log('');
 
     process.exit(0);
