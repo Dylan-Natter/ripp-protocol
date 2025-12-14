@@ -56,11 +56,21 @@ body {
   gap: 16px;
 }
 
+.logo-link {
+  display: block;
+  line-height: 0;
+}
+
 .site-logo {
   width: 48px;
   height: 48px;
   border-radius: 6px;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.site-logo:hover {
+  transform: scale(1.05);
 }
 
 .header-text {
@@ -247,6 +257,7 @@ hr {
   margin: 0 auto 24px;
   border-radius: 12px;
   display: block;
+  box-shadow: 0 4px 12px rgba(74, 158, 255, 0.1);
 }
 
 .hero h1 {
