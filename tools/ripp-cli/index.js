@@ -71,12 +71,12 @@ function validatePacket(packet, schema, filePath, options = {}) {
   // File naming convention check
   const basename = path.basename(filePath);
   if (!basename.match(/\.ripp\.(yaml|yml|json)$/)) {
-    warnings.push(`File does not follow naming convention (*.ripp.yaml or *.ripp.json)`);
+    warnings.push('File does not follow naming convention (*.ripp.yaml or *.ripp.json)');
   }
   
   // packet_id format check
   if (packet.packet_id && !packet.packet_id.match(/^[a-z0-9-]+$/)) {
-    errors.push(`packet_id must be lowercase with hyphens only (kebab-case)`);
+    errors.push('packet_id must be lowercase with hyphens only (kebab-case)');
   }
   
   // Minimum level enforcement
@@ -198,7 +198,7 @@ async function main() {
   
   if (command !== 'validate') {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
-    console.error(`Run 'ripp --help' for usage information.`);
+    console.error('Run \'ripp --help\' for usage information.');
     process.exit(1);
   }
   
@@ -206,7 +206,7 @@ async function main() {
   
   if (!pathArg) {
     console.error(`${colors.red}Error: Path argument required${colors.reset}`);
-    console.error(`Usage: ripp validate <path>`);
+    console.error('Usage: ripp validate <path>');
     process.exit(1);
   }
   

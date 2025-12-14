@@ -41,9 +41,24 @@ Thank you for your interest in contributing to the Regenerative Intent Prompting
 2. Create a feature branch: `git checkout -b feature/new-validator`
 3. Write clear, documented code
 4. Add tests if applicable
-5. Ensure all tests pass: `npm test`
-6. Update relevant documentation
-7. Submit a pull request
+5. Run linting: `npm run lint` (or `npm run lint:fix` to auto-fix)
+6. Check code formatting: `npm run format:check`
+7. Ensure all tests pass: `npm test`
+8. Update relevant documentation
+9. Submit a pull request
+
+## Code Quality
+
+This repository uses ESLint for linting and Prettier for code formatting.
+
+- **Linting**: `npm run lint` or `npm run lint:fix`
+- **Formatting**: `npm run format:check` or `npm run format`
+- **Tests**: `npm test`
+
+Configuration files:
+- `.eslintrc.json` - ESLint rules
+- `.prettierrc` - Prettier formatting rules
+- `.editorconfig` - Editor settings for consistent styling
 
 ## Pull Request Guidelines
 
