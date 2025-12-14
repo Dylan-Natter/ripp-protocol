@@ -270,9 +270,27 @@ failure_modes:
 
 ## Quickstart
 
-### 1. Create a RIPP File
+### 1. Initialize RIPP in Your Repository
 
-Create `my-feature.ripp.yaml`:
+Install the RIPP CLI and set up your repository:
+
+```bash
+# Install RIPP CLI
+npm install -g ripp-cli
+
+# Initialize RIPP scaffolding
+ripp init
+```
+
+This creates:
+- `ripp/` directory for your RIPP packets
+- `ripp/features/` for feature specifications
+- GitHub Actions workflow for automated validation
+- Intent package management structure
+
+### 2. Create Your First RIPP File
+
+Create `ripp/features/my-feature.ripp.yaml`:
 
 ```yaml
 ripp_version: '1.0'
@@ -323,21 +341,18 @@ data_contracts:
           description: 'Registration status (pending_verification)'
 ```
 
-### 2. Validate It
-
-Install the RIPP CLI:
-
-```bash
-npm install -g ripp-cli
-```
+### 3. Validate It
 
 Validate your packet:
 
 ```bash
-ripp validate my-feature.ripp.yaml
+ripp validate ripp/features/my-feature.ripp.yaml
+
+# Or validate all features
+ripp validate ripp/features/
 ```
 
-### 3. Learn More
+### 4. Learn More
 
 - **Full Specification**: [SPEC.md](SPEC.md)
 - **Examples**: [examples/](examples/)

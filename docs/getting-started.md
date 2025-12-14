@@ -21,10 +21,54 @@ RIPP is designed to feel familiar if you've worked with user stories, API specs,
 - Basic understanding of YAML or JSON
 - A feature or API to document
 
-**Optional:**
+## What You'll Need
 
-- Node.js (for the validator CLI)
+- A text editor (VS Code, Sublime, Vim, etc.)
+- Basic understanding of YAML or JSON
+- A feature or API to document
+
+**Optional (but recommended):**
+
+- Node.js (for the RIPP CLI validator)
 - Git (for version control)
+
+---
+
+## Quick Start: Initialize RIPP in Your Repository
+
+The fastest way to get started is with the RIPP CLI:
+
+```bash
+# Install RIPP CLI
+npm install -g ripp-cli
+
+# Initialize RIPP in your repository
+ripp init
+```
+
+This creates:
+- `ripp/` directory for your RIPP packets
+- `ripp/features/` for feature specifications
+- `ripp/intent-packages/` for packaged artifacts
+- `.github/workflows/ripp-validate.yml` for automated validation
+
+**What you get:**
+- ✅ Proper directory structure
+- ✅ GitHub Actions for CI/CD validation
+- ✅ Documentation and examples
+- ✅ Intent package management
+
+Now skip to **Step 4** to create your first RIPP packet.
+
+---
+
+## Manual Setup (Without CLI)
+
+If you prefer to set up manually:
+
+1. Create a directory for RIPP packets (e.g., `ripp/` or `specs/`)
+2. Choose your naming convention (e.g., `*.ripp.yaml`)
+3. Set up your text editor with the RIPP schema (optional, see [Tooling]({{ '/tooling' | relative_url }}))
 
 ---
 
