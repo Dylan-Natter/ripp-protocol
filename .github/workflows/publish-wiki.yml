@@ -39,7 +39,7 @@ jobs:
           # Remove all existing markdown files from wiki (clean sync)
           cd "$GITHUB_WORKSPACE/wiki" || exit 1
           echo "Cleaning existing wiki files..."
-          rm -f *.md || echo '::warning::Failed to clean existing wiki files'
+          rm -f *.md || echo '::warning::Failed to clean existing wiki files - some old files may persist in the wiki'
 
           # Copy all wiki markdown files except excluded ones
           cd "$GITHUB_WORKSPACE/repo/docs/wiki" || exit 1
