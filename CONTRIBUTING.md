@@ -91,12 +91,14 @@ A GitHub Action checks PRs for high-impact changes and requires docs updates. If
 2. Include a comment explaining why (e.g., "internal refactor, no user-facing impact")
 
 The check will pass if:
+
 - Documentation changes are detected in `/docs/`
 - OR the `docs-not-needed` label is present
 
 ### How Documentation is Reviewed
 
 The CODEOWNERS file requires:
+
 - Spec/schema/CLI changes: review by spec/tool owners
 - Documentation changes: review by docs owners
 

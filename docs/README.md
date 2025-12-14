@@ -132,6 +132,7 @@ This is RIPP's philosophy applied to its own development process.
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for general contribution guidelines.
 
 For documentation-specific questions, see:
+
 - `/docs/wiki/Contributing-to-RIPP.md` — How to contribute to RIPP
 - This README — Documentation governance model
 

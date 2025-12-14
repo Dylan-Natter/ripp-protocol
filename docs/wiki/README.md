@@ -1,6 +1,6 @@
 # RIPP Protocol Wiki Content (Source of Truth)
 
-This directory is the **canonical source** for all RIPP Protocol GitHub Wiki content. 
+This directory is the **canonical source** for all RIPP Protocol GitHub Wiki content.
 
 **Important**: This is the authoritative location. The GitHub Wiki is a published view only. All edits must be made here in the main repository, not directly in the GitHub Wiki.
 
