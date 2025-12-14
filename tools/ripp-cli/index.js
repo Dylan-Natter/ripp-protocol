@@ -6,6 +6,7 @@ const yaml = require('js-yaml');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const { glob } = require('glob');
+const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./lib/linter');
 
 // ANSI color codes
 const colors = {
@@ -147,32 +148,32 @@ function printResults(results, options) {
 function showHelp() {
   const pkg = require('./package.json');
   console.log(`
-${colors.blue}RIPP CLI Validator v${pkg.version}${colors.reset}
+${colors.blue}RIPP CLI v${pkg.version}${colors.reset}
 
-${colors.green}Usage:${colors.reset}
+${colors.green}Commands:${colors.reset}
   ripp validate <path>              Validate RIPP packets
-  ripp validate <path> --min-level <1|2|3>
-                                    Enforce minimum conformance level
+  ripp lint <path>                  Lint RIPP packets for best practices
   ripp --help                       Show this help message
   ripp --version                    Show version
 
-${colors.green}Arguments:${colors.reset}
-  <path>                            File or directory to validate
-
-${colors.green}Options:${colors.reset}
+${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
   --quiet                           Suppress warnings
-  --help                            Show help
-  --version                         Show version
+
+${colors.green}Lint Options:${colors.reset}
+  --strict                          Treat warnings as errors
+  --output <dir>                    Output directory for reports (default: reports/)
 
 ${colors.green}Examples:${colors.reset}
   ripp validate my-feature.ripp.yaml
   ripp validate features/
   ripp validate api/ --min-level 2
+  ripp lint examples/
+  ripp lint examples/ --strict
 
 ${colors.green}Exit Codes:${colors.reset}
-  0                                 All packets valid
-  1                                 Validation failures found
+  0                                 All checks passed
+  1                                 Validation or lint failures found
 
 ${colors.gray}Learn more: https://dylan-natter.github.io/ripp-protocol${colors.reset}
 `);
@@ -198,11 +199,18 @@ async function main() {
 
   const command = args[0];
 
-  if (command !== 'validate') {
+  if (command === 'validate') {
+    await handleValidateCommand(args);
+  } else if (command === 'lint') {
+    await handleLintCommand(args);
+  } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
     process.exit(1);
   }
+}
+
+async function handleValidateCommand(args) {
 
   const pathArg = args[1];
 
@@ -270,6 +278,131 @@ async function main() {
   printResults(results, options);
 
   const hasFailures = results.some(r => !r.valid);
+  process.exit(hasFailures ? 1 : 0);
+}
+
+async function handleLintCommand(args) {
+  const pathArg = args[1];
+
+  if (!pathArg) {
+    console.error(`${colors.red}Error: Path argument required${colors.reset}`);
+    console.error('Usage: ripp lint <path>');
+    process.exit(1);
+  }
+
+  // Parse options
+  const options = {
+    strict: args.includes('--strict'),
+    outputDir: 'reports/'
+  };
+
+  const outputIndex = args.indexOf('--output');
+  if (outputIndex !== -1 && args[outputIndex + 1]) {
+    options.outputDir = args[outputIndex + 1];
+  }
+
+  // Ensure output directory ends with /
+  if (!options.outputDir.endsWith('/')) {
+    options.outputDir += '/';
+  }
+
+  // Check if path exists
+  if (!fs.existsSync(pathArg)) {
+    console.error(`${colors.red}Error: Path not found: ${pathArg}${colors.reset}`);
+    process.exit(1);
+  }
+
+  console.log(`${colors.blue}Linting RIPP packets...${colors.reset}`);
+
+  const schema = loadSchema();
+  const files = await findRippFiles(pathArg);
+
+  if (files.length === 0) {
+    console.log(`${colors.yellow}No RIPP files found in ${pathArg}${colors.reset}`);
+    process.exit(0);
+  }
+
+  const results = [];
+  let totalErrors = 0;
+  let totalWarnings = 0;
+
+  for (const file of files) {
+    try {
+      const packet = loadPacket(file);
+      
+      // First validate against schema
+      const validation = validatePacket(packet, schema, file);
+      
+      if (!validation.valid) {
+        // Skip linting if schema validation fails
+        console.log(`${colors.yellow}⚠${colors.reset} ${path.relative(process.cwd(), file)} - Skipped (schema validation failed)`);
+        continue;
+      }
+
+      // Run linter on valid packets
+      const lintResult = lintPacket(packet, file);
+      
+      results.push({
+        file: path.relative(process.cwd(), file),
+        errors: lintResult.errors,
+        warnings: lintResult.warnings,
+        errorCount: lintResult.errorCount,
+        warningCount: lintResult.warningCount
+      });
+
+      totalErrors += lintResult.errorCount;
+      totalWarnings += lintResult.warningCount;
+
+      // Print inline results
+      if (lintResult.errorCount === 0 && lintResult.warningCount === 0) {
+        log(colors.green, '✓', `${path.relative(process.cwd(), file)} - No issues`);
+      } else {
+        if (lintResult.errorCount > 0) {
+          log(colors.red, '✗', `${path.relative(process.cwd(), file)} - ${lintResult.errorCount} error(s), ${lintResult.warningCount} warning(s)`);
+        } else {
+          log(colors.yellow, '⚠', `${path.relative(process.cwd(), file)} - ${lintResult.warningCount} warning(s)`);
+        }
+      }
+
+    } catch (error) {
+      console.log(`${colors.red}✗${colors.reset} ${path.relative(process.cwd(), file)} - Parse error: ${error.message}`);
+    }
+  }
+
+  console.log('');
+
+  // Create output directory if it doesn't exist
+  if (!fs.existsSync(options.outputDir)) {
+    fs.mkdirSync(options.outputDir, { recursive: true });
+  }
+
+  // Write JSON report
+  const jsonReport = generateJsonReport(results);
+  const jsonPath = path.join(options.outputDir, 'lint.json');
+  fs.writeFileSync(jsonPath, jsonReport);
+  console.log(`${colors.blue}📄${colors.reset} JSON report: ${jsonPath}`);
+
+  // Write Markdown report
+  const mdReport = generateMarkdownReport(results);
+  const mdPath = path.join(options.outputDir, 'lint.md');
+  fs.writeFileSync(mdPath, mdReport);
+  console.log(`${colors.blue}📄${colors.reset} Markdown report: ${mdPath}`);
+
+  console.log('');
+
+  // Summary
+  if (totalErrors > 0) {
+    log(colors.red, '✗', `Found ${totalErrors} error(s) and ${totalWarnings} warning(s)`);
+  } else if (totalWarnings > 0) {
+    log(colors.yellow, '⚠', `Found ${totalWarnings} warning(s)`);
+  } else {
+    log(colors.green, '✓', 'All packets passed linting checks');
+  }
+
+  console.log('');
+
+  // Exit with appropriate code
+  const hasFailures = totalErrors > 0 || (options.strict && totalWarnings > 0);
   process.exit(hasFailures ? 1 : 0);
 }
 
