@@ -2,26 +2,36 @@
 
 VS Code integration for validating, linting, packaging, and analyzing RIPP packets.
 
-## Features
+## What This Extension Does
 
-This extension provides seamless integration with the RIPP CLI directly from VS Code:
+This extension integrates the official RIPP CLI into VS Code. It is a **thin wrapper** around the CLI—no reimplementation of validation or linting logic. All operations are read-only with respect to RIPP packet files, and no data is transmitted externally. Processing happens locally via the RIPP CLI.
 
-- **Validate Packet(s)**: Validate all RIPP packets in your workspace against the schema
-- **Lint Packet(s)**: Run quality checks and best practice linting on your packets
-- **Package Handoff**: Package a RIPP packet into a handoff document (Markdown, JSON, or YAML)
-- **Analyze Project (Draft Packet)**: Generate a draft RIPP packet from existing documentation
+## Commands
+
+All commands are available via the Command Palette (Ctrl+Shift+P / Cmd+Shift+P):
+
+- **RIPP: Validate Packet(s)** - Validate all RIPP packets in your workspace against the schema
+- **RIPP: Lint Packet(s)** - Run quality checks and best practice linting on your packets
+- **RIPP: Package Handoff** - Package a RIPP packet into a handoff document (Markdown, JSON, or YAML)
+- **RIPP: Analyze Project (Draft Packet)** - Generate a draft RIPP packet from existing documentation
 
 ## Requirements
 
-This extension requires:
-- Node.js 16 or higher
-- The RIPP CLI to be available via `npx ripp` or npm scripts
+This extension requires the RIPP CLI to be available via:
+- `npx ripp ...` (default mode), or
+- Workspace npm scripts (e.g., `npm run ripp:validate`)
 
-The RIPP CLI will be automatically installed via `npx` if using the default configuration.
+**Note:** The extension does not install dependencies automatically. When using the default `npx` mode, the RIPP CLI will be fetched on first use if not already cached.
 
-## Codespaces & CLI Availability
+## Codespaces & Remote Environments
 
 **Codespaces note:** This extension works in GitHub Codespaces and other VS Code remote environments. Ensure the RIPP CLI is available via `npx ripp` or workspace npm scripts (for example, `npm run ripp:validate`).
+
+## Security Notes
+
+- **Read-only:** The extension does not mutate RIPP packet files (*.ripp.yaml, *.ripp.json)
+- **Local processing:** All validation, linting, and analysis happens locally via the RIPP CLI
+- **No credentials collected:** No secrets, tokens, or environment variables are collected or stored
 
 ## Installation
 
@@ -32,22 +42,18 @@ Install from the VS Code Marketplace:
 3. Search for "RIPP Protocol"
 4. Click Install
 
-## Usage
+## Quick Start
 
-### Commands
+1. Open a workspace containing RIPP packets (or create a new `.ripp.yaml` file)
+2. Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
+3. Run **RIPP: Validate Packet(s)** to validate your packets
+4. View results in the Output panel (View → Output, select "RIPP")
 
-All commands are available via the Command Palette (Ctrl+Shift+P / Cmd+Shift+P):
-
-- **RIPP: Validate Packet(s)** - Validates all `*.ripp.yaml` and `*.ripp.json` files in your workspace
-- **RIPP: Lint Packet(s)** - Runs linting checks on all RIPP packets
-- **RIPP: Package Handoff** - Select a packet and output format to create a handoff document
-- **RIPP: Analyze Project (Draft Packet)** - Analyze documentation to generate a draft RIPP packet
-
-### Configuration
+## Configuration
 
 Configure the extension via VS Code settings (File → Preferences → Settings):
 
-#### `ripp.cliMode`
+### `ripp.cliMode`
 
 How to execute the RIPP CLI:
 - `"npx"` (default): Runs `npx ripp` commands
@@ -59,7 +65,7 @@ How to execute the RIPP CLI:
 }
 ```
 
-#### `ripp.strict`
+### `ripp.strict`
 
 Enable strict mode for linting (treat warnings as errors):
 
@@ -69,7 +75,7 @@ Enable strict mode for linting (treat warnings as errors):
 }
 ```
 
-#### `ripp.paths`
+### `ripp.paths`
 
 Glob patterns for discovering RIPP packet files:
 
@@ -82,13 +88,6 @@ Glob patterns for discovering RIPP packet files:
 }
 ```
 
-## Quick Start
-
-1. Open a workspace containing RIPP packets (or create a new `.ripp.yaml` file)
-2. Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
-3. Run **RIPP: Validate Packet(s)** to validate your packets
-4. View results in the Output panel (View → Output, select "RIPP")
-
 ## File Naming Convention
 
 RIPP packet files must follow the naming convention:
@@ -98,25 +97,6 @@ RIPP packet files must follow the naming convention:
 Examples:
 - `user-registration.ripp.yaml`
 - `api-feature.ripp.json`
-
-## Architecture
-
-This extension is a **thin wrapper** around the RIPP CLI. It:
-- Discovers RIPP packets using `vscode.workspace.findFiles`
-- Executes CLI commands via `child_process.execFile` with security constraints:
-  - `shell: false` (no shell injection)
-  - Args array only (no command strings)
-  - `cwd` set to workspace root
-- Never mutates RIPP packet files
-- Never executes arbitrary user input
-
-## Security
-
-This extension follows strict security practices:
-- No arbitrary code execution
-- No file mutation (read-only operations on RIPP packets)
-- No secret or environment variable logging
-- All CLI commands use safe execution methods
 
 ## Documentation
 

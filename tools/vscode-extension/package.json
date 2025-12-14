@@ -10,14 +10,16 @@
   },
   "categories": [
     "Linters",
-    "Formatters",
     "Other"
   ],
   "keywords": [
     "ripp",
     "protocol",
-    "specification",
     "validation",
+    "lint",
+    "spec",
+    "handoff",
+    "specification",
     "yaml",
     "json"
   ],
