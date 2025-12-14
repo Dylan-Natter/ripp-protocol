@@ -36,9 +36,33 @@ Closes #
 
 - [ ] All RIPP packets validate: `ripp validate .`
 - [ ] Schema changes are backward compatible
-- [ ] Documentation is updated
+- [ ] Documentation is updated (or `docs-not-needed` label applied)
 - [ ] Examples are updated (if applicable)
 - [ ] CI checks pass
+
+## Documentation Impact
+
+<!-- Required: Check one or more -->
+
+- [ ] This PR updates documentation in `/docs/`
+- [ ] This PR does NOT require documentation updates
+  - **If checked, you must apply the `docs-not-needed` label and explain why below**
+
+**Explanation for no docs update** (required if checked above):
+<!-- Explain why documentation updates aren't needed. Examples:
+  - Internal refactoring with no user-facing changes
+  - Test-only changes
+  - CI configuration with no behavior impact
+  - Fixing typos in non-user-facing code
+-->
+
+**Documentation changes made** (if applicable):
+<!-- List which documentation files were updated:
+  - /docs/wiki/CLI-Reference.md
+  - /docs/wiki/Schema-Reference.md
+  - SPEC.md
+  etc.
+-->
 
 ## Checklist
 

@@ -1,0 +1,35 @@
+# CODEOWNERS — Documentation Enforcement and Code Review
+#
+# This file defines ownership and review requirements for RIPP Protocol.
+# It ensures that changes to critical paths are reviewed by domain experts
+# and that documentation stays in sync with implementation.
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default ownership — all contributors can review general changes
+* @Dylan-Natter
+
+# Specification and Schema — require spec maintainer review
+/SPEC.md @Dylan-Natter
+/schema/** @Dylan-Natter
+
+# Documentation — require docs owner review
+/docs/** @Dylan-Natter
+/README.md @Dylan-Natter
+/CONTRIBUTING.md @Dylan-Natter
+
+# CLI Tooling — require tool owner review
+/tools/ripp-cli/** @Dylan-Natter
+
+# VSCode Extension — require extension owner review
+/tools/vscode-extension/** @Dylan-Natter
+
+# GitHub Workflows — require workflow owner review
+/.github/workflows/** @Dylan-Natter
+
+# Examples and Templates — community can review, but maintainer approves
+/examples/** @Dylan-Natter
+/templates/** @Dylan-Natter
+
+# Wiki Source — requires docs review (published automatically)
+/docs/wiki/** @Dylan-Natter
