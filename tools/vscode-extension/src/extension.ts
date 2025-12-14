@@ -85,9 +85,18 @@ function handleCommandError(error: any, commandName: string) {
 					vscode.window.showInformationMessage(
 						'Run: npm install -D ripp-cli'
 					);
+				}, (err) => {
+					// Terminal failed to open
+					vscode.window.showErrorMessage(
+						`Could not open terminal: ${err.message}`
+					);
 				});
 			} else if (selection === 'Open Terminal') {
-				vscode.commands.executeCommand('workbench.action.terminal.new');
+				vscode.commands.executeCommand('workbench.action.terminal.new').then(undefined, (err) => {
+					vscode.window.showErrorMessage(
+						`Could not open terminal: ${err.message}`
+					);
+				});
 			}
 		});
 	} else {
@@ -148,6 +157,10 @@ async function executeRippCommand(
 			const binName = process.platform === 'win32' ? 'ripp.cmd' : 'ripp';
 			const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
 			
+			// Note: Using fs.existsSync here is acceptable because:
+			// - It's checking a local file (very fast, <1ms)
+			// - The alternative (fs.promises.access) would add complexity
+			// - This is already in an async context (executeRippCommand)
 			if (fs.existsSync(localBinary)) {
 				// Use local binary directly
 				command = localBinary;
@@ -458,7 +471,7 @@ async function initRepository() {
 	}
 
 	// Ask user to confirm initialization
-	const forceOption = await vscode.window.showQuickPick(
+	const selectedOption = await vscode.window.showQuickPick(
 		[
 			{
 				label: 'Standard',
@@ -476,7 +489,7 @@ async function initRepository() {
 		}
 	);
 
-	if (!forceOption) {
+	if (!selectedOption) {
 		return;
 	}
 
@@ -489,7 +502,7 @@ async function initRepository() {
 		async () => {
 			try {
 				const args = ['init'];
-				if (forceOption.force) {
+				if (selectedOption.force) {
 					args.push('--force');
 				}
 
