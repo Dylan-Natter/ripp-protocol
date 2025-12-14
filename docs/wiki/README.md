@@ -141,19 +141,19 @@ The wiki is documentation, not specification. When in conflict:
 
 ### Updating Wiki Pages
 
-1. Update the corresponding `.md` file in `/docs/wiki/` directory
+1. Update the corresponding `.md` file in `docs/wiki/` directory
 2. Submit PR with changes
 3. After merge to `main`, the GitHub Actions workflow automatically syncs changes to the wiki
 
 **Manual sync** (for testing or troubleshooting only):
 ```bash
-cd /docs/wiki
+cd docs/wiki
 ./deploy-wiki.sh
 ```
 
 ### Adding New Pages
 
-1. Create new `.md` file in `/docs/wiki/` directory
+1. Create new `.md` file in `docs/wiki/` directory
 2. Follow existing page structure and style
 3. Update `Home.md` with link to new page
 4. Submit PR
@@ -173,7 +173,7 @@ All wiki pages follow these guidelines:
 
 To contribute to wiki documentation:
 
-1. Update `.md` files in `/docs/wiki/` directory
+1. Update `.md` files in `docs/wiki/` directory
 2. Submit PR via normal contribution process
 3. After merge to `main`, the wiki is automatically updated via GitHub Actions
 
