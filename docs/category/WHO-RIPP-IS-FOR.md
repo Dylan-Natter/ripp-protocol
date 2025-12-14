@@ -20,12 +20,14 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Profile**: Teams using AI coding assistants (Copilot, ChatGPT, etc.) to accelerate development.
 
 **Why RIPP helps**:
+
 - AI generates code fast, but prompts are ephemeral—RIPP makes specs durable
 - Prototypes lack security boundaries—RIPP defines permissions and failure modes upfront
 - Code review lacks authoritative specs—RIPP provides the contract to validate against
 - Regeneration requires reprompting—RIPP enables rebuilding from a stable specification
 
 **Use cases**:
+
 - Rapid prototyping → production transition
 - AI-generated features that need production rigor
 - Preserving intent when prompts disappear from chat history
@@ -41,12 +43,14 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Profile**: Teams building internal platforms, APIs, or shared services used by other teams.
 
 **Why RIPP helps**:
+
 - Platform contracts must be explicit—RIPP documents APIs, permissions, and failure modes
 - Breaking changes are costly—RIPP provides versioned specifications that evolve deliberately
 - Onboarding new platform users is hard—RIPP packets serve as authoritative documentation
 - Platform reliability is critical—RIPP captures NFRs, audit events, and acceptance tests
 
 **Use cases**:
+
 - Internal APIs consumed by multiple teams
 - Developer platforms (CI/CD, deployment, observability)
 - Shared services (auth, payments, notifications)
@@ -63,12 +67,14 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Profile**: Teams delivering features directly to users, where quality and clarity are essential.
 
 **Why RIPP helps**:
+
 - Requirements scatter across Jira, Slack, and PRD docs—RIPP consolidates them
 - Edge cases discovered in production—RIPP forces upfront failure mode analysis
 - Code review is reactive—RIPP enables spec review before code exists
 - Onboarding is slow—RIPP packets document "why" and "how" for new engineers
 
 **Use cases**:
+
 - User-facing features (registration, payments, dashboards)
 - API endpoints for mobile or web clients
 - High-stakes features (auth, PII handling, financial transactions)
@@ -85,12 +91,14 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Profile**: Teams operating in regulated industries (healthcare, finance, government) where auditability is mandatory.
 
 **Why RIPP helps**:
+
 - Compliance requires documented intent—RIPP captures purpose, permissions, and audit events
 - Audits demand traceability—RIPP packets are versioned in Git alongside code
 - Security reviews need explicit contracts—RIPP defines data handling, permissions, and failure modes
 - Regulations change—RIPP allows evolving specifications with clear versioning
 
 **Use cases**:
+
 - Features handling PII, PHI, or financial data
 - Systems requiring SOC 2, HIPAA, or PCI-DSS compliance
 - Government contracts with strict documentation requirements
@@ -107,12 +115,14 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Profile**: Maintainers of open source projects who need clear specifications for contributors.
 
 **Why RIPP helps**:
+
 - Contributors need clear requirements—RIPP packets define "what to build" before coding
 - Code review is time-consuming—RIPP enables spec review before implementation
 - Documentation often lags—RIPP packets become the authoritative reference
 - Maintainer time is limited—RIPP reduces back-and-forth on ambiguous requirements
 
 **Use cases**:
+
 - New feature proposals (contributors write RIPP packets before PRs)
 - API design (RIPP defines contracts before implementation)
 - Breaking changes (RIPP documents migration path and failure modes)
@@ -129,12 +139,14 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Profile**: Teams building software for clients, where handoff and clarity are critical.
 
 **Why RIPP helps**:
+
 - Clients need to approve specs—RIPP provides reviewable, non-technical documentation
 - Handoffs are risky—RIPP packets preserve intent when transitioning between teams
 - Scope creep is common—RIPP defines contracts that prevent "one more thing" drift
 - Maintenance requires context—RIPP ensures future maintainers understand the "why"
 
 **Use cases**:
+
 - Client feature delivery (RIPP as deliverable alongside code)
 - Staff augmentation (RIPP ensures consistency across rotating contractors)
 - Agency-to-internal-team handoffs (RIPP preserves decisions post-engagement)
@@ -153,6 +165,7 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Scenario**: You build a prototype with AI in 2 hours. It works. Now you need to ship it to production.
 
 **How RIPP helps**:
+
 1. Extract RIPP packet from prototype (document intent, contracts, learnings)
 2. Review RIPP packet with team (identify security gaps, missing failure modes)
 3. Approve RIPP packet (becomes the production contract)
@@ -168,6 +181,7 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Scenario**: Your backend team is building an API consumed by 3 frontend teams. Miscommunication leads to rework.
 
 **How RIPP helps**:
+
 1. Backend team writes RIPP packet (defines API contracts, error codes, permissions)
 2. Frontend teams review RIPP packet (catch mismatches early)
 3. Approve RIPP packet before implementation (alignment before coding)
@@ -183,6 +197,7 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Scenario**: Your company needs SOC 2 compliance. Auditors ask, "How do you document permissions and audit events?"
 
 **How RIPP helps**:
+
 1. Write Level 3 RIPP packets for all features handling sensitive data
 2. Include `permissions`, `audit_events`, and `nfrs` sections
 3. Version RIPP packets in Git (audit trail via commit history)
@@ -198,11 +213,13 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Scenario**: A new engineer joins and asks, "Why does this feature work this way?"
 
 **Without RIPP**:
+
 - Archaeology through Git commits, Slack, and Jira
 - "Ask Alice, she built it 6 months ago"
 - Undocumented assumptions and tribal knowledge
 
 **With RIPP**:
+
 - Read the RIPP packet (purpose, contracts, failure modes all documented)
 - Understand the "why" and "how" in 15 minutes
 - No dependency on original author
@@ -216,6 +233,7 @@ RIPP™ is designed for teams and individuals who need **durable, structured spe
 **Scenario**: You want to use AI to generate features, but you're concerned about security gaps and missing edge cases.
 
 **How RIPP helps**:
+
 1. Write RIPP packet first (define permissions, failure modes, NFRs)
 2. Review and approve RIPP packet (security boundaries explicit)
 3. Prompt AI with RIPP packet as context ("Implement this RIPP spec in Python")
@@ -247,6 +265,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 **Why**: If you have comprehensive ADRs, OpenAPI specs, and test coverage, RIPP may be redundant.
 
 **When to consider RIPP anyway**:
+
 - If specs are scattered (ADRs, Confluence, Jira, code comments)
 - If permissions and failure modes are undocumented
 - If onboarding still requires tribal knowledge
@@ -270,6 +289,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 **Why**: RIPP requires deliberate specification work. If your team views all documentation as bureaucracy, adoption will fail.
 
 **Mitigation**:
+
 - Start with Level 1 (30-60 minutes per packet)
 - Frame RIPP as "preventing rework" not "adding process"
 - Use RIPP for high-risk features only
@@ -322,30 +342,30 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 
 ## Organizational Fit
 
-| Organization Type          | RIPP Fit | Why                                        |
-| -------------------------- | -------- | ------------------------------------------ |
-| **Early-stage startup (1-5 people)** | ⚠️ Moderate | RIPP adds rigor but may slow rapid iteration. Use Level 1 for critical features only. |
-| **Growth-stage startup (10-50)** | ✅ High | Intent erosion accelerates at scale. RIPP prevents scattered requirements. |
-| **Mid-market company (50-200)** | ✅ High | Cross-team coordination requires explicit contracts. RIPP provides single source of truth. |
-| **Enterprise (200+)** | ✅ High | Compliance, auditability, and onboarding challenges make RIPP valuable. |
-| **Open source (any size)** | ✅ High | Distributed contributors need clear specifications. RIPP reduces maintainer burden. |
-| **Consultancy/Agency** | ✅ High | Client handoffs and scope management benefit from explicit contracts. |
-| **Research lab** | ❌ Low | Pure exploration doesn't need structured specs. Use RIPP when transitioning to production. |
+| Organization Type                    | RIPP Fit    | Why                                                                                        |
+| ------------------------------------ | ----------- | ------------------------------------------------------------------------------------------ |
+| **Early-stage startup (1-5 people)** | ⚠️ Moderate | RIPP adds rigor but may slow rapid iteration. Use Level 1 for critical features only.      |
+| **Growth-stage startup (10-50)**     | ✅ High     | Intent erosion accelerates at scale. RIPP prevents scattered requirements.                 |
+| **Mid-market company (50-200)**      | ✅ High     | Cross-team coordination requires explicit contracts. RIPP provides single source of truth. |
+| **Enterprise (200+)**                | ✅ High     | Compliance, auditability, and onboarding challenges make RIPP valuable.                    |
+| **Open source (any size)**           | ✅ High     | Distributed contributors need clear specifications. RIPP reduces maintainer burden.        |
+| **Consultancy/Agency**               | ✅ High     | Client handoffs and scope management benefit from explicit contracts.                      |
+| **Research lab**                     | ❌ Low      | Pure exploration doesn't need structured specs. Use RIPP when transitioning to production. |
 
 ---
 
 ## Industry Fit
 
-| Industry               | RIPP Fit | Why                                        |
-| ---------------------- | -------- | ------------------------------------------ |
-| **Financial services** | ✅ High | Compliance, audit trails, and permissions are mandatory. RIPP Level 3 ideal. |
-| **Healthcare**         | ✅ High | HIPAA compliance requires documented data handling and access controls. |
-| **Government/Defense** | ✅ High | Strict documentation and audit requirements. RIPP provides traceability. |
-| **SaaS/Cloud**         | ✅ High | Multi-tenant systems require explicit tenant isolation and permissions. |
-| **E-commerce**         | ✅ Moderate-High | Payment and PII handling benefit from RIPP Level 2-3. |
-| **Media/Entertainment**| ⚠️ Moderate | RIPP useful for APIs and platforms, less so for content-heavy workflows. |
-| **Gaming**             | ⚠️ Low-Moderate | Rapid iteration may conflict with RIPP's rigor. Use for backend services, not gameplay. |
-| **EdTech**             | ✅ Moderate-High | Student data privacy and compliance make RIPP valuable. |
+| Industry                | RIPP Fit         | Why                                                                                     |
+| ----------------------- | ---------------- | --------------------------------------------------------------------------------------- |
+| **Financial services**  | ✅ High          | Compliance, audit trails, and permissions are mandatory. RIPP Level 3 ideal.            |
+| **Healthcare**          | ✅ High          | HIPAA compliance requires documented data handling and access controls.                 |
+| **Government/Defense**  | ✅ High          | Strict documentation and audit requirements. RIPP provides traceability.                |
+| **SaaS/Cloud**          | ✅ High          | Multi-tenant systems require explicit tenant isolation and permissions.                 |
+| **E-commerce**          | ✅ Moderate-High | Payment and PII handling benefit from RIPP Level 2-3.                                   |
+| **Media/Entertainment** | ⚠️ Moderate      | RIPP useful for APIs and platforms, less so for content-heavy workflows.                |
+| **Gaming**              | ⚠️ Low-Moderate  | Rapid iteration may conflict with RIPP's rigor. Use for backend services, not gameplay. |
+| **EdTech**              | ✅ Moderate-High | Student data privacy and compliance make RIPP valuable.                                 |
 
 ---
 
@@ -354,6 +374,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ### For Product Managers
 
 **RIPP helps you**:
+
 - Define features clearly before engineering estimates
 - Review specifications before code review (catch issues early)
 - Communicate requirements to stakeholders (RIPP packets are readable)
@@ -364,6 +385,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ### For Engineering Managers
 
 **RIPP helps you**:
+
 - Reduce rework from unclear requirements
 - Improve onboarding (RIPP packets document intent)
 - Enforce standards across teams (RIPP validation in CI/CD)
@@ -374,6 +396,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ### For Security Engineers
 
 **RIPP helps you**:
+
 - Review permissions and data handling before code exists
 - Define threat models in `failure_modes` section
 - Ensure audit events are specified upfront (Level 3)
@@ -384,6 +407,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ### For DevOps/SRE
 
 **RIPP helps you**:
+
 - Understand NFRs (performance, availability, scalability) before deployment
 - Define monitoring and alerting requirements (from `audit_events` and `nfrs`)
 - Document deployment dependencies and failure modes
@@ -394,6 +418,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ### For QA/Test Engineers
 
 **RIPP helps you**:
+
 - Write tests before code exists (from `acceptance_tests` section)
 - Validate edge cases (from `failure_modes`)
 - Verify API contracts (from `api_contracts`)
@@ -404,6 +429,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ### For Individual Contributors
 
 **RIPP helps you**:
+
 - Clarify requirements before coding (prevents rework)
 - Review specs with team before implementation (alignment)
 - Document your work for future maintainers (RIPP survives your code)
@@ -428,6 +454,7 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 ✅ You're onboarding multiple new engineers (RIPP reduces knowledge transfer burden)
 
 **Start small**:
+
 - Use Level 1 for simple features (low overhead)
 - Use Level 2 for production APIs (production-grade)
 - Use Level 3 for high-risk features (full rigor)
@@ -438,14 +465,14 @@ RIPP is not suitable for all teams or projects. **RIPP may not be a good fit if*
 
 ## Summary: Is RIPP Right for You?
 
-| You Should Use RIPP If                                  | You Should NOT Use RIPP If                  |
-| ------------------------------------------------------- | ------------------------------------------- |
-| You need durable, structured specifications             | You're building throwaway prototypes        |
-| You're using AI to generate code                        | You already have mature, stable specs       |
-| You're building APIs for other teams                    | You're in pure research mode                |
-| You operate in a regulated industry                     | Your team resists all documentation         |
-| You've experienced intent erosion                       | You're in crisis/firefighting mode          |
-| You value "spec review before code review"              | Features are trivial CRUD with no edge cases|
+| You Should Use RIPP If                      | You Should NOT Use RIPP If                   |
+| ------------------------------------------- | -------------------------------------------- |
+| You need durable, structured specifications | You're building throwaway prototypes         |
+| You're using AI to generate code            | You already have mature, stable specs        |
+| You're building APIs for other teams        | You're in pure research mode                 |
+| You operate in a regulated industry         | Your team resists all documentation          |
+| You've experienced intent erosion           | You're in crisis/firefighting mode           |
+| You value "spec review before code review"  | Features are trivial CRUD with no edge cases |
 
 ---
 

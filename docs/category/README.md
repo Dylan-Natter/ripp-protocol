@@ -55,13 +55,13 @@ Identifies specific audiences (AI-assisted teams, platform teams, compliance-dri
 
 **Should you use RIPP?**
 
-| You Should Use RIPP If | You Should NOT Use RIPP If |
-| ---------------------- | -------------------------- |
-| You need durable, structured specifications | You're building throwaway prototypes |
-| You're using AI to generate code | You already have mature, stable specs |
-| You're building APIs for other teams | You're in pure research mode |
-| You operate in a regulated industry | Your team resists all documentation |
-| You've experienced intent erosion | You're in crisis/firefighting mode |
+| You Should Use RIPP If                      | You Should NOT Use RIPP If            |
+| ------------------------------------------- | ------------------------------------- |
+| You need durable, structured specifications | You're building throwaway prototypes  |
+| You're using AI to generate code            | You already have mature, stable specs |
+| You're building APIs for other teams        | You're in pure research mode          |
+| You operate in a regulated industry         | Your team resists all documentation   |
+| You've experienced intent erosion           | You're in crisis/firefighting mode    |
 
 ---
 

@@ -209,15 +209,15 @@ RIPP packets are **executable** in the sense that they:
 
 ## Summary: Why Intent as Protocol Matters
 
-| Without Intent as Protocol              | With RIPP (Intent as Protocol)         |
-| --------------------------------------- | -------------------------------------- |
-| Intent scattered across docs and code   | Intent in one versioned specification  |
-| No machine validation of completeness   | Automated schema validation            |
-| "Why" lost after 6 months               | "Why" preserved in RIPP packet         |
-| Refactoring requires archaeology        | Refactoring references the RIPP spec   |
-| Code review lacks authoritative spec    | Code review compares to approved RIPP  |
-| AI-generated code has no durable spec   | RIPP governs what AI is allowed to do  |
-| Prototypes ship without production rigor| RIPP bridges prototype to production   |
+| Without Intent as Protocol               | With RIPP (Intent as Protocol)        |
+| ---------------------------------------- | ------------------------------------- |
+| Intent scattered across docs and code    | Intent in one versioned specification |
+| No machine validation of completeness    | Automated schema validation           |
+| "Why" lost after 6 months                | "Why" preserved in RIPP packet        |
+| Refactoring requires archaeology         | Refactoring references the RIPP spec  |
+| Code review lacks authoritative spec     | Code review compares to approved RIPP |
+| AI-generated code has no durable spec    | RIPP governs what AI is allowed to do |
+| Prototypes ship without production rigor | RIPP bridges prototype to production  |
 
 ---
 

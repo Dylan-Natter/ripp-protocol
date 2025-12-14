@@ -283,13 +283,13 @@ RIPP is often misunderstood as an IaC tool, policy engine, or code generator. It
 
 **Quick answers:**
 
-| Question | Answer |
-| -------- | ------ |
-| Is RIPP a code generator? | No. RIPP is a specification format. Code generation is optional tooling. |
-| Does RIPP replace IaC/Terraform? | No. RIPP documents intent; IaC provisions infrastructure. They coexist. |
-| Does RIPP enforce policies at runtime? | No. RIPP documents permissions; policy engines (OPA, etc.) enforce them. |
-| Is RIPP only for AI-assisted development? | No. RIPP solves intent erosion for all teams, with or without AI. |
-| Do I need Level 3 for everything? | No. Choose Level 1 (simple), 2 (production), or 3 (high-risk) based on your feature. |
+| Question                                  | Answer                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| Is RIPP a code generator?                 | No. RIPP is a specification format. Code generation is optional tooling.             |
+| Does RIPP replace IaC/Terraform?          | No. RIPP documents intent; IaC provisions infrastructure. They coexist.              |
+| Does RIPP enforce policies at runtime?    | No. RIPP documents permissions; policy engines (OPA, etc.) enforce them.             |
+| Is RIPP only for AI-assisted development? | No. RIPP solves intent erosion for all teams, with or without AI.                    |
+| Do I need Level 3 for everything?         | No. Choose Level 1 (simple), 2 (production), or 3 (high-risk) based on your feature. |
 
 ---
 
