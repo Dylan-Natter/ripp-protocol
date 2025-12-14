@@ -6,6 +6,7 @@ title: 'FAQ - Frequently Asked Questions'
 ## Frequently Asked Questions
 
 **Looking for category and positioning information?** See:
+
 - **[What RIPP Is and Is Not](category/WHAT-RIPP-IS-AND-IS-NOT)** — Boundaries and common misconceptions
 - **[RIPP vs Existing Paradigms](category/RIPP-VS-EXISTING-PARADIGMS)** — How RIPP relates to IaC, GitOps, Policy-as-Code
 - **[Who RIPP Is For](category/WHO-RIPP-IS-FOR)** — Ideal adopters and use cases
