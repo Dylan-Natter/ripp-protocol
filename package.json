@@ -2,7 +2,6 @@
   "name": "ripp-protocol",
   "version": "0.1.0",
   "description": "Regenerative Intent Prompting Protocol (RIPP) — an open standard for turning AI-generated ideas and prototypes into secure, scalable, production-ready systems without losing their original intent.",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"No tests specified yet\" && exit 0"
   },
