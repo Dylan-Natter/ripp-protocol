@@ -93,7 +93,7 @@ Teams face pressure to "just ship it" because the feature appears finished. This
 
 **Why it fails:**
 
-- **Rewrites never happen**: Production code accumulates dependencies, integrations, and tribal knowledge
+- **Rewrites rarely happen**: Production code accumulates dependencies, integrations, and tribal knowledge
 - **Opportunity cost**: Engineering time goes to new features, not technical debt repayment
 - **Intent is lost**: Six months later, no one remembers why the prototype worked the way it did
 - **Risk aversion**: "Don't touch working code" mentality prevents improvement
