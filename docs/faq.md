@@ -334,7 +334,9 @@ A: Yes! RIPP supports a prototype-first workflow where you start with rapid prot
 2. Extract a draft RIPP packet from the prototype code + stated requirements
 3. Review the draft, filling gaps and resolving conflicts
 4. Approve the RIPP packet as the production specification
-5. Rebuild (or refine) for production using RIPP as the contract
+5. Rebuild for production using RIPP as the contract (may share no code with prototype)
+
+**Key principle**: The prototype is disposable. Intent is the asset. Production implementations may use completely different languages, frameworks, architectures, or platforms while preserving the core intent captured in the RIPP packet.
 
 The RIPP Extractor is a conceptual tool documented but not yet fully implemented. Manual extraction is currently the recommended approach.
 

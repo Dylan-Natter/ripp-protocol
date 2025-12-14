@@ -637,6 +637,17 @@ Idea → Prototype → RIPP Extraction → Review → Production Implementation
 
 **Result**: The prototype proves it CAN be done. The RIPP packet defines HOW it SHOULD be done.
 
+**Key Principle: Intent is preserved. Code is optional.**
+
+Production implementations guided by RIPP may:
+
+- Share no code with the prototype (complete rewrite in different language)
+- Use different architectures (microservices instead of monolith)
+- Use different frameworks and platforms
+- Follow different implementation patterns
+
+What remains constant is the intent: the problem being solved, the value delivered, the data contracts, and the user experience patterns.
+
 ### Optional Metadata for Prototype-Generated RIPP
 
 When RIPP packets are generated from prototypes, optional metadata provides traceability:

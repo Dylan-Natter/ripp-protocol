@@ -116,14 +116,70 @@ RIPP doesn't replace user stories—it extends them. Where user stories capture 
 RIPP also supports starting with a rapid prototype and extracting the specification:
 
 ```
-┌───────────┐      ┌──────────────┐      ┌─────────────┐      ┌────────────┐
-│   Idea    │─────▶│  Prototype   │─────▶│ RIPP Extract│─────▶│ Production │
-│           │      │ (AI-powered) │      │  + Review   │      │   Feature  │
-└───────────┘      └──────────────┘      └─────────────┘      └────────────┘
-  Fast ideation    Proves feasibility    Formal specification   Safe to ship
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Modern Software Delivery Flow                    │
+└─────────────────────────────────────────────────────────────────────┘
 
-                                         RIPP acts as
-                                      "intent compiler"
+  ┌───────────────────────────┐
+  │  Spark / AI Prototyping   │
+  │       Tool                │
+  │                           │
+  │  • Rapid ideation         │
+  │  • Prove feasibility      │
+  │  • Core functionality     │
+  └─────────────┬─────────────┘
+                │
+                │ (working code exported)
+                ▼
+  ┌───────────────────────────┐
+  │    Prototype Repo         │
+  │  (disposable code)        │
+  │                           │
+  │  • Functional demo        │
+  │  • Early validation       │
+  │  • NOT production-ready   │
+  │  • Missing: security,     │
+  │    scale, compliance      │
+  └─────────────┬─────────────┘
+                │
+                │ (extract intent, not code)
+                ▼
+  ┌───────────────────────────┐
+  │    RIPP Packet            │
+  │  (intent contract)        │
+  │                           │
+  │  • Purpose & value        │
+  │  • Data contracts         │
+  │  • UX flows               │
+  │  • Permissions            │
+  │  • Failure modes          │
+  │  • Audit requirements     │
+  │  • NFRs                   │
+  └─────────────┬─────────────┘
+                │
+                │ (specification for production build)
+                ▼
+  ┌───────────────────────────┐
+  │    Production System      │
+  │                           │
+  │  ✓ Secure                 │
+  │  ✓ Scalable               │
+  │  ✓ Compliant              │
+  │  ✓ Observable             │
+  │  ✓ Resilient              │
+  │  ✓ Maintainable           │
+  │                           │
+  │  MAY share no code with   │
+  │  prototype                │
+  │  MAY use different        │
+  │  architecture             │
+  │  MAY use different        │
+  │  language/platform        │
+  └───────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Key Principle: Intent is preserved. Code is optional.              │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **Build rapid prototype**: Use AI or rapid tools to prove feasibility
