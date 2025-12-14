@@ -322,8 +322,6 @@ A: Absolutely. RIPP packets are reviewable, transparent, and version-controlledâ
 
 ---
 
----
-
 ### Prototype-to-Production Workflow
 
 **Q: Can I generate a RIPP packet from an existing prototype?**
