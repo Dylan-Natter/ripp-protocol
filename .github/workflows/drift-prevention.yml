@@ -67,20 +67,26 @@ jobs:
             exit 1
           fi
           
+          # Dynamically detect available CLI commands from help output
+          echo "Detecting available CLI commands..."
+          AVAILABLE_COMMANDS=$(ripp --help 2>&1 | grep -oP '(?<=ripp )\w+' || true)
+          
+          if [ -z "$AVAILABLE_COMMANDS" ]; then
+            echo "⚠️  Warning: Could not detect CLI commands from help output"
+            echo "Falling back to known command list"
+            AVAILABLE_COMMANDS="validate lint package"
+          fi
+          
+          echo "Available commands: $AVAILABLE_COMMANDS"
+          
           # Check if main commands are documented
           MISSING=""
           
-          if ! grep -q "ripp validate" docs/wiki/CLI-Reference.md; then
-            MISSING="$MISSING\n  - 'ripp validate' command"
-          fi
-          
-          if ! grep -q "ripp lint" docs/wiki/CLI-Reference.md; then
-            MISSING="$MISSING\n  - 'ripp lint' command"
-          fi
-          
-          if ! grep -q "ripp package" docs/wiki/CLI-Reference.md; then
-            MISSING="$MISSING\n  - 'ripp package' command"
-          fi
+          for cmd in $AVAILABLE_COMMANDS; do
+            if ! grep -q "ripp $cmd" docs/wiki/CLI-Reference.md; then
+              MISSING="$MISSING\n  - 'ripp $cmd' command"
+            fi
+          done
           
           if [ -n "$MISSING" ]; then
             echo "❌ CLI-Reference.md is missing documentation for:"

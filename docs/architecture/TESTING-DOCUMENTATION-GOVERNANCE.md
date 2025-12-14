@@ -184,11 +184,13 @@ gh pr merge --auto --squash
 
 - Workflow runs automatically after merge ✅
 - Wiki repository is updated with commit message like:
+
   ```
   docs: sync wiki from main repository
-  
+
   Auto-synced from /docs/wiki/ on commit <sha>
   ```
+
 - GitHub Wiki shows updated content ✅
 
 ---
@@ -221,7 +223,7 @@ git push -u origin test/cli-drift-check
 # 5. Create PR
 gh pr create --title "Test: CLI drift check" --body "Testing drift prevention"
 
-# Expected: 
+# Expected:
 # - Docs enforcement fails (no docs update)
 # - Drift prevention checks CLI-Reference.md for command presence
 ```

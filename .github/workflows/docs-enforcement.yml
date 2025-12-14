@@ -22,6 +22,15 @@ jobs:
       - name: Get changed files
         id: changed-files
         run: |
+          # Define high-impact paths (single source of truth)
+          HIGH_IMPACT_PATHS=(
+            "SPEC.md"
+            "schema/"
+            "tools/ripp-cli/"
+            "tools/vscode-extension/"
+            ".github/workflows/"
+          )
+          
           # Get list of changed files
           git fetch origin main
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
@@ -31,12 +40,13 @@ jobs:
           # Check for high-impact paths that require docs
           HIGH_IMPACT=""
           while IFS= read -r file; do
-            case "$file" in
-              SPEC.md|schema/*|tools/ripp-cli/*|tools/vscode-extension/*|.github/workflows/*)
+            for path in "${HIGH_IMPACT_PATHS[@]}"; do
+              if [[ "$file" == $path* ]]; then
                 HIGH_IMPACT="true"
-                echo "High-impact file detected: $file"
-                ;;
-            esac
+                echo "High-impact file detected: $file (matches $path)"
+                break
+              fi
+            done
           done <<< "$CHANGED_FILES"
           
           # Check if docs were updated
@@ -50,8 +60,16 @@ jobs:
             esac
           done <<< "$CHANGED_FILES"
           
+          # Export high-impact paths for error message
+          HIGH_IMPACT_LIST=$(printf "  - %s\n" "${HIGH_IMPACT_PATHS[@]}")
+          
           echo "high_impact=$HIGH_IMPACT" >> $GITHUB_OUTPUT
           echo "docs_updated=$DOCS_UPDATED" >> $GITHUB_OUTPUT
+          {
+            echo "high_impact_list<<EOF"
+            echo "$HIGH_IMPACT_LIST"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Check for docs-not-needed label
         id: check-label
@@ -89,10 +107,7 @@ jobs:
               echo "❌ Documentation update required"
               echo ""
               echo "This PR modifies high-impact paths:"
-              echo "  - SPEC.md or /schema/"
-              echo "  - /tools/ripp-cli/"
-              echo "  - /tools/vscode-extension/"
-              echo "  - /.github/workflows/"
+              echo "${{ steps.changed-files.outputs.high_impact_list }}"
               echo ""
               echo "You must either:"
               echo "  1. Update documentation in /docs/ (recommended)"

@@ -31,10 +31,25 @@ jobs:
         run: |
           echo "Syncing wiki content from /docs/wiki/ to wiki repository..."
           
-          # Copy all wiki markdown files except README and internal logs
+          # Files to exclude from wiki publishing
+          # README.md - internal documentation for contributors
+          # RIPP-Tooling-Evolution-Log.md - development/internal tracking
+          EXCLUDE_FILES=("README.md" "RIPP-Tooling-Evolution-Log.md")
+          
+          # Copy all wiki markdown files except excluded ones
           cd repo/docs/wiki
           for file in *.md; do
-            if [ "$file" != "README.md" ] && [ "$file" != "RIPP-Tooling-Evolution-Log.md" ]; then
+            # Check if file should be excluded
+            skip=false
+            for exclude in "${EXCLUDE_FILES[@]}"; do
+              if [ "$file" = "$exclude" ]; then
+                skip=true
+                echo "  Skipping $file (excluded from wiki)"
+                break
+              fi
+            done
+            
+            if [ "$skip" = false ]; then
               echo "  Copying $file"
               cp "$file" "../../wiki/$file"
             fi

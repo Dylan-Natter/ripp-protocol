@@ -63,23 +63,23 @@ Wiki reflects latest docs (no manual step)
 
 ### New Files
 
-| File | Purpose |
-| ---- | ------- |
-| `.github/CODEOWNERS` | Defines review requirements for critical paths |
-| `.github/workflows/docs-enforcement.yml` | Enforces docs updates for high-impact PRs |
-| `.github/workflows/publish-wiki.yml` | Auto-syncs `/docs/wiki/` to GitHub Wiki |
-| `.github/workflows/drift-prevention.yml` | Verifies CLI docs match implementation |
-| `docs/README.md` | Documents governance philosophy and structure |
-| `docs/architecture/TESTING-DOCUMENTATION-GOVERNANCE.md` | E2E testing guide |
-| `docs/wiki/*` | All wiki content (copied from `/wiki/`) |
-| `wiki/MIGRATION-NOTICE.md` | Explains deprecated `/wiki/` directory |
+| File                                                    | Purpose                                        |
+| ------------------------------------------------------- | ---------------------------------------------- |
+| `.github/CODEOWNERS`                                    | Defines review requirements for critical paths |
+| `.github/workflows/docs-enforcement.yml`                | Enforces docs updates for high-impact PRs      |
+| `.github/workflows/publish-wiki.yml`                    | Auto-syncs `/docs/wiki/` to GitHub Wiki        |
+| `.github/workflows/drift-prevention.yml`                | Verifies CLI docs match implementation         |
+| `docs/README.md`                                        | Documents governance philosophy and structure  |
+| `docs/architecture/TESTING-DOCUMENTATION-GOVERNANCE.md` | E2E testing guide                              |
+| `docs/wiki/*`                                           | All wiki content (copied from `/wiki/`)        |
+| `wiki/MIGRATION-NOTICE.md`                              | Explains deprecated `/wiki/` directory         |
 
 ### Modified Files
 
-| File | Changes |
-| ---- | ------- |
-| `CONTRIBUTING.md` | Added docs structure, requirements, enforcement process |
-| `.github/PULL_REQUEST_TEMPLATE.md` | Added mandatory docs checklist and impact section |
+| File                               | Changes                                                 |
+| ---------------------------------- | ------------------------------------------------------- |
+| `CONTRIBUTING.md`                  | Added docs structure, requirements, enforcement process |
+| `.github/PULL_REQUEST_TEMPLATE.md` | Added mandatory docs checklist and impact section       |
 
 ## GitHub Actions Explained
 
@@ -157,15 +157,15 @@ Wiki reflects latest docs (no manual step)
 
 The `.github/CODEOWNERS` file ensures expert review:
 
-| Path | Required Reviewer | Rationale |
-| ---- | ----------------- | --------- |
-| `/SPEC.md` | Spec maintainer | Protocol changes require deep expertise |
-| `/schema/**` | Spec maintainer | Schema defines packet structure |
-| `/docs/**` | Docs owner | Documentation quality and consistency |
-| `/tools/ripp-cli/**` | Tool owner | CLI implementation and behavior |
-| `/tools/vscode-extension/**` | Extension owner | Extension functionality |
-| `.github/workflows/**` | Workflow owner | CI/CD reliability |
-| `/examples/**`, `/templates/**` | Maintainer | Examples must be correct |
+| Path                            | Required Reviewer | Rationale                               |
+| ------------------------------- | ----------------- | --------------------------------------- |
+| `/SPEC.md`                      | Spec maintainer   | Protocol changes require deep expertise |
+| `/schema/**`                    | Spec maintainer   | Schema defines packet structure         |
+| `/docs/**`                      | Docs owner        | Documentation quality and consistency   |
+| `/tools/ripp-cli/**`            | Tool owner        | CLI implementation and behavior         |
+| `/tools/vscode-extension/**`    | Extension owner   | Extension functionality                 |
+| `.github/workflows/**`          | Workflow owner    | CI/CD reliability                       |
+| `/examples/**`, `/templates/**` | Maintainer        | Examples must be correct                |
 
 **Effect**: PRs touching these paths require approval from designated owners before merging.
 
@@ -230,7 +230,8 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/drift-prevention
 
 **Limitation**: GitHub doesn't provide a way to disable direct wiki edits via UI.
 
-**Mitigation**: 
+**Mitigation**:
+
 - Documentation clearly states repo is source of truth
 - Auto-sync overwrites manual wiki edits
 - Contributor education in CONTRIBUTING.md
@@ -243,7 +244,8 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/drift-prevention
 
 **Limitation**: The `docs-not-needed` label must be present when the workflow runs.
 
-**Mitigation**: 
+**Mitigation**:
+
 - Add label before opening PR, or
 - Push a new commit to re-trigger after adding label
 
@@ -255,7 +257,8 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/drift-prevention
 
 **Limitation**: GitHub Wiki must be manually enabled in repository settings.
 
-**Mitigation**: 
+**Mitigation**:
+
 - Documented in `/docs/wiki/README.md`
 - One-time manual step required
 - After setup, everything is automated
@@ -268,7 +271,8 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/drift-prevention
 
 **Limitation**: Currently checks for command presence, not exact help text.
 
-**Mitigation**: 
+**Mitigation**:
+
 - Sufficient for preventing completely undocumented commands
 - Developers still responsible for keeping details accurate
 
@@ -280,12 +284,14 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/drift-prevention
 
 **Limitation**: No auto-generation of docs from code yet.
 
-**Mitigation**: 
+**Mitigation**:
+
 - System is designed to be extensible
 - Drift prevention workflow scaffolds future generation
 - CONTRIBUTING.md notes this as future work
 
-**Future Enhancement**: 
+**Future Enhancement**:
+
 - Auto-generate `CLI-Reference.md` from CLI code
 - Auto-generate `Schema-Reference.md` from JSON Schema
 - Fail CI if generated docs are stale

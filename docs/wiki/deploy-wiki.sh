@@ -3,7 +3,9 @@
 
 set -e
 
-WIKI_REPO="https://github.com/Dylan-Natter/ripp-protocol.wiki.git"
+# Dynamically detect repository from git config
+REPO_URL=$(git config --get remote.origin.url)
+WIKI_REPO="${REPO_URL%.git}.wiki.git"
 WIKI_DIR="ripp-protocol.wiki"
 SOURCE_DIR="$(dirname "$0")"
 
