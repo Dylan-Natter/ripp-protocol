@@ -1,6 +1,6 @@
-# RIPP CLI Validator
+# RIPP CLI
 
-Official command-line tool for validating Regenerative Intent Prompting Protocol (RIPP) packets.
+Official command-line tool for working with Regenerative Intent Prompting Protocol (RIPP) packets.
 
 ## Installation
 
@@ -19,52 +19,131 @@ npm install
 npm link
 ```
 
-## Usage
+## Commands
 
-### Validate a single file
+### Validate
+
+Validate RIPP packets against the JSON Schema.
 
 ```bash
+# Validate a single file
 ripp validate my-feature.ripp.yaml
-```
 
-### Validate a directory
-
-```bash
+# Validate a directory
 ripp validate features/
-```
 
-### Enforce minimum RIPP level
-
-```bash
+# Enforce minimum RIPP level
 ripp validate api/ --min-level 2
-ripp validate auth/ --min-level 3
-```
 
-### Suppress warnings
-
-```bash
+# Suppress warnings
 ripp validate . --quiet
 ```
 
-## Commands
+**Options:**
 
-| Command                | Description                   |
-| ---------------------- | ----------------------------- |
-| `ripp validate <path>` | Validate RIPP packets at path |
-| `ripp --help`          | Show help message             |
-| `ripp --version`       | Show version                  |
+- `--min-level <1|2|3>` - Enforce minimum conformance level
+- `--quiet` - Suppress warnings
 
-## Options
+### Lint
 
-| Option                  | Description                       |
-| ----------------------- | --------------------------------- |
-| `--min-level <1\|2\|3>` | Enforce minimum conformance level |
-| `--quiet`               | Suppress warnings                 |
+Check RIPP packets for best practices beyond schema validation.
+
+```bash
+# Lint files in a directory
+ripp lint examples/
+
+# Treat warnings as errors
+ripp lint examples/ --strict
+
+# Custom output directory
+ripp lint specs/ --output ./build/reports/
+```
+
+**Options:**
+
+- `--strict` - Treat warnings as errors (fail on warnings)
+- `--output <dir>` - Output directory for reports (default: `reports/`)
+
+**Output:**
+
+- `reports/lint.json` - Machine-readable report
+- `reports/lint.md` - Human-readable Markdown report
+
+**Lint Rules:**
+
+- Missing critical sections (out_of_scope, assumptions, security NFRs)
+- Undefined ID references in schema_ref
+- Placeholder text (TODO, TBD, example.com)
+- Missing or vague verification steps
+
+### Package
+
+Package a RIPP packet into a normalized handoff artifact.
+
+```bash
+# Package to Markdown (handoff doc)
+ripp package --in feature.ripp.yaml --out handoff.md
+
+# Package to JSON
+ripp package --in feature.ripp.yaml --out packaged.json
+
+# Package to YAML
+ripp package --in feature.ripp.yaml --out normalized.yaml
+
+# Explicit format specification
+ripp package --in feature.ripp.yaml --out artifact --format json
+```
+
+**Options:**
+
+- `--in <file>` - Input RIPP packet file (required)
+- `--out <file>` - Output file path (required)
+- `--format <json|yaml|md>` - Output format (auto-detected from extension)
+
+**Features:**
+
+- Validates input before packaging
+- Normalizes packet structure
+- Removes empty optional fields
+- Adds packaging metadata
+- Read-only (never modifies source)
+
+### Analyze
+
+Generate a DRAFT RIPP packet from existing code or schemas.
+
+```bash
+# Analyze OpenAPI specification
+ripp analyze openapi.json --output draft-api.ripp.yaml
+
+# Analyze JSON Schema
+ripp analyze schema.json --output draft.ripp.yaml --packet-id my-feature
+```
+
+**Options:**
+
+- `<input>` - Input file (OpenAPI spec or JSON Schema)
+- `--output <file>` - Output DRAFT RIPP packet file (required)
+- `--packet-id <id>` - Packet ID for generated RIPP (default: `analyzed`)
+
+**⚠️ Important:**
+
+- Generated packets are always **DRAFT** (status: 'draft')
+- Output contains TODO markers requiring human review
+- Extracts only observable facts from code/schemas
+- **Never guesses** intent, business logic, or failure modes
+- **Requires human review** before use
+
+**Supported Inputs:**
+
+- OpenAPI 3.0 specifications
+- Swagger 2.0 specifications
+- JSON Schema
 
 ## Exit Codes
 
-- `0` - All packets valid
-- `1` - Validation failures found
+- `0` - All checks passed
+- `1` - Validation or lint failures found
 
 ## What It Validates
 
@@ -76,7 +155,7 @@ ripp validate . --quiet
 
 ## Example Output
 
-**Success:**
+**Validation Success:**
 
 ```
 ✓ item-creation.ripp.yaml is valid (Level 3)
@@ -85,7 +164,7 @@ ripp validate . --quiet
 ✓ All 2 RIPP packets are valid.
 ```
 
-**Failure:**
+**Validation Failure:**
 
 ```
 ✗ user-registration.ripp.yaml
@@ -94,6 +173,19 @@ ripp validate . --quiet
   • Packet is Level 2, but missing section: permissions
 
 ✗ 1 of 1 RIPP packets failed validation.
+```
+
+**Linting:**
+
+```
+Linting RIPP packets...
+✗ draft-api.ripp.yaml - 2 error(s), 5 warning(s)
+✓ feature.ripp.yaml - No issues
+
+📄 JSON report: reports/lint.json
+📄 Markdown report: reports/lint.md
+
+✗ Found 2 error(s) and 5 warning(s)
 ```
 
 ## CI Integration
@@ -111,6 +203,9 @@ ripp validate . --quiet
 
 - name: Validate RIPP Packets
   run: ripp validate .
+
+- name: Lint RIPP Packets (strict)
+  run: ripp lint specs/ --strict
 ```
 
 ### GitLab CI
@@ -121,6 +216,7 @@ validate-ripp:
   script:
     - npm install -g ripp-cli
     - ripp validate .
+    - ripp lint specs/ --strict
 ```
 
 ## Development
@@ -135,6 +231,8 @@ npm install
 
 ```bash
 ./index.js validate ../../examples/
+./index.js lint ../../examples/
+./index.js package --in ../../examples/item-creation.ripp.yaml --out /tmp/test.md
 ```
 
 ### Link for Development

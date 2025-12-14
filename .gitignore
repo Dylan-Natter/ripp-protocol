@@ -27,3 +27,7 @@ _site/
 tmp/
 temp/
 *.tmp
+
+# RIPP tooling outputs
+reports/
+*.ripp.packaged.*
