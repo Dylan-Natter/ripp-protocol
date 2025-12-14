@@ -1,7 +1,7 @@
 {
   "name": "ripp-protocol",
   "displayName": "RIPP Protocol",
-  "description": "VS Code integration for validating, linting, packaging, and analyzing RIPP packets.",
+  "description": "VS Code integration for the Regenerative Intent Prompting Protocol (RIPP™) - validate, lint, and manage feature specification packets.",
   "version": "0.1.0",
   "publisher": "RIPP",
   "license": "MIT",
@@ -37,7 +37,8 @@
     "onCommand:ripp.validate",
     "onCommand:ripp.lint",
     "onCommand:ripp.package",
-    "onCommand:ripp.analyze"
+    "onCommand:ripp.analyze",
+    "onCommand:ripp.init"
   ],
   "contributes": {
     "commands": [
@@ -59,6 +60,11 @@
       {
         "command": "ripp.analyze",
         "title": "RIPP: Analyze Project (Draft Packet)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.init",
+        "title": "RIPP: Initialize Repository",
         "category": "RIPP"
       }
     ],

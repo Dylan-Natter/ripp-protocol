@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { execFile } from 'child_process';
 import * as path from 'path';
 import { promisify } from 'util';
+import * as fs from 'fs';
 
 const execFileAsync = promisify(execFile);
 
@@ -46,6 +47,10 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ripp.analyze', () => analyzeProject())
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.init', () => initRepository())
+	);
 }
 
 export function deactivate() {
@@ -70,11 +75,28 @@ function getWorkspaceRoot(): string | undefined {
 function handleCommandError(error: any, commandName: string) {
 	if ((error as any).code === 'CLI_NOT_FOUND') {
 		vscode.window.showErrorMessage(
-			`RIPP CLI not found. Please verify that \`npx ripp\` works in your terminal.`,
+			`RIPP CLI not found. Install it with: npm install -D ripp-cli`,
+			'Install Locally',
 			'Open Terminal'
 		).then(selection => {
-			if (selection === 'Open Terminal') {
-				vscode.commands.executeCommand('workbench.action.terminal.new');
+			if (selection === 'Install Locally') {
+				// Open terminal and suggest install command
+				vscode.commands.executeCommand('workbench.action.terminal.new').then(() => {
+					vscode.window.showInformationMessage(
+						'Run: npm install -D ripp-cli'
+					);
+				}, (err) => {
+					// Terminal failed to open
+					vscode.window.showErrorMessage(
+						`Could not open terminal: ${err.message}`
+					);
+				});
+			} else if (selection === 'Open Terminal') {
+				vscode.commands.executeCommand('workbench.action.terminal.new').then(undefined, (err) => {
+					vscode.window.showErrorMessage(
+						`Could not open terminal: ${err.message}`
+					);
+				});
 			}
 		});
 	} else {
@@ -131,9 +153,29 @@ async function executeRippCommand(
 		let commandArgs: string[];
 
 		if (config.cliMode === 'npx') {
-			// Use npx ripp
-			command = 'npx';
-			commandArgs = ['ripp', ...args];
+			// Try to use local binary first (prefer devDependency)
+			const binName = process.platform === 'win32' ? 'ripp.cmd' : 'ripp';
+			const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
+			
+			// Note: Using fs.existsSync here is acceptable because:
+			// - It's checking a local file (very fast, <1ms)
+			// - The alternative (fs.promises.access) would add complexity
+			// - This is already in an async context (executeRippCommand)
+			if (fs.existsSync(localBinary)) {
+				// Use local binary directly
+				command = localBinary;
+				commandArgs = args;
+				if (showOutput) {
+					outputChannel.appendLine('Using local RIPP CLI from node_modules');
+				}
+			} else {
+				// Fallback to npx
+				command = 'npx';
+				commandArgs = ['ripp', ...args];
+				if (showOutput) {
+					outputChannel.appendLine('Using npx (no local RIPP CLI found)');
+				}
+			}
 		} else {
 			// Use npm run script
 			// Assumes workspace has npm scripts like "ripp:validate", "ripp:lint", etc.
@@ -414,6 +456,63 @@ async function analyzeProject() {
 				await vscode.window.showTextDocument(doc);
 			} catch (error: any) {
 				handleCommandError(error, 'analysis');
+			}
+		}
+	);
+}
+
+/**
+ * Command: Initialize RIPP in Repository
+ */
+async function initRepository() {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot) {
+		return;
+	}
+
+	// Ask user to confirm initialization
+	const selectedOption = await vscode.window.showQuickPick(
+		[
+			{
+				label: 'Standard',
+				description: 'Create RIPP files (skip existing)',
+				force: false
+			},
+			{
+				label: 'Force',
+				description: 'Overwrite existing files',
+				force: true
+			}
+		],
+		{
+			placeHolder: 'Initialize RIPP in this repository?'
+		}
+	);
+
+	if (!selectedOption) {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Initializing repository...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const args = ['init'];
+				if (selectedOption.force) {
+					args.push('--force');
+				}
+
+				await executeRippCommand(args, workspaceRoot);
+				
+				vscode.window.showInformationMessage(
+					`RIPP initialized successfully! Check the RIPP output for details.`
+				);
+			} catch (error: any) {
+				handleCommandError(error, 'initialization');
 			}
 		}
 	);
