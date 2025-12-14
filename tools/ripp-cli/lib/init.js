@@ -13,8 +13,8 @@ function initRepository(options = {}) {
     errors: []
   };
 
+  // 1. Create /ripp directory
   try {
-    // 1. Create /ripp directory
     const rippDir = path.join(process.cwd(), 'ripp');
     if (!fs.existsSync(rippDir)) {
       fs.mkdirSync(rippDir, { recursive: true });
@@ -22,8 +22,13 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('ripp/ (already exists)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/: ${error.message}`);
+  }
 
-    // 2. Create /ripp/README.md
+  // 2. Create /ripp/README.md
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
     const rippReadmePath = path.join(rippDir, 'README.md');
     if (!fs.existsSync(rippReadmePath) || force) {
       const rippReadme = generateRippReadme();
@@ -32,8 +37,13 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('ripp/README.md (already exists, use --force to overwrite)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/README.md: ${error.message}`);
+  }
 
-    // 3. Create /ripp/features directory for feature RIPP files
+  // 3. Create /ripp/features directory for feature RIPP files
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
     const featuresDir = path.join(rippDir, 'features');
     if (!fs.existsSync(featuresDir)) {
       fs.mkdirSync(featuresDir, { recursive: true });
@@ -41,8 +51,14 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('ripp/features/ (already exists)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/features/: ${error.message}`);
+  }
 
-    // 4. Create /ripp/features/.gitkeep
+  // 4. Create /ripp/features/.gitkeep
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
+    const featuresDir = path.join(rippDir, 'features');
     const gitkeepPath = path.join(featuresDir, '.gitkeep');
     if (!fs.existsSync(gitkeepPath) || force) {
       fs.writeFileSync(gitkeepPath, '');
@@ -50,8 +66,13 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('ripp/features/.gitkeep (already exists, use --force to overwrite)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/features/.gitkeep: ${error.message}`);
+  }
 
-    // 5. Create /ripp/intent-packages directory
+  // 5. Create /ripp/intent-packages directory
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
     const intentPackagesDir = path.join(rippDir, 'intent-packages');
     if (!fs.existsSync(intentPackagesDir)) {
       fs.mkdirSync(intentPackagesDir, { recursive: true });
@@ -59,8 +80,14 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('ripp/intent-packages/ (already exists)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/intent-packages/: ${error.message}`);
+  }
 
-    // 6. Create /ripp/intent-packages/README.md
+  // 6. Create /ripp/intent-packages/README.md
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
+    const intentPackagesDir = path.join(rippDir, 'intent-packages');
     const intentReadmePath = path.join(intentPackagesDir, 'README.md');
     if (!fs.existsSync(intentReadmePath) || force) {
       const intentReadme = generateIntentPackageReadme();
@@ -69,8 +96,12 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('ripp/intent-packages/README.md (already exists, use --force to overwrite)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/intent-packages/README.md: ${error.message}`);
+  }
 
-    // 7. Create .github/workflows directory
+  // 7. Create .github/workflows directory
+  try {
     const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
     if (!fs.existsSync(workflowsDir)) {
       fs.mkdirSync(workflowsDir, { recursive: true });
@@ -78,8 +109,13 @@ function initRepository(options = {}) {
     } else {
       results.skipped.push('.github/workflows/ (already exists)');
     }
+  } catch (error) {
+    results.errors.push(`Failed to create .github/workflows/: ${error.message}`);
+  }
 
-    // 8. Create GitHub Action workflow
+  // 8. Create GitHub Action workflow
+  try {
+    const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
     const workflowPath = path.join(workflowsDir, 'ripp-validate.yml');
     if (!fs.existsSync(workflowPath) || force) {
       const workflow = generateGitHubActionWorkflow();
@@ -89,7 +125,7 @@ function initRepository(options = {}) {
       results.skipped.push('.github/workflows/ripp-validate.yml (already exists, use --force to overwrite)');
     }
   } catch (error) {
-    results.errors.push(`Failed to create files: ${error.message}`);
+    results.errors.push(`Failed to create .github/workflows/ripp-validate.yml: ${error.message}`);
   }
 
   return results;
