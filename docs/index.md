@@ -23,6 +23,10 @@ RIPP is a specification format for documenting features before you build them. A
 
 Teams write RIPP packets first, review them, approve them, then build the feature. The specification becomes the source of truth, the documentation, and the validation checklist.
 
+**RIPP is the production-grade, AI-executable evolution of the user story.**
+
+In an era where AI can generate features from prompts, specifications must be precise enough to guide autonomous execution while remaining human-reviewable. RIPP fills the gap between "as a user, I want" and production-ready implementation.
+
 **Build fast. Ship safely. Regenerate always.**
 
 ---
@@ -39,6 +43,8 @@ Teams write RIPP packets first, review them, approve them, then build the featur
       <li>Intent erodes during implementation</li>
       <li>Production issues reveal undocumented assumptions</li>
       <li>New engineers struggle to understand feature rationale</li>
+      <li>AI-generated prototypes lack durable specifications</li>
+      <li>User stories optimize for conversation, not execution</li>
     </ul>
   </div>
   <div class="comparison-column after">
@@ -50,11 +56,38 @@ Teams write RIPP packets first, review them, approve them, then build the featur
       <li>Intent is preserved and versioned</li>
       <li>Failure modes documented before code is written</li>
       <li>Onboarding clarity through structured specs</li>
+      <li>AI-assisted delivery governed by explicit contracts</li>
+      <li>RIPP optimizes for delegation to autonomous systems</li>
     </ul>
   </div>
 </div>
 
 ---
+
+## The Evolution from User Story to RIPP
+
+**User stories were revolutionary.** They transformed software development by making requirements conversational, collaborative, and customer-focused. "As a [user], I want [feature] so that [value]" became the lingua franca of Agile teams.
+
+**But the world changed.**
+
+AI coding assistants can now generate entire features from natural language prompts. Prototypes appear in minutes. The bottleneck is no longer writing code—it's preserving intent, defining boundaries, and ensuring what ships to production is safe, secure, and maintainable.
+
+**User stories were designed for a human-paced world.** They excel at facilitating dialogue between product and engineering. But when machines participate in delivery, conversation alone isn't enough. You need contracts.
+
+**This is where RIPP enters.**
+
+RIPP doesn't replace user stories—it extends them. Where user stories capture "what" and "why," RIPP adds "how," "who can," "what if," and "how to verify." Where user stories optimize for discussion, RIPP optimizes for execution.
+
+**The relationship:**
+
+- **User stories** define the problem space and business value  
+- **RIPP packets** define the solution space and implementation contract  
+- **Together** they provide both alignment (user story) and rigor (RIPP)
+
+**For AI-assisted teams:** RIPP provides the specification layer that prevents "fast prototype, slow production" disasters.  
+**For traditional teams:** RIPP provides the clarity that prevents intent erosion and undocumented assumptions.
+
+**The promise:** Build with the speed of AI, ship with the confidence of complete specifications.
 
 ## How RIPP Works
 
@@ -103,19 +136,26 @@ Teams write RIPP packets first, review them, approve them, then build the featur
 
 ## 7 Canonical Statements About RIPP
 
-1. **RIPP is a specification format, not a project management tool.** It documents features, not timelines or assignments.
+1. **User stories optimize for conversation. RIPP optimizes for delegation.**  
+   In an AI-assisted world, requirements must guide autonomous execution, not just human discussion.
 
-2. **A RIPP packet is reviewed before code is written.** The specification is the first artifact, not the last.
+2. **User stories describe what humans should discuss. RIPP defines what machines are allowed to build.**  
+   The shift from collaborative exploration to bounded autonomy requires explicit, enforceable contracts.
 
-3. **RIPP preserves intent.** The "why" is captured alongside the "what" and versioned with the code.
+3. **AI made code cheap. RIPP makes intent durable.**  
+   Generating implementations is fast. Preserving why they exist and how they should behave is the new challenge.
 
-4. **RIPP is progressive.** Level 1 is simple; Level 3 is comprehensive. Choose based on risk and complexity.
+4. **RIPP is not a replacement for user stories—it's their specification layer.**  
+   User stories capture problem and value. RIPP adds contracts, permissions, failure modes, and verification.
 
-5. **RIPP is language agnostic.** It describes behavior, not implementation. Use any stack.
+5. **The best code review happens before the code exists.**  
+   Reviewing a RIPP packet catches security gaps, edge cases, and design issues before implementation begins.
 
-6. **RIPP makes failure modes explicit.** Teams think about edge cases and error handling before they ship.
+6. **Intent erosion is the silent killer of production systems.**  
+   RIPP preserves the "why" alongside the "what" and "how," versioned with the code it governs.
 
-7. **RIPP packets are validated automatically.** CI checks ensure specifications are complete and conformant.
+7. **In an AI-assisted world, specifications are the new source code.**  
+   If machines generate implementation, humans must govern intent. RIPP is that governance layer.
 
 ---
 
