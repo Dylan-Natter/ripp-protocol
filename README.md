@@ -10,6 +10,23 @@ RIPP is an open standard for capturing feature requirements as structured, machi
 
 RIPP solves **intent erosion**: the problem where clear ideas degrade into fragmented requirements, undocumented edge cases, and production surprises. By making the specification the primary artifact, RIPP enables teams to review, validate, and ship features with confidence.
 
+### RIPP as the Next-Generation User Story
+
+In an era where AI can generate entire features from prompts, the traditional user story—optimized for human conversation—no longer captures what modern teams need: **executable intent**.
+
+User stories were designed to facilitate dialogue between product and engineering. They succeeded brilliantly at making requirements discussable. But AI-assisted development demands more. When machines participate in delivery, specifications must be precise, structured, and complete enough to guide autonomous execution while remaining human-reviewable.
+
+**RIPP is not a rejection of user stories. It is their evolution.**
+
+Where user stories describe what humans should discuss, RIPP defines what machines are allowed to build. Where user stories optimize for conversation, RIPP optimizes for delegation. Where user stories capture high-level intent, RIPP preserves that intent through implementation, deployment, and maintenance.
+
+**The gap RIPP fills:**
+
+- **User stories** excel at capturing "As a user, I want X so that Y"—the problem and the value
+- **RIPP** adds "here's exactly how it works, what can break, who can access it, and how to verify it"—the contract
+
+For teams building with AI assistance, RIPP provides the rigor that prevents prototype-to-production disasters. For teams building without AI, RIPP provides the clarity that prevents intent erosion.
+
 ---
 
 ## Why RIPP Exists
@@ -22,6 +39,232 @@ Modern development moves fast. Ideas are prototyped in hours. But turning protot
 - Production issues reveal undocumented assumptions
 
 RIPP fixes this. Write a RIPP packet first. Review it. Approve it. Then build it. The specification becomes the contract, the documentation, and the validation checklist.
+
+---
+
+## User Story vs RIPP: A Comparison
+
+RIPP is not a replacement for user stories—it's a complement. User stories define the "what" and "why" at a high level. RIPP adds the "how," "who," "what if," and "how to verify."
+
+| Dimension                       | Traditional User Story                     | RIPP Packet                                                           |
+| ------------------------------- | ------------------------------------------ | --------------------------------------------------------------------- |
+| **Intent Capture**              | High-level problem and value statement     | Structured purpose with problem, solution, and value                  |
+| **Human Readability**           | Optimized for conversation and consensus   | Human-reviewable but structured for machines                          |
+| **AI Executability**            | Requires interpretation and clarification  | Machine-readable with explicit contracts                              |
+| **Security & Permissions**      | Implicit or documented separately          | Explicit permissions and authorization model (Level 2+)               |
+| **Multi-Tenancy**               | Rarely addressed                           | Tenant isolation in permissions and failure modes (Level 3)           |
+| **Auditability**                | No standard format                         | Structured audit events with severity and purpose (Level 3)           |
+| **Non-Functional Requirements** | Often in separate docs or tribal knowledge | Explicit NFRs section for performance, security, compliance (Level 3) |
+| **Failure Modes**               | Discovered during testing or production    | Documented upfront with handling strategies (Level 2+)                |
+| **Regenerability**              | Intent erodes during implementation        | Intent preserved and versioned with code                              |
+| **Validation**                  | Manual review only                         | Automated schema validation in CI/CD                                  |
+
+**When to use both:**
+
+1. Start with a user story to align on business value
+2. Translate to a RIPP packet to define implementation contract
+3. Review the RIPP packet before writing code
+4. Reference the user story in RIPP's `purpose.references` field
+
+---
+
+## The AI-Assisted Development Shift
+
+### Before RIPP: Prototyping Without Durable Intent
+
+AI coding assistants have made prototyping nearly frictionless. Ideas become running code in minutes. But this speed creates a hidden cost: **specifications that exist only in the prompt history**.
+
+**The problem:**
+
+- Features ship with the intent trapped in a conversation log
+- Security and edge cases are addressed reactively
+- Code review has no authoritative spec to validate against
+- Six months later, no one remembers why it works this way
+- Regenerating or refactoring requires archaeology through git history and Slack threads
+
+**The user story doesn't scale to this reality.** It was designed for human-paced iteration where requirements evolved through conversation. In AI-assisted workflows, the conversation happens in seconds, but the durability requirement remains.
+
+### After RIPP: AI-Assisted Delivery Governed by Specification
+
+RIPP makes intent explicit, reviewable, and durable. When you prompt an AI to build a feature, you start with a RIPP packet—not a freeform description.
+
+**The transformation:**
+
+- Intent is captured in a structured, versioned specification
+- Security, permissions, and failure modes are defined before code generation
+- Code review compares implementation against an approved contract
+- Features can be regenerated from the RIPP packet with confidence
+- The "why" and "how" survive beyond the original author
+
+**AI made code cheap. RIPP makes intent durable.**
+
+---
+
+## 7 Canonical Statements About RIPP
+
+1. **"User stories optimize for conversation. RIPP optimizes for delegation."**  
+   User stories facilitate discussion. RIPP facilitates execution by autonomous systems.
+
+2. **"User stories describe what humans should discuss. RIPP defines what machines are allowed to build."**  
+   The shift from collaborative exploration to bounded autonomy requires explicit contracts.
+
+3. **"AI made code cheap. RIPP makes intent durable."**  
+   Generating code is fast. Preserving why it exists and how it should behave is the new bottleneck.
+
+4. **"RIPP is not the death of Agile—it's Agile's specification layer."**  
+   User stories remain valuable for problem discovery. RIPP adds the rigor for safe delivery.
+
+5. **"The best code review happens before the code exists."**  
+   Reviewing a RIPP packet catches security, edge cases, and architectural issues before implementation.
+
+6. **"Intent erosion is the silent killer of production systems."**  
+   RIPP preserves the "why" alongside the "what" and "how," versioned and reviewable.
+
+7. **"In an AI-assisted world, specifications are the new source code."**  
+   If machines generate implementation, humans must govern intent. RIPP is that governance layer.
+
+---
+
+## From User Story to RIPP Packet: A Practical Translation
+
+Agile teams can adopt RIPP without abandoning user stories. Here's how a traditional user story maps to a RIPP packet:
+
+### User Story (Traditional)
+
+```
+As a registered user
+I want to update my profile information
+So that my account details stay current
+```
+
+**Acceptance Criteria:**
+
+- User can edit name and email
+- Changes are validated before saving
+- User sees confirmation after successful update
+
+### RIPP Packet (Evolution)
+
+```yaml
+ripp_version: '1.0'
+packet_id: 'user-profile-update'
+title: 'User Profile Update Feature'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'draft'
+level: 2
+
+purpose:
+  problem: 'Users cannot update their profile information after registration'
+  solution: 'Provide a profile editing form with server-side validation'
+  value: 'Improves user experience and data accuracy'
+  references:
+    - title: 'User Story US-4521: Profile Management'
+      url: 'https://example.com/jira/US-4521'
+
+ux_flow:
+  - step: 1
+    actor: 'User'
+    action: 'Navigates to profile settings page'
+    trigger: "Clicks 'Edit Profile' button"
+  - step: 2
+    actor: 'User'
+    action: 'Updates name and email fields'
+    result: 'Form shows real-time validation'
+  - step: 3
+    actor: 'User'
+    action: 'Submits form'
+    trigger: "Clicks 'Save Changes'"
+  - step: 4
+    actor: 'System'
+    action: 'Validates and persists changes'
+    result: 'User sees success message and updated profile'
+
+data_contracts:
+  inputs:
+    - name: 'ProfileUpdateRequest'
+      fields:
+        - name: 'name'
+          type: 'string'
+          required: true
+          description: "User's display name"
+        - name: 'email'
+          type: 'string'
+          required: true
+          description: "User's email address"
+          format: 'email'
+  outputs:
+    - name: 'ProfileUpdateResponse'
+      fields:
+        - name: 'user_id'
+          type: 'string'
+          required: true
+          description: 'UUID of the updated user'
+        - name: 'updated_at'
+          type: 'string'
+          required: true
+          description: 'ISO 8601 timestamp of update'
+    - name: 'ValidationError'
+      fields:
+        - name: 'error'
+          type: 'string'
+          required: true
+          description: 'Error message'
+        - name: 'field'
+          type: 'string'
+          required: false
+          description: 'Field that caused the error'
+
+api_contracts:
+  - endpoint: '/api/users/{user_id}/profile'
+    method: 'PATCH'
+    purpose: 'Update user profile information'
+    request:
+      content_type: 'application/json'
+      schema_ref: 'ProfileUpdateRequest'
+    response:
+      success:
+        status: 200
+        schema_ref: 'ProfileUpdateResponse'
+        content_type: 'application/json'
+      errors:
+        - status: 400
+          description: 'Validation error (invalid email format or missing required field)'
+        - status: 401
+          description: 'User not authenticated'
+        - status: 403
+          description: 'User cannot update another user profile'
+
+permissions:
+  - action: 'update:profile'
+    required_roles: ['authenticated_user']
+    resource_scope: 'own_profile'
+    description: 'User must be authenticated and can only update their own profile (user_id in request matches authenticated user_id)'
+
+failure_modes:
+  - scenario: 'Email already in use by another account'
+    impact: 'Update fails with validation error'
+    handling: 'Return 400 with error message'
+    user_message: 'This email is already registered to another account'
+```
+
+### What RIPP Adds
+
+**Beyond the user story:**
+
+- **Explicit data contracts** — types, validation, required fields
+- **API specification** — endpoints, methods, response codes
+- **Permission model** — who can update what, under which conditions
+- **Failure modes** — edge cases and error handling defined upfront
+- **Machine validation** — automated checks in CI/CD
+
+**Continuity with Agile:**
+
+- The user story's problem and value appear in `purpose`
+- Acceptance criteria map to `ux_flow` and optionally `acceptance_tests`
+- Reference the original user story in `purpose.references`
+
+**The result:** Teams keep the conversational benefits of user stories while gaining the execution rigor needed for AI-assisted and production-grade development.
 
 ---
 

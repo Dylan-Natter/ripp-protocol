@@ -25,6 +25,48 @@ A: RIPP isn't just documentation. It's a structured, machine-readable specificat
 
 A: No. While RIPP was designed for AI-augmented workflows (where ideas move fast), it works for any software development. If you write features, you can use RIPP.
 
+**RIPP solves two related problems:**
+
+1. **For AI-assisted teams:** When AI generates code from prompts, RIPP ensures the specification is durable, reviewable, and complete—not trapped in a conversation log.
+
+2. **For all teams:** Intent erosion happens whether code is written by humans or AI. RIPP preserves the "why" and "how" regardless of who (or what) writes the implementation.
+
+**The key insight:** AI made code cheap. The bottleneck is now preserving intent, defining boundaries, and ensuring production safety. RIPP addresses this bottleneck.
+
+---
+
+**Q: How does RIPP support AI-assisted development?**
+
+A: RIPP provides the specification layer that makes AI-generated code production-ready.
+
+**The problem RIPP solves:**
+
+- AI can generate features from prompts in minutes
+- But prompts are ephemeral—they don't survive as documentation
+- Security, permissions, edge cases often missing from generated code
+- Regenerating or modifying features requires re-prompting with context loss
+- Code review has no authoritative spec to validate against
+
+**How RIPP helps:**
+
+1. **Spec-first workflow:** Write RIPP packet before prompting AI to generate code
+2. **Bounded autonomy:** RIPP defines exactly what the AI is allowed to build
+3. **Durable intent:** Specification survives beyond the prompt conversation
+4. **Review gate:** Team reviews RIPP packet before code generation begins
+5. **Validation:** Generated code can be verified against RIPP contracts
+6. **Regeneration:** Features can be rebuilt from RIPP spec with confidence
+
+**Example workflow:**
+
+1. Draft RIPP packet describing the feature
+2. Review and approve RIPP packet
+3. Use RIPP packet as context when prompting AI
+4. Validate generated code against RIPP contracts
+5. Update RIPP if implementation reveals gaps
+6. RIPP packet becomes the durable specification
+
+**The result:** AI provides speed. RIPP provides safety and durability.
+
 ---
 
 **Q: Who created RIPP?**
@@ -137,13 +179,71 @@ A: Usually not. RIPP is for features and significant changes. Trivial bug fixes 
 
 **Q: Can I use RIPP with Agile/Scrum?**
 
-A: Yes. RIPP complements Agile:
+A: Yes. RIPP complements Agile workflows:
 
-- **User stories** define the "what" (high-level)
-- **RIPP packets** add the "how" (technical depth)
-- **Acceptance criteria** map to RIPP's `acceptance_tests`
+- **User stories** define the "what" and "why" (high-level, conversational)
+- **RIPP packets** add the "how," "who can," "what if," and "how to verify" (technical depth, executable)
+- **Acceptance criteria** from user stories map to RIPP's `ux_flow` and `acceptance_tests`
 
-Include "RIPP packet complete" in your Definition of Done.
+**Workflow integration:**
+
+1. Create user story during sprint planning
+2. Draft RIPP packet to define implementation contract
+3. Review RIPP packet with team (like a design review)
+4. Approve RIPP packet before development begins
+5. Implement feature according to RIPP spec
+6. Validate against RIPP's acceptance tests
+7. Mark RIPP packet as "implemented"
+
+Include "RIPP packet complete and approved" in your Definition of Done.
+
+**RIPP is not a replacement for Agile—it's Agile's specification layer.**
+
+---
+
+**Q: How does RIPP relate to user stories?**
+
+A: RIPP is the evolution of the user story for AI-assisted and production-grade development.
+
+**User stories excel at:**
+
+- Facilitating conversation between product and engineering
+- Capturing high-level problem and value
+- Remaining lightweight and discussable
+
+**RIPP adds:**
+
+- Structured data contracts and API specifications
+- Explicit permissions and authorization model
+- Documented failure modes and error handling
+- Machine-readable format for validation and automation
+- Preserved intent that survives implementation
+
+**The relationship:** User stories define the problem space. RIPP packets define the solution space. Together, they provide both alignment (user story) and rigor (RIPP).
+
+**Practical approach:**
+
+- Start with a user story to align on business value
+- Translate to a RIPP packet to define implementation contract
+- Reference the user story in `purpose.references`
+- Keep user story in your backlog tool (Jira, Linear, etc.)
+- Keep RIPP packet in version control with your code
+
+---
+
+**Q: Does RIPP replace user stories?**
+
+A: No. RIPP complements user stories.
+
+**User stories answer:** "What problem are we solving and why?"  
+**RIPP answers:** "How exactly does it work, who can use it, what can break, and how do we verify it?"
+
+**Think of it this way:**
+
+- User story = the initial conversation starter
+- RIPP packet = the reviewed contract before implementation
+
+For simple features, a user story might be enough. For production features—especially with AI assistance—you need both the conversational clarity of a user story and the executable precision of a RIPP packet.
 
 ---
 

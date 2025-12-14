@@ -304,4 +304,46 @@ The property where an operation can be safely repeated without changing the resu
 
 ---
 
+### User Story
+
+A high-level description of a software requirement from the user's perspective, typically in the format "As a [user], I want [feature] so that [value]." User stories focus on problem and value, while RIPP packets add implementation contracts, security, and verification. RIPP complements user stories by providing the specification layer needed for production delivery.
+
+---
+
+### Intent Preservation
+
+The practice of maintaining the original purpose and reasoning for a feature throughout its lifecycle. RIPP preserves intent by capturing the "why" in the `purpose` section and versioning it with the code, preventing the degradation of clarity that occurs when requirements exist only in conversations or tickets.
+
+---
+
+### Executable Specification
+
+A specification that is precise and structured enough to guide automated implementation or validation. RIPP packets are executable specifications—they're machine-readable, validatable, and can serve as contracts for AI-assisted code generation or automated testing.
+
+---
+
+### Spec-First Development
+
+A development approach where the specification is written and reviewed before implementation begins. Contrast with "code-first" or "documentation-last" approaches. RIPP enables spec-first workflows by making specifications reviewable, validatable, and versioned artifacts.
+
+---
+
+### AI-Assisted Development
+
+Software development where AI tools (like coding assistants or code generators) participate in creating implementations from natural language prompts or specifications. RIPP provides the governance layer for AI-assisted development by defining explicit contracts, permissions, and boundaries.
+
+---
+
+### Bounded Autonomy
+
+The principle of allowing autonomous systems (including AI) to operate independently within explicitly defined constraints. RIPP enables bounded autonomy by specifying exactly what can be built, who can access it, what can go wrong, and how to verify correctness.
+
+---
+
+### Contract-Driven Development
+
+A development methodology where interfaces, data structures, and behavior are defined as formal contracts before implementation. RIPP packets serve as contracts that both humans and AI systems can use to validate implementations.
+
+---
+
 **New terms?** [Open an issue](https://github.com/Dylan-Natter/ripp-protocol/issues) to request additions to this glossary.
