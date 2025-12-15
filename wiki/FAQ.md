@@ -605,6 +605,7 @@ Expand as you see value.
 ---
 
 <!-- // Added for clarity: AI-Specific Questions -->
+
 ## AI and RIPP
 
 ### Can AI invent or modify intent?
@@ -693,12 +694,12 @@ permissions:
 
 **When drift is detected:**
 
-| Scenario                     | Action                                                  |
-| ---------------------------- | ------------------------------------------------------- |
-| **Code deviates from RIPP**  | Update code to match approved RIPP specification        |
-| **RIPP is outdated**         | Update RIPP packet to reflect new requirements, re-approve |
-| **Intentional change**       | Update RIPP packet first, then update code              |
-| **Accidental drift**         | Revert code changes or update RIPP with team approval   |
+| Scenario                    | Action                                                     |
+| --------------------------- | ---------------------------------------------------------- |
+| **Code deviates from RIPP** | Update code to match approved RIPP specification           |
+| **RIPP is outdated**        | Update RIPP packet to reflect new requirements, re-approve |
+| **Intentional change**      | Update RIPP packet first, then update code                 |
+| **Accidental drift**        | Revert code changes or update RIPP with team approval      |
 
 **Handling workflow:**
 
@@ -730,7 +731,7 @@ ripp test features/item-creation.ripp.yaml --against http://staging-api
 ❌ Test Failed: TC-003
    Expected: HTTP 403 when non-owner tries to delete item
    Actual: HTTP 200 (item was deleted)
-   
+
    → Intent drift detected: Permission check missing in implementation
 ```
 

@@ -41,6 +41,7 @@ RIPP fixes this by making the feature specification the **primary artifact**—r
 - **Precise, not verbose** — RIPP documents decisions, not marketing fluff
 
 <!-- // Added for clarity: AI's role in RIPP -->
+
 ## The Role of AI in RIPP
 
 **AI functions as an interpreter, validator, and regenerator of intent—but is subordinate to human-authored specifications.**

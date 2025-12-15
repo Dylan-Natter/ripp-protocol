@@ -3,6 +3,7 @@
 This page explains the principles and design decisions behind RIPP™.
 
 <!-- // Added for clarity: The Role of AI in RIPP -->
+
 ## The Role of AI in RIPP
 
 RIPP embraces AI as a powerful tool for interpreting, validating, and regenerating intent—but AI is **subordinate to human-authored intent**, never a decision authority.
@@ -77,6 +78,7 @@ When AI assists in intent extraction (see "Intent Extraction" section below), sp
 ---
 
 <!-- // Added for clarity: Intent Extraction Lifecycle Phase -->
+
 ## Intent Extraction (AI-Assisted, Human-Approved)
 
 RIPP recognizes **Intent Extraction** as a formally named lifecycle phase, distinct from traditional spec-first workflows.
@@ -136,12 +138,12 @@ RIPP recognizes **Intent Extraction** as a formally named lifecycle phase, disti
 
 ### AI's Role in Each Phase
 
-| Phase                   | AI Participation                                     | Human Responsibility                    |
-| ----------------------- | ---------------------------------------------------- | --------------------------------------- |
-| **Prototype**           | Optional (AI may generate prototype code)            | Validate prototype meets user needs     |
-| **Intent Extraction**   | AI proposes RIPP packet from code + requirements     | Review, correct, approve specification  |
-| **Human Review**        | AI flags issues, suggests improvements               | Make final decisions, fill gaps         |
-| **Production**          | AI may generate production code from approved RIPP   | Validate, test, deploy to production    |
+| Phase                 | AI Participation                                   | Human Responsibility                   |
+| --------------------- | -------------------------------------------------- | -------------------------------------- |
+| **Prototype**         | Optional (AI may generate prototype code)          | Validate prototype meets user needs    |
+| **Intent Extraction** | AI proposes RIPP packet from code + requirements   | Review, correct, approve specification |
+| **Human Review**      | AI flags issues, suggests improvements             | Make final decisions, fill gaps        |
+| **Production**        | AI may generate production code from approved RIPP | Validate, test, deploy to production   |
 
 ### Guardrails for AI-Assisted Extraction
 
@@ -173,16 +175,17 @@ permissions: # CONFIDENCE: HIGH (human-reviewed and approved)
 
 ### Intent Extraction vs Spec-First: When to Use Each
 
-| Workflow              | Best For                                                 | Trade-offs                               |
-| --------------------- | -------------------------------------------------------- | ---------------------------------------- |
-| **Spec-First**        | New features, high-security systems, compliance-critical | Slower to prototype, more upfront work   |
-| **Intent Extraction** | Prototypes, legacy systems, AI-generated MVPs            | Requires careful review, risk of gaps    |
+| Workflow              | Best For                                                 | Trade-offs                             |
+| --------------------- | -------------------------------------------------------- | -------------------------------------- |
+| **Spec-First**        | New features, high-security systems, compliance-critical | Slower to prototype, more upfront work |
+| **Intent Extraction** | Prototypes, legacy systems, AI-generated MVPs            | Requires careful review, risk of gaps  |
 
 **Both workflows result in the same artifact**: An approved, human-reviewed RIPP packet that serves as the authoritative specification.
 
 ---
 
 <!-- // Added for clarity: Conceptual Mental Model -->
+
 ## Mental Model: The Intent → Code → AI Triangle
 
 Understanding the relationship between intent, code, and AI is critical to using RIPP effectively.
