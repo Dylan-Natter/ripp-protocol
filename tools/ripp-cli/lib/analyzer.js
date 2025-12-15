@@ -322,7 +322,10 @@ function createDraftPacket(packetId, targetLevel = 1) {
       value: 'TODO: Define the value'
     },
     ux_flow: [],
-    data_contracts: {}
+    data_contracts: {
+      inputs: [],
+      outputs: []
+    }
   };
 }
 
