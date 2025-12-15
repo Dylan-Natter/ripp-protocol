@@ -269,10 +269,94 @@ ripp package --in feature.ripp.yaml --out packaged.yaml --format yaml
 
 The packager:
 
-- Validates the packet before packaging
+- Validates the packet before packaging (configurable)
 - Normalizes the structure
-- Adds packaging metadata
+- Adds packaging metadata with versioning information
 - Generates clean, distribution-ready output
+- Automatically versions output files to prevent overwrites
+
+### Versioning Features
+
+Prevent accidental overwrites with automatic versioning:
+
+```bash
+# First run - creates handoff.md
+ripp package --in feature.ripp.yaml --out handoff.md
+
+# Second run - detects existing file, creates handoff-v2.md
+ripp package --in feature.ripp.yaml --out handoff.md
+# ℹ Output file exists. Versioning applied: handoff-v2.md
+
+# Explicit semantic versioning
+ripp package --in feature.ripp.yaml --out handoff.md --package-version 1.0.0
+# Creates: handoff-v1.0.0.md
+
+# Force overwrite without versioning (useful in CI/CD)
+ripp package --in feature.ripp.yaml --out handoff.md --force
+# Overwrites: handoff.md
+```
+
+**Benefits:**
+- Maintains history of handoff packages
+- Clear audit trail of deliveries
+- Easy rollback to previous versions
+- Safe by default (prevents accidental data loss)
+
+### Validation Control
+
+Control validation behavior during packaging:
+
+```bash
+# Skip validation entirely (useful for WIP drafts)
+ripp package --in draft.ripp.yaml --out draft.md --skip-validation
+
+# Validate but package anyway on errors (show warnings)
+ripp package --in wip.ripp.yaml --out wip.md --warn-on-invalid
+# ⚠ Warning: Input packet has validation errors
+# ✓ Packaged successfully: wip.md
+
+# Default: validation failures block packaging
+ripp package --in feature.ripp.yaml --out handoff.md
+# ✗ Validation failed. Package was NOT created.
+# 💡 Tip: Use --warn-on-invalid to package anyway, or --skip-validation to skip validation
+```
+
+**Use cases for flexible validation:**
+- Delivering WIP handoffs for review/feedback
+- Partial implementations (Level 1 → Level 2 transition)
+- Documentation-only packages
+- Archiving historical snapshots
+
+### Enhanced Metadata
+
+Packaged files include comprehensive metadata for traceability:
+
+```json
+{
+  "_meta": {
+    "packaged_at": "2025-12-15T21:00:00.000Z",
+    "packaged_by": "ripp-cli",
+    "ripp_cli_version": "1.0.0",
+    "ripp_version": "1.0",
+    "source_level": 2,
+    "package_version": "1.0.0",
+    "git_commit": "e0a127f",
+    "git_branch": "main",
+    "source_files": ["feature.ripp.yaml"],
+    "validation_status": "valid"
+  }
+}
+```
+
+**Metadata fields:**
+- `packaged_at` - ISO 8601 timestamp
+- `ripp_cli_version` - CLI version used for packaging
+- `package_version` - Explicit version (when `--package-version` used)
+- `git_commit` - Git commit hash (when in git repository)
+- `git_branch` - Git branch name (when in git repository)
+- `source_files` - Array of source file names
+- `validation_status` - `valid`, `invalid`, or `unvalidated`
+- `validation_errors` - Count of errors (when status is `invalid`)
 
 ---
 
