@@ -21,7 +21,7 @@ const pkg = require('../package.json');
  */
 function packagePacket(packet, options = {}) {
   const normalized = normalizePacket(packet);
-  
+
   const packaged = {
     _meta: {
       packaged_at: new Date().toISOString(),

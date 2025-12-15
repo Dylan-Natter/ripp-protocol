@@ -334,13 +334,13 @@ function applyVersionToPath(filePath, version) {
   const dir = path.dirname(filePath);
   const ext = path.extname(filePath);
   const base = path.basename(filePath, ext);
-  
+
   // Remove existing version suffix if present
   const cleanBase = base.replace(/-v\d+(\.\d+)*$/, '');
-  
+
   // Add version prefix if not already present
   const versionStr = version.startsWith('v') ? version : `v${version}`;
-  
+
   const newBase = `${cleanBase}-${versionStr}${ext}`;
   return path.join(dir, newBase);
 }
@@ -355,18 +355,18 @@ function getNextVersionPath(filePath) {
   const dir = path.dirname(filePath);
   const ext = path.extname(filePath);
   const base = path.basename(filePath, ext);
-  
+
   // Remove existing version suffix if present
   const cleanBase = base.replace(/-v\d+$/, '');
-  
+
   let version = 2; // Start with v2 since v1 is the existing file
   let newPath;
-  
+
   do {
     newPath = path.join(dir, `${cleanBase}-v${version}${ext}`);
     version++;
   } while (fs.existsSync(newPath));
-  
+
   return newPath;
 }
 
@@ -378,10 +378,10 @@ function getGitInfo() {
   try {
     // Check if we're in a git repo
     execSync('git rev-parse --git-dir', { stdio: 'pipe' });
-    
+
     const commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
     const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
-    
+
     return {
       commit,
       branch
@@ -785,20 +785,22 @@ async function handlePackageCommand(args) {
     // Load the packet
     const packet = loadPacket(options.input);
     const schema = loadSchema();
-    
+
     // Validation handling
     let validation = { valid: true, errors: [], warnings: [] };
     let validationStatus = 'unvalidated';
-    
+
     if (!options.skipValidation) {
       validation = validatePacket(packet, schema, options.input);
-      
+
       if (!validation.valid) {
         validationStatus = 'invalid';
-        
+
         if (options.warnOnInvalid) {
           // Warn but continue
-          console.log(`${colors.yellow}⚠ Warning: Input packet has validation errors${colors.reset}`);
+          console.log(
+            `${colors.yellow}⚠ Warning: Input packet has validation errors${colors.reset}`
+          );
           validation.errors.forEach(error => {
             console.log(`  ${colors.yellow}•${colors.reset} ${error}`);
           });
@@ -810,7 +812,9 @@ async function handlePackageCommand(args) {
             console.error(`  ${colors.red}•${colors.reset} ${error}`);
           });
           console.log('');
-          console.log(`${colors.blue}💡 Tip:${colors.reset} Use --warn-on-invalid to package anyway, or --skip-validation to skip validation`);
+          console.log(
+            `${colors.blue}💡 Tip:${colors.reset} Use --warn-on-invalid to package anyway, or --skip-validation to skip validation`
+          );
           process.exit(1);
         }
       } else {
@@ -820,7 +824,7 @@ async function handlePackageCommand(args) {
 
     // Determine final output path with versioning
     let finalOutputPath = options.output;
-    
+
     if (!options.force && fs.existsSync(options.output)) {
       // File exists and --force not specified, apply versioning
       if (options.version) {
@@ -830,8 +834,10 @@ async function handlePackageCommand(args) {
         // Auto-increment version
         finalOutputPath = getNextVersionPath(options.output);
       }
-      
-      console.log(`${colors.yellow}ℹ${colors.reset} Output file exists. Versioning applied: ${path.basename(finalOutputPath)}`);
+
+      console.log(
+        `${colors.yellow}ℹ${colors.reset} Output file exists. Versioning applied: ${path.basename(finalOutputPath)}`
+      );
       console.log('');
     } else if (options.version) {
       // Explicit version provided, use it even if file doesn't exist
