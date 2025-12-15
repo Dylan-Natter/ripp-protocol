@@ -75,7 +75,7 @@ function getWorkspaceRoot(): string | undefined {
 function handleCommandError(error: any, commandName: string) {
 	if ((error as any).code === 'CLI_NOT_FOUND') {
 		vscode.window.showErrorMessage(
-			`RIPP CLI not found. Install it with: npm install -D ripp-cli`,
+			'RIPP CLI not found. Install it with: npm install -D ripp-cli',
 			'Install Locally',
 			'Open Terminal'
 		).then(selection => {
@@ -309,7 +309,7 @@ async function lintPackets() {
 				await executeRippCommand(args, workspaceRoot);
 				
 				vscode.window.showInformationMessage(
-					`RIPP linting complete. Check output for details.`
+					'RIPP linting complete. Check output for details.'
 				);
 			} catch (error: any) {
 				handleCommandError(error, 'linting');
@@ -509,7 +509,7 @@ async function initRepository() {
 				await executeRippCommand(args, workspaceRoot);
 				
 				vscode.window.showInformationMessage(
-					`RIPP initialized successfully! Check the RIPP output for details.`
+					'RIPP initialized successfully! Check the RIPP output for details.'
 				);
 			} catch (error: any) {
 				handleCommandError(error, 'initialization');
