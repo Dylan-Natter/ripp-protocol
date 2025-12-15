@@ -2,6 +2,235 @@
 
 This page explains the principles and design decisions behind RIPP™.
 
+<!-- // Added for clarity: The Role of AI in RIPP -->
+## The Role of AI in RIPP
+
+RIPP embraces AI as a powerful tool for interpreting, validating, and regenerating intent—but AI is **subordinate to human-authored intent**, never a decision authority.
+
+### AI as Interpreter, Validator, and Regenerator
+
+In the RIPP workflow, AI functions in three specific capacities:
+
+1. **Interpreter**: AI assists in extracting structured intent from prototypes, natural language requirements, or existing code
+2. **Validator**: AI helps verify that implementations match approved RIPP specifications
+3. **Regenerator**: AI can regenerate implementations from RIPP packets when code needs to be rewritten
+
+**Critical principle**: In all three roles, AI serves the specification. It does not invent, modify, or override human intent.
+
+### Human Authority Over Intent
+
+- **Intent is human-authored**: All purpose, permissions, failure modes, and acceptance criteria must be explicitly defined by humans
+- **Intent is human-approved**: AI may propose candidate specifications, but humans must review and ratify before they become authoritative
+- **Intent is immutable by AI**: AI tools cannot modify approved RIPP packets without explicit human direction
+
+**Example workflow (AI-assisted intent extraction):**
+
+```
+1. AI analyzes prototype code and requirements
+   ↓
+2. AI proposes candidate RIPP packet
+   ↓
+3. Human reviews, corrects, and approves
+   ↓
+4. RIPP packet becomes authoritative
+   ↓
+5. Production implementation follows approved spec
+```
+
+**At no point does AI output become authoritative without human review.**
+
+### What AI May Do
+
+✅ **Permitted AI activities:**
+
+- Extract observable behavior from prototype code (data flows, API patterns, UX interactions)
+- Propose candidate intent based on stated requirements and code analysis
+- Validate that code implementations match approved RIPP specifications
+- Generate production code scaffolding from approved RIPP packets
+- Identify gaps or inconsistencies in draft specifications
+- Suggest failure modes based on code analysis (marked as "proposed")
+- Flag security or permission issues for human review
+
+### What AI Must Never Do
+
+❌ **Prohibited AI activities:**
+
+- Invent or modify intent without human approval
+- Mark proposed content as "verified" or "authoritative"
+- Silently resolve conflicts between requirements and code (must flag for human decision)
+- Guess permissions, tenancy, or security boundaries (must mark as "unknown" or "proposed")
+- Approve or merge RIPP packets into production workflows
+- Override human decisions about feature scope or design
+- Generate "final" specifications without human review and sign-off
+
+### AI and the Intent Extraction Lifecycle Phase
+
+When AI assists in intent extraction (see "Intent Extraction" section below), specific guardrails apply:
+
+- **Read-only analysis**: AI reads code and requirements but never modifies source files
+- **Conservative inference**: When uncertain, AI marks sections as "proposed" or "unknown" rather than guessing
+- **Transparent sourcing**: AI indicates which parts come from code, requirements, or inference
+- **Human-in-the-loop**: Every extracted specification requires explicit human review before production use
+
+**Mental model**: Think of AI as a skilled analyst who drafts reports for your approval, not an autonomous agent making final decisions.
+
+---
+
+<!-- // Added for clarity: Intent Extraction Lifecycle Phase -->
+## Intent Extraction (AI-Assisted, Human-Approved)
+
+RIPP recognizes **Intent Extraction** as a formally named lifecycle phase, distinct from traditional spec-first workflows.
+
+### What Is Intent Extraction?
+
+**Intent Extraction** is the process of creating a formal RIPP specification from existing artifacts (prototypes, code, or legacy systems) rather than writing the specification before implementation.
+
+**When to use Intent Extraction:**
+
+- ✅ Prototype-first workflows: Rapid MVP built to prove feasibility, then formalized for production
+- ✅ Legacy system documentation: Capturing intent from existing undocumented systems
+- ✅ AI-generated prototypes: Extracting durable specifications from AI-created proof-of-concept code
+
+**When NOT to use Intent Extraction:**
+
+- ❌ New greenfield features (prefer spec-first workflow)
+- ❌ High-security or compliance-critical features (require upfront specification)
+- ❌ When prototype code quality is too poor to extract meaningful patterns
+
+### The Intent Extraction Workflow
+
+```
+┌─────────────────────────────────────────────────────┐
+│ Phase 1: Prototype                                  │
+│ • Build rapid MVP (AI-assisted or manual)           │
+│ • Prove core functionality works                    │
+│ • Validate with early users                         │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│ Phase 2: Intent Extraction (AI-Assisted)            │
+│ • AI analyzes prototype code + stated requirements  │
+│ • AI proposes candidate RIPP packet                 │
+│ • AI flags gaps, conflicts, and uncertainties       │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│ Phase 3: Human Review and Approval                  │
+│ • Human reviews proposed RIPP packet                │
+│ • Human resolves flagged conflicts                  │
+│ • Human fills gaps (permissions, audit, NFRs)       │
+│ • Human approves specification                      │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│ Phase 4: Production Implementation                  │
+│ • Build production system from approved RIPP        │
+│ • May discard prototype code entirely               │
+│ • May use different language/architecture           │
+│ • Validate against RIPP acceptance tests            │
+└─────────────────────────────────────────────────────┘
+```
+
+### AI's Role in Each Phase
+
+| Phase                   | AI Participation                                     | Human Responsibility                    |
+| ----------------------- | ---------------------------------------------------- | --------------------------------------- |
+| **Prototype**           | Optional (AI may generate prototype code)            | Validate prototype meets user needs     |
+| **Intent Extraction**   | AI proposes RIPP packet from code + requirements     | Review, correct, approve specification  |
+| **Human Review**        | AI flags issues, suggests improvements               | Make final decisions, fill gaps         |
+| **Production**          | AI may generate production code from approved RIPP   | Validate, test, deploy to production    |
+
+### Guardrails for AI-Assisted Extraction
+
+To ensure trust in extracted specifications:
+
+1. **Code is evidence, not authority**: AI extracts what EXISTS in prototype, not what SHOULD exist in production
+2. **Conflicts must be flagged**: Never silently choose between conflicting requirements and code behavior
+3. **Never infer security**: Permissions, tenancy, and audit requirements must be marked "proposed" or "unknown" if not explicit
+4. **Confidence levels**: AI indicates certainty (high/medium/low/unknown) for each extracted section
+5. **Human approval required**: Extracted RIPP packets are always "draft" until human-approved
+
+**Example: AI marks uncertain content**
+
+```yaml
+permissions: # CONFIDENCE: LOW (inferred from code, requires human review)
+  - action: 'create:item'
+    required_roles: ['unknown'] # AI: No explicit auth found in prototype
+    description: 'PROPOSED: Prototype has no auth; production requirements unknown'
+```
+
+**Human must explicitly resolve before approval:**
+
+```yaml
+permissions: # CONFIDENCE: HIGH (human-reviewed and approved)
+  - action: 'create:item'
+    required_roles: ['authenticated_user']
+    description: 'Any authenticated user can create items in their own workspace'
+```
+
+### Intent Extraction vs Spec-First: When to Use Each
+
+| Workflow              | Best For                                                 | Trade-offs                               |
+| --------------------- | -------------------------------------------------------- | ---------------------------------------- |
+| **Spec-First**        | New features, high-security systems, compliance-critical | Slower to prototype, more upfront work   |
+| **Intent Extraction** | Prototypes, legacy systems, AI-generated MVPs            | Requires careful review, risk of gaps    |
+
+**Both workflows result in the same artifact**: An approved, human-reviewed RIPP packet that serves as the authoritative specification.
+
+---
+
+<!-- // Added for clarity: Conceptual Mental Model -->
+## Mental Model: The Intent → Code → AI Triangle
+
+Understanding the relationship between intent, code, and AI is critical to using RIPP effectively.
+
+```
+         INTENT (Human-Owned)
+              ▲
+              │
+              │ Preserves "why" and "what"
+              │ Survives rewrites
+              │ Authoritative
+              │
+      ┌───────┴───────┐
+      │               │
+      │               │
+  Guides         Extracts from
+  (spec-first)   (prototype-first)
+      │               │
+      │               │
+      ▼               ▼
+    CODE ◄─────────► AI
+  (Ephemeral)    (Assistant)
+
+  Implements      Proposes,
+  intent          validates,
+                  regenerates
+```
+
+**Key relationships:**
+
+1. **Intent → Code**: Approved RIPP specification guides implementation (spec-first workflow)
+2. **Code → Intent**: AI extracts candidate specification from prototype (intent extraction workflow)
+3. **Intent → AI → Code**: AI regenerates implementation from approved specification (regeneration workflow)
+4. **Code ← AI**: AI validates implementation matches approved intent (validation workflow)
+
+**Core principle**: Intent is the stable, durable artifact. Code and AI are tools that serve intent, not replace it.
+
+**What this means in practice:**
+
+- Code can be rewritten in different languages; intent remains constant
+- AI models can be swapped; intent remains constant
+- Architectures can change (monolith → microservices); intent remains constant
+- Frameworks can be upgraded; intent remains constant
+
+**Only intent is authoritative. Everything else is regenerable.**
+
+---
+
 ## Why RIPP Is Intentionally Minimal
 
 RIPP is designed to be **just enough structure, no more**.

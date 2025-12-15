@@ -604,6 +604,261 @@ Expand as you see value.
 
 ---
 
+<!-- // Added for clarity: AI-Specific Questions -->
+## AI and RIPP
+
+### Can AI invent or modify intent?
+
+**No.** AI cannot invent or modify intent without human approval.
+
+**What AI can do:**
+
+- ✅ Propose candidate intent based on prototype code and requirements
+- ✅ Extract observable behavior from existing systems
+- ✅ Suggest failure modes or edge cases for human review
+- ✅ Flag gaps or inconsistencies in draft specifications
+
+**What AI cannot do:**
+
+- ❌ Create authoritative specifications without human review
+- ❌ Modify approved RIPP packets without human direction
+- ❌ Override human decisions about feature scope or design
+- ❌ Silently resolve conflicts between requirements and prototype behavior
+
+**Workflow:**
+
+```
+AI proposes → Human reviews → Human approves → Specification becomes authoritative
+```
+
+**Key principle:** Intent is human-owned. AI is a tool that assists, not decides.
+
+See **[Design Philosophy: The Role of AI in RIPP](Design-Philosophy#the-role-of-ai-in-ripp)** for complete details.
+
+---
+
+### Is AI output ever considered authoritative?
+
+**No.** AI output is **never** authoritative without human review and approval.
+
+**Why this matters:**
+
+- AI can misinterpret requirements
+- AI can extract incorrect patterns from prototype code
+- AI cannot understand business context or compliance requirements
+- AI cannot make trade-off decisions (performance vs. cost, security vs. usability)
+
+**RIPP's approach:**
+
+1. **AI proposes** candidate specifications (marked as "draft" or "proposed")
+2. **Human reviews** and corrects the proposed content
+3. **Human approves** the final specification
+4. **Approved RIPP packet** becomes the authoritative source of truth
+
+**Example: AI proposes permissions**
+
+```yaml
+# AI-generated (NOT authoritative)
+permissions:
+  - action: 'delete:item'
+    required_roles: ['unknown'] # AI: No auth found in prototype code
+    confidence: 'low'
+    description: 'PROPOSED: Requires human review'
+```
+
+**Human approves:**
+
+```yaml
+# Human-approved (authoritative)
+permissions:
+  - action: 'delete:item'
+    required_roles: ['admin', 'owner']
+    description: 'Only admins and item owners can delete items'
+```
+
+**Trust model:** AI is a skilled analyst who drafts reports. Humans are the decision-makers who approve them.
+
+---
+
+### How is intent drift detected and handled?
+
+**Intent drift** occurs when code implementation deviates from the approved RIPP specification. RIPP provides multiple mechanisms to detect and handle drift:
+
+**Detection mechanisms:**
+
+1. **Manual code review**: Reviewers compare implementation against RIPP packet during PR review
+2. **Automated validation**: CI/CD runs acceptance tests from RIPP packet against implementation
+3. **AI-assisted validation**: AI compares deployed code behavior against RIPP data contracts and API specifications
+4. **Regression testing**: RIPP acceptance tests serve as regression suite to catch unintended changes
+
+**When drift is detected:**
+
+| Scenario                     | Action                                                  |
+| ---------------------------- | ------------------------------------------------------- |
+| **Code deviates from RIPP**  | Update code to match approved RIPP specification        |
+| **RIPP is outdated**         | Update RIPP packet to reflect new requirements, re-approve |
+| **Intentional change**       | Update RIPP packet first, then update code              |
+| **Accidental drift**         | Revert code changes or update RIPP with team approval   |
+
+**Handling workflow:**
+
+```
+1. Detect drift (CI failure, review, or AI validation)
+   ↓
+2. Determine source of truth
+   ↓
+3a. If RIPP is correct: Fix code to match RIPP
+   ↓
+3b. If code is correct: Update RIPP and get approval
+   ↓
+4. Re-validate (ensure spec and code are in sync)
+```
+
+**Prevention strategies:**
+
+- **Spec-first workflow**: Write and approve RIPP before coding (prevents most drift)
+- **PR checklists**: Include "Implementation matches RIPP packet" in PR template
+- **CI/CD gates**: Fail builds if acceptance tests from RIPP don't pass
+- **Regular audits**: Periodically verify deployed features match RIPP specifications
+
+**Example: CI detects drift**
+
+```bash
+# CI runs acceptance tests from RIPP packet
+ripp test features/item-creation.ripp.yaml --against http://staging-api
+
+❌ Test Failed: TC-003
+   Expected: HTTP 403 when non-owner tries to delete item
+   Actual: HTTP 200 (item was deleted)
+   
+   → Intent drift detected: Permission check missing in implementation
+```
+
+**Resolution:**
+
+```javascript
+// Fix: Add permission check to match RIPP specification
+if (!user.isOwner(item) && !user.hasRole('admin')) {
+  return res.status(403).json({ error: 'Forbidden' });
+}
+```
+
+**Key principle:** RIPP packet and code must stay in sync. When they diverge, one of them is wrong—determine which, then fix it.
+
+See **[Design Philosophy: Human Intent as the Control Plane](Design-Philosophy#human-intent-as-the-control-plane)** for governance details.
+
+---
+
+### Can AI help migrate legacy code to RIPP?
+
+**Yes, with human supervision.** AI can assist in extracting intent from legacy code, but humans must review and approve the results.
+
+**How AI helps with legacy migration:**
+
+1. **Code analysis**: AI scans existing code to identify data flows, API patterns, and business logic
+2. **Draft RIPP generation**: AI proposes candidate RIPP packets based on observed behavior
+3. **Gap identification**: AI flags missing information (permissions, failure modes, audit events)
+4. **Consistency checking**: AI identifies inconsistencies between different parts of the codebase
+
+**Workflow:**
+
+```
+1. AI analyzes legacy code
+   ↓
+2. AI generates draft RIPP packet
+   ↓
+3. Human reviews draft, fills gaps (permissions, NFRs, etc.)
+   ↓
+4. Human approves RIPP packet
+   ↓
+5. RIPP packet becomes source of truth for future changes
+```
+
+**Limitations:**
+
+- AI cannot infer business context or compliance requirements
+- AI cannot determine original intent if it's not observable in code
+- AI cannot guess permissions or security boundaries (must mark as "unknown")
+- AI cannot verify that extracted behavior is correct (only that it exists)
+
+**Best practices:**
+
+- Start with well-isolated modules or features
+- Involve original developers in review (they know the intent)
+- Focus on extracting data contracts and API patterns first
+- Fill in permissions, failure modes, and NFRs through human analysis
+- Use extracted RIPP as baseline for refactoring or rewriting
+
+**Example: AI proposes draft from legacy code**
+
+```yaml
+# AI-GENERATED DRAFT - REQUIRES HUMAN REVIEW
+ripp_version: '1.0'
+packet_id: 'legacy-order-processing'
+status: 'draft' # AI: Not approved, human review required
+level: 1 # AI: Only extracted Level 1 content
+
+purpose:
+  problem: 'UNKNOWN - Not documented in code'
+  solution: 'PROPOSED: System processes orders via POST /orders endpoint'
+  value: 'UNKNOWN - Requires business stakeholder input'
+
+data_contracts:
+  inputs:
+    - name: 'OrderRequest' # AI: Extracted from code
+      fields:
+        - name: 'customer_id'
+          type: 'string'
+          required: true # AI: Code crashes without it
+        - name: 'items'
+          type: 'array'
+          required: true
+
+# AI: Following sections require human input
+permissions: 'UNKNOWN - No auth found in legacy code'
+failure_modes: 'UNKNOWN - Limited error handling observed'
+```
+
+**Human fills gaps and approves:**
+
+```yaml
+ripp_version: '1.0'
+packet_id: 'legacy-order-processing'
+status: 'approved' # Human-reviewed and approved
+level: 2
+
+purpose:
+  problem: 'Customers need to place orders through API'
+  solution: 'REST API endpoint accepts order data and creates order records'
+  value: 'Enables third-party integrations and mobile apps'
+
+data_contracts:
+  inputs:
+    - name: 'OrderRequest'
+      fields:
+        - name: 'customer_id'
+          type: 'string'
+          required: true
+        - name: 'items'
+          type: 'array'
+          required: true
+
+permissions: # Human-defined based on business requirements
+  - action: 'create:order'
+    required_roles: ['customer', 'admin']
+    description: 'Customers can create orders for themselves; admins can create on behalf of any customer'
+
+failure_modes: # Human-defined based on operational knowledge
+  - scenario: 'Customer has insufficient credit'
+    impact: 'Order creation fails'
+    handling: 'Return 402 Payment Required'
+    user_message: 'Unable to process order: insufficient account balance'
+```
+
+**Key takeaway:** AI accelerates the extraction process, but humans ensure accuracy and completeness.
+
+---
+
 ## Next Steps
 
 - **New to RIPP?** → [Getting Started](Getting-Started)
