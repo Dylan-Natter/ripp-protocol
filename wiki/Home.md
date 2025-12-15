@@ -42,6 +42,49 @@ RIPP fixes this by making the feature specification the **primary artifact**—r
 
 <!-- // Added for clarity: AI's role in RIPP -->
 
+<!-- // Added for clarity: Why RIPP Works Without AI -->
+
+## Why RIPP Works Without AI
+
+**RIPP is deterministic by default—AI is optional and additive.**
+
+When a system's intent is already structurally encoded (through data models, UI components, workflows, and contracts), RIPP acts as an **intent compiler**, not an inference engine. It normalizes and packages declared structure into a standardized handoff format—no semantic interpretation required.
+
+### How RIPP Generates Complete Handoffs Without AI
+
+Real-world use has demonstrated that RIPP CLI can produce production-ready handoff packages without invoking AI when:
+
+1. **Intent is structurally encoded**: Data models, UI components, and workflows explicitly declare behavior
+2. **Contracts are already defined**: Type definitions, API schemas, and validation rules exist in code
+3. **Structure is observable**: The prototype or system exposes its architecture through standard patterns
+
+In this mode, RIPP operates as a **structure extractor and normalizer**:
+
+- Reads declared types, routes, and components
+- Maps them to RIPP's standardized schema
+- Packages them into a reviewable, machine-readable specification
+
+**No guessing. No inference. Just normalization of explicitly declared structure.**
+
+### When AI Adds Value
+
+AI becomes useful when:
+
+- ❌ **Intent is implicit**: Requirements exist only in conversation logs or tribal knowledge
+- ❌ **Intent is ambiguous**: Multiple interpretations are possible
+- ❌ **Intent is lost**: Legacy systems with no documentation
+
+In these cases, AI can **assist** (not decide) by:
+
+- Proposing candidate specifications from incomplete information
+- Identifying patterns in undocumented code
+- Flagging inconsistencies for human review
+
+**Key distinction**:
+
+- **Deterministic extraction** (structure-driven): RIPP compiles what is already declared
+- **AI-assisted recovery** (semantic inference): AI helps when intent must be reconstructed
+
 ## The Role of AI in RIPP
 
 **AI functions as an interpreter, validator, and regenerator of intent—but is subordinate to human-authored specifications.**
