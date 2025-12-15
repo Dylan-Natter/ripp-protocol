@@ -24,7 +24,7 @@ npm run compile
 npm run package
 ```
 
-This will create `ripp-protocol-{version}.vsix` in the current directory (e.g., `ripp-protocol-0.1.0.vsix`).
+This will create `ripp-protocol-{version}.vsix` in the current directory (e.g., `ripp-protocol-0.1.0.vsix`). The version number is automatically read from `package.json`.
 
 ## Build Commands
 
@@ -80,7 +80,7 @@ This command:
 
 1. Runs `vscode:prepublish` script (compiles TypeScript)
 2. Packages the extension using `vsce package`
-3. Creates `ripp-protocol-0.1.0.vsix`
+3. Creates `ripp-protocol-{version}.vsix` (version from package.json)
 
 The package includes:
 
@@ -98,6 +98,38 @@ npx vsce ls
 ```
 
 Lists all files that will be included in the package.
+
+## Version Management
+
+### Bump Version
+
+To increment the version before building a new package:
+
+```bash
+# Patch version (0.1.0 → 0.1.1)
+npm version patch
+
+# Minor version (0.1.0 → 0.2.0)
+npm version minor
+
+# Major version (0.1.0 → 1.0.0)
+npm version major
+
+# Specific version
+npm version 1.2.3
+```
+
+The `npm version` command:
+1. Updates the `version` field in `package.json`
+2. Creates a git commit with the new version
+3. Creates a git tag (e.g., `v0.1.1`)
+
+After bumping the version:
+1. Update `CHANGELOG.md` with release notes
+2. Run `npm run package` to create the new VSIX with updated version
+3. Push the changes and tags: `git push && git push --tags`
+
+**Important**: The VS Code Marketplace requires each published version to be unique and incremental. Always bump the version before publishing a new release.
 
 ## Local Testing
 
