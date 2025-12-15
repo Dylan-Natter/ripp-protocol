@@ -141,24 +141,26 @@ The wiki is documentation, not specification. When in conflict:
 
 ### Updating Wiki Pages
 
-1. Update the corresponding `.md` file in `wiki/` directory
+1. Update the corresponding `.md` file in `docs/wiki/` directory
 2. Submit PR with changes
-3. After merge, update GitHub wiki:
-   ```bash
-   cd ripp-protocol.wiki
-   cp ../ripp-protocol/wiki/[PageName].md ./[PageName].md
-   git add [PageName].md
-   git commit -m "Update [PageName]"
-   git push
-   ```
+3. After merge to `main`, the GitHub Actions workflow automatically syncs changes to the wiki
+
+**Manual sync** (for testing or troubleshooting only):
+
+> **Note:** The `deploy-wiki.sh` script is not included by default in this repository. You may need to create or adapt this script for your local environment if you wish to perform a manual sync.
+
+```bash
+cd docs/wiki
+./deploy-wiki.sh
+```
 
 ### Adding New Pages
 
-1. Create new `.md` file in `wiki/` directory
+1. Create new `.md` file in `docs/wiki/` directory
 2. Follow existing page structure and style
 3. Update `Home.md` with link to new page
 4. Submit PR
-5. After merge, publish to GitHub wiki
+5. After merge to `main`, the page is automatically published to the wiki
 
 ## Style Guidelines
 
@@ -174,8 +176,10 @@ All wiki pages follow these guidelines:
 
 To contribute to wiki documentation:
 
-1. Update `.md` files in `wiki/` directory
+1. Update `.md` files in `docs/wiki/` directory
 2. Submit PR via normal contribution process
-3. After merge, wiki maintainers will publish to GitHub wiki
+3. After merge to `main`, the wiki is automatically updated via GitHub Actions
+
+**Note**: Direct edits to the GitHub Wiki will be overwritten by the next automated sync.
 
 See [Contributing-to-RIPP.md](Contributing-to-RIPP.md) for full guidelines.

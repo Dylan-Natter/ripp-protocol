@@ -30,14 +30,23 @@ jobs:
       - name: Sync wiki content
         run: |
           echo "Syncing wiki content from /docs/wiki/ to wiki repository..."
-          
+
           # Files to exclude from wiki publishing
           # README.md - internal documentation for contributors
           # RIPP-Tooling-Evolution-Log.md - development/internal tracking
           EXCLUDE_FILES=("README.md" "RIPP-Tooling-Evolution-Log.md")
-          
+
+          # Remove all existing markdown files from wiki (clean sync)
+          cd "$GITHUB_WORKSPACE/wiki" || exit 1
+          echo "Cleaning existing wiki files..."
+          rm -f *.md || echo '::warning::Failed to clean existing wiki files - some old files may persist in the wiki'
+
           # Copy all wiki markdown files except excluded ones
-          cd repo/docs/wiki
+          cd "$GITHUB_WORKSPACE/repo/docs/wiki" || exit 1
+          echo "Copying wiki files..."
+
+          # Enable nullglob to handle case where no .md files exist
+          shopt -s nullglob
           for file in *.md; do
             # Check if file should be excluded
             skip=false
@@ -48,14 +57,14 @@ jobs:
                 break
               fi
             done
-            
+
             if [ "$skip" = false ]; then
               echo "  Copying $file"
-              cp "$file" "../../wiki/$file"
+              cp "$file" "$GITHUB_WORKSPACE/wiki/$file"
             fi
           done
-          
-          cd ../../wiki
+
+          cd "$GITHUB_WORKSPACE/wiki" || exit 1
 
       - name: Check for changes
         id: check-changes
@@ -80,8 +89,9 @@ jobs:
           git commit -m "docs: sync wiki from main repository
 
           Auto-synced from /docs/wiki/ on commit ${{ github.sha }}
-          
-          Source: ${{ github.repository }}@${{ github.ref_name }}"
+
+          Source: ${{ github.repository }}@${{ github.ref_name }}
+          Workflow: ${{ github.workflow }}"
           git push
 
       - name: Summary
