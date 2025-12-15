@@ -21,17 +21,20 @@ Extension Structure:
 **File**: `src/rippStatusProvider.ts`
 
 **Implementation**:
+
 - Implements `vscode.TreeDataProvider<RippTreeItem>`
 - Provides hierarchical view of RIPP status and actions
 - Auto-refreshes when validation completes
 
 **Items Displayed**:
+
 1. Initialization status (checks for `ripp/` directory)
 2. Last validation result (pass/fail, timestamp, message)
 3. Detected artifacts count
 4. Action buttons (as tree items with commands)
 
 **Key Methods**:
+
 - `refresh()`: Triggers UI update
 - `setLastValidationResult()`: Updates validation status
 - `isRippInitialized()`: Checks for RIPP directory
@@ -42,11 +45,13 @@ Extension Structure:
 **File**: `src/diagnosticsProvider.ts`
 
 **Implementation**:
+
 - Creates `vscode.DiagnosticCollection` named "ripp"
 - Parses RIPP CLI output for errors/warnings
 - Maps issues to VS Code diagnostics with file/line info
 
 **Parsing Patterns**:
+
 ```
 FILE:LINE:COL: SEVERITY: MESSAGE
 FILE:LINE: SEVERITY: MESSAGE
@@ -54,6 +59,7 @@ SEVERITY in FILE: MESSAGE
 ```
 
 **Key Methods**:
+
 - `parseAndSetDiagnostics()`: Main parsing and display logic
 - `parseLine()`: Pattern matching for individual lines
 - `createDiagnostic()`: Creates VS Code diagnostic objects
@@ -63,17 +69,20 @@ SEVERITY in FILE: MESSAGE
 **File**: `src/reportViewProvider.ts`
 
 **Implementation**:
+
 - Implements `vscode.WebviewViewProvider`
 - Displays HTML-based validation report
 - Supports export to JSON/Markdown
 
 **Features**:
+
 - Summary panel (status, timestamp, counts)
 - Findings table with severity indicators
 - Copy to clipboard functionality
 - Export buttons with save dialogs
 
 **Key Methods**:
+
 - `updateReport()`: Receives new validation results
 - `copyReportToClipboard()`: Clipboard integration
 - `exportReport()`: File export with format selection
@@ -84,13 +93,14 @@ SEVERITY in FILE: MESSAGE
 **File**: `src/extension.ts` - `initRepository()`
 
 **Safety Features**:
+
 1. **Preview**: Shows all files that will be created
 2. **Confirmation**: Modal dialog with detailed explanation
-3. **Options**: 
+3. **Options**:
    - Initialize (skip existing)
    - Force (overwrite)
    - Cancel
-4. **Post-init actions**: 
+4. **Post-init actions**:
    - Refresh sidebar
    - Offer to open folder or view changes
 
@@ -99,11 +109,13 @@ SEVERITY in FILE: MESSAGE
 **File**: `src/extension.ts` - `openCI()`
 
 **Implementation**:
+
 - Executes `git remote get-url origin`
 - Parses GitHub URL from remote
 - Opens browser to Actions page
 
 **Supported URL formats**:
+
 ```
 https://github.com/user/repo.git
 git@github.com:user/repo.git
@@ -114,11 +126,13 @@ git@github.com:user/repo.git
 **File**: `src/extension.ts` - `checkWorkspaceTrust()`
 
 **Implementation**:
+
 - Checks `vscode.workspace.isTrusted`
 - Blocks CLI execution in untrusted workspaces
 - Shows educational error message
 
 **Protected Commands**:
+
 - validate, lint, package, analyze, init
 
 ## Command Registration
@@ -130,11 +144,13 @@ git@github.com:user/repo.git
   "activationEvents": ["onView:rippStatus"],
   "contributes": {
     "viewsContainers": {
-      "activitybar": [{
-        "id": "rippActivityBar",
-        "title": "RIPP",
-        "icon": "$(package)"
-      }]
+      "activitybar": [
+        {
+          "id": "rippActivityBar",
+          "title": "RIPP",
+          "icon": "$(package)"
+        }
+      ]
     },
     "views": {
       "rippActivityBar": [
@@ -150,11 +166,13 @@ git@github.com:user/repo.git
       { "command": "ripp.refreshStatus", "title": "RIPP: Refresh Status", "icon": "$(refresh)" }
     ],
     "menus": {
-      "view/title": [{
-        "command": "ripp.refreshStatus",
-        "when": "view == rippStatus",
-        "group": "navigation"
-      }]
+      "view/title": [
+        {
+          "command": "ripp.refreshStatus",
+          "when": "view == rippStatus",
+          "group": "navigation"
+        }
+      ]
     }
   }
 }
@@ -205,16 +223,19 @@ Offer post-init actions
 ## Security Considerations
 
 ### Workspace Trust
+
 - All CLI commands respect `vscode.workspace.isTrusted`
 - Prevents arbitrary code execution in untrusted workspaces
 - Educational messaging guides users to trust settings
 
 ### CLI Execution
+
 - Uses `execFile` with explicit args array (no shell injection)
 - Environment variables filtered to safe subset
 - No user input passed directly to shell
 
 ### File System Access
+
 - Read-only operations for status checks
 - Write operations only on explicit user commands
 - Preview shown before any file creation
@@ -224,6 +245,7 @@ Offer post-init actions
 **Trigger**: `onView:rippStatus`
 
 This ensures the extension activates when:
+
 1. User opens VS Code with RIPP sidebar visible
 2. User clicks RIPP icon in Activity Bar
 3. User runs any RIPP command
@@ -233,6 +255,7 @@ This ensures the extension activates when:
 **Name**: "RIPP"
 
 **Content**:
+
 - Command execution logs
 - CLI stdout/stderr
 - Error diagnostics
@@ -263,12 +286,14 @@ Currently manual testing required. Automated testing would need:
 ## Performance
 
 **Optimizations**:
+
 - Lazy loading: Extension activates only when needed
 - Synchronous file checks: Uses `fs.existsSync` for instant UI updates
 - Cached validation results: Stored until next validation
 - Lightweight TreeView: Minimal tree depth, no expensive computations
 
 **Resource Usage**:
+
 - Low memory footprint (< 10MB typical)
 - No background processes
 - No network calls (except opening URLs)
@@ -279,11 +304,13 @@ Currently manual testing required. Automated testing would need:
 **VS Code Version**: `^1.85.0`
 
 **Platform Support**:
+
 - ✅ Windows (tested with `.cmd` binary detection)
 - ✅ macOS (standard binary)
 - ✅ Linux (standard binary)
 
 **Environment Support**:
+
 - ✅ Local VS Code
 - ✅ Remote containers
 - ✅ GitHub Codespaces
@@ -292,15 +319,18 @@ Currently manual testing required. Automated testing would need:
 ## Dependencies
 
 **Runtime**:
+
 - `vscode` API (provided by VS Code)
 - Node.js `child_process`, `fs`, `path`, `util`
 
 **Development**:
+
 - TypeScript `^5.3.0`
 - ESLint `^8.56.0`
 - `@vscode/vsce` `^3.7.1`
 
 **External**:
+
 - RIPP CLI (`ripp-cli` package or `npx ripp`)
 
 ## File Structure

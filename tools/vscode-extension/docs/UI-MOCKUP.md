@@ -319,16 +319,16 @@ When clicking "Open CI / GitHub Actions", the extension:
 
 ## UI Features Summary
 
-| Feature | Location | Purpose |
-|---------|----------|---------|
-| Activity Bar Icon | Left sidebar | Quick access to RIPP features |
-| TreeView Status | RIPP sidebar | Show initialization & validation status |
-| Action Buttons | RIPP sidebar | One-click access to common commands |
-| Problems Panel | Bottom panel | Native VS Code diagnostics integration |
-| Validation Report | Webview panel | Detailed results with export |
-| Output Channel | Bottom panel | Real-time CLI output stream |
-| Command Palette | Ctrl+Shift+P | All RIPP commands accessible |
-| Refresh Button | Sidebar title bar | Manual status refresh |
+| Feature           | Location          | Purpose                                 |
+| ----------------- | ----------------- | --------------------------------------- |
+| Activity Bar Icon | Left sidebar      | Quick access to RIPP features           |
+| TreeView Status   | RIPP sidebar      | Show initialization & validation status |
+| Action Buttons    | RIPP sidebar      | One-click access to common commands     |
+| Problems Panel    | Bottom panel      | Native VS Code diagnostics integration  |
+| Validation Report | Webview panel     | Detailed results with export            |
+| Output Channel    | Bottom panel      | Real-time CLI output stream             |
+| Command Palette   | Ctrl+Shift+P      | All RIPP commands accessible            |
+| Refresh Button    | Sidebar title bar | Manual status refresh                   |
 
 ## Color Coding
 
