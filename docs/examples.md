@@ -275,6 +275,31 @@ Even simple features can fail. Always document at least:
 
 ---
 
+## Packaged Handoff Example
+
+### Handoff Artifact (Markdown Format)
+
+An example of a packaged RIPP handoff document created using the `ripp package` command.
+
+**Demonstrates:**
+
+- Normalized, human-readable handoff artifact format
+- Packaging metadata (timestamp, CLI version, validation status)
+- Complete Level 3 packet formatted as Markdown documentation
+- Ready-to-deliver artifact for production teams
+
+**[View: handoff.ripp.md →](https://github.com/Dylan-Natter/ripp-protocol/blob/main/examples/handoff.ripp.md)**
+
+**Generated using:**
+
+```bash
+ripp package --in item-creation.ripp.yaml --out handoff.ripp.md
+```
+
+This packaged artifact is what you'd deliver to a production team or external stakeholders. It contains the same information as the source RIPP packet but formatted for maximum readability and includes packaging metadata.
+
+---
+
 ## Download Examples
 
 All examples are available in the [examples/](https://github.com/Dylan-Natter/ripp-protocol/tree/main/examples) directory:
@@ -291,6 +316,7 @@ Or download individually:
 curl -O https://raw.githubusercontent.com/Dylan-Natter/ripp-protocol/main/examples/item-creation.ripp.yaml
 curl -O https://raw.githubusercontent.com/Dylan-Natter/ripp-protocol/main/examples/multi-tenant-feature.ripp.yaml
 curl -O https://raw.githubusercontent.com/Dylan-Natter/ripp-protocol/main/examples/api-only-feature.ripp.yaml
+curl -O https://raw.githubusercontent.com/Dylan-Natter/ripp-protocol/main/examples/handoff.ripp.md
 ```
 
 ---
