@@ -53,8 +53,11 @@ jobs:
       # - name: Run tests
       #   run: npm test
       
+      - name: Create output directory
+        run: mkdir -p dist
+      
       - name: Package extension (Marketplace-ready)
-        run: npx @vscode/vsce package --no-dependencies --out dist/
+        run: npx @vscode/vsce package --no-dependencies --out dist/ripp-protocol.vsix
       
       - name: Verify VSIX package
         run: |
