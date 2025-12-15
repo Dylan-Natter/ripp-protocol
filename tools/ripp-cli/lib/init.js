@@ -490,17 +490,11 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Install RIPP CLI
-        run: npm install -g ripp-cli
+      - name: Install dependencies
+        run: npm ci
       
       - name: Validate RIPP packets
-        run: |
-          if [ -d "ripp/features" ]; then
-            echo "Validating RIPP packets in ripp/features/..."
-            ripp validate ripp/features/
-          else
-            echo "No ripp/features directory found. Skipping validation."
-          fi
+        run: npm run ripp:validate
       
       - name: Summary
         if: always()

@@ -17,11 +17,13 @@ const path = require('path');
  * Analyze input and generate a DRAFT RIPP packet
  * @param {string} inputPath - Path to input file (OpenAPI, JSON Schema, etc.)
  * @param {Object} options - Analysis options
+ * @param {number} options.targetLevel - Target RIPP level (1, 2, or 3). Default: 1
  * @returns {Object} Draft RIPP packet
  */
 function analyzeInput(inputPath, options = {}) {
   const ext = path.extname(inputPath).toLowerCase();
   const content = fs.readFileSync(inputPath, 'utf8');
+  const targetLevel = options.targetLevel || 1;
 
   let input;
   try {
@@ -32,9 +34,9 @@ function analyzeInput(inputPath, options = {}) {
 
   // Detect input type and extract accordingly
   if (input.openapi || input.swagger) {
-    return analyzeOpenAPI(input, options);
+    return analyzeOpenAPI(input, { ...options, targetLevel });
   } else if (input.$schema || input.type === 'object') {
-    return analyzeJsonSchema(input, options);
+    return analyzeJsonSchema(input, { ...options, targetLevel });
   } else {
     throw new Error('Unsupported input type. Currently supports: OpenAPI/Swagger, JSON Schema');
   }
@@ -45,7 +47,8 @@ function analyzeInput(inputPath, options = {}) {
  * EXTRACTIVE ONLY - does not invent intent or business logic
  */
 function analyzeOpenAPI(spec, options = {}) {
-  const packet = createDraftPacket(options.packetId || 'analyzed-api');
+  const targetLevel = options.targetLevel || 1;
+  const packet = createDraftPacket(options.packetId || 'analyzed-api', targetLevel);
 
   // Extract title and description if present
   if (spec.info?.title) {
@@ -58,39 +61,55 @@ function analyzeOpenAPI(spec, options = {}) {
     packet.purpose.value = 'TODO: Define business value';
   }
 
-  // Extract API contracts from paths
-  const apiContracts = [];
-  if (spec.paths) {
-    Object.keys(spec.paths).forEach(pathKey => {
-      const pathItem = spec.paths[pathKey];
-      ['get', 'post', 'put', 'delete', 'patch'].forEach(method => {
-        if (pathItem[method]) {
-          const operation = pathItem[method];
-          const contract = extractApiContract(pathKey, method.toUpperCase(), operation);
-          if (contract) {
-            apiContracts.push(contract);
-          }
-        }
-      });
-    });
-  }
-
-  if (apiContracts.length > 0) {
-    packet.api_contracts = apiContracts;
-    packet.level = 2; // API contracts present = minimum Level 2
-  }
-
-  // Extract data contracts from schemas/components
+  // For Level 1, keep it simple with basic data contracts
   const dataContracts = extractDataContractsFromOpenAPI(spec);
   if (dataContracts.inputs.length > 0 || dataContracts.outputs.length > 0) {
     packet.data_contracts = dataContracts;
   }
 
-  // Generate placeholder UX flow based on API operations
-  packet.ux_flow = generatePlaceholderUxFlow(apiContracts);
+  // Generate simple UX flow for Level 1
+  packet.ux_flow = [
+    {
+      step: 1,
+      actor: 'User',
+      action: 'TODO: Define how user initiates API interaction',
+      trigger: 'TODO: Define trigger'
+    },
+    {
+      step: 2,
+      actor: 'System',
+      action: 'Processes API request',
+      result: 'TODO: Define user-visible result'
+    }
+  ];
 
-  // Add placeholder permissions and failure modes for Level 2
-  if (packet.level >= 2) {
+  // For Level 2+, extract API contracts and add required fields
+  if (targetLevel >= 2) {
+    const apiContracts = [];
+    if (spec.paths) {
+      Object.keys(spec.paths).forEach(pathKey => {
+        const pathItem = spec.paths[pathKey];
+        ['get', 'post', 'put', 'delete', 'patch'].forEach(method => {
+          if (pathItem[method]) {
+            const operation = pathItem[method];
+            const contract = extractApiContract(pathKey, method.toUpperCase(), operation);
+            if (contract) {
+              apiContracts.push(contract);
+            }
+          }
+        });
+      });
+    }
+
+    if (apiContracts.length > 0) {
+      packet.api_contracts = apiContracts;
+      packet.level = 2;
+      
+      // Update UX flow based on API operations
+      packet.ux_flow = generatePlaceholderUxFlow(apiContracts);
+    }
+
+    // Add placeholder permissions and failure modes for Level 2
     packet.permissions = [
       {
         action: 'api:access',
@@ -230,7 +249,8 @@ function extractDataContractsFromOpenAPI(spec) {
  * Analyze JSON Schema
  */
 function analyzeJsonSchema(schema, options = {}) {
-  const packet = createDraftPacket(options.packetId || 'analyzed-schema');
+  const targetLevel = options.targetLevel || 1;
+  const packet = createDraftPacket(options.packetId || 'analyzed-schema', targetLevel);
 
   packet.title = schema.title || 'Analyzed Schema';
   packet.purpose.problem = 'TODO: Define the problem this schema solves';
@@ -285,7 +305,7 @@ function analyzeJsonSchema(schema, options = {}) {
  * Create a base DRAFT RIPP packet
  * Marked as 'draft' status to require human review
  */
-function createDraftPacket(packetId) {
+function createDraftPacket(packetId, targetLevel = 1) {
   const now = new Date().toISOString().split('T')[0];
 
   return {
@@ -295,7 +315,7 @@ function createDraftPacket(packetId) {
     created: now,
     updated: now,
     status: 'draft', // CRITICAL: Always draft
-    level: 1,
+    level: targetLevel,
     purpose: {
       problem: 'TODO: Define the problem',
       solution: 'TODO: Define the solution',
