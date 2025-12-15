@@ -21,15 +21,44 @@ const yaml = require('js-yaml');
 function packagePacket(packet, options = {}) {
   const normalized = normalizePacket(packet);
 
+  const pkg = require('../package.json');
+  
   const packaged = {
     _meta: {
       packaged_at: new Date().toISOString(),
       packaged_by: 'ripp-cli',
+      ripp_cli_version: pkg.version,
       source_level: packet.level,
       ripp_version: packet.ripp_version
     },
     ...normalized
   };
+
+  // Add package version if provided
+  if (options.version) {
+    packaged._meta.package_version = options.version;
+  }
+
+  // Add git info if available
+  if (options.gitInfo) {
+    packaged._meta.git_commit = options.gitInfo.commit;
+    packaged._meta.git_branch = options.gitInfo.branch;
+  }
+
+  // Add source file info
+  if (options.sourceFile) {
+    packaged._meta.source_files = [options.sourceFile];
+  }
+
+  // Add validation status
+  if (options.validationStatus) {
+    packaged._meta.validation_status = options.validationStatus;
+  }
+
+  // Add validation error count if errors exist
+  if (options.validationErrors > 0) {
+    packaged._meta.validation_errors = options.validationErrors;
+  }
 
   return packaged;
 }
