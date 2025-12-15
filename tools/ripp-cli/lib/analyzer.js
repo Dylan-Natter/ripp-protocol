@@ -104,7 +104,7 @@ function analyzeOpenAPI(spec, options = {}) {
     if (apiContracts.length > 0) {
       packet.api_contracts = apiContracts;
       packet.level = 2;
-      
+
       // Update UX flow based on API operations
       packet.ux_flow = generatePlaceholderUxFlow(apiContracts);
     }

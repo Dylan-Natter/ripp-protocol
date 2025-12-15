@@ -77,20 +77,20 @@ function validatePacket(packet, schema, filePath, options = {}) {
     validate.errors.forEach(error => {
       const field = error.instancePath || 'root';
       let message = error.message;
-      
+
       // Enhanced error messages for level-based requirements
       if (error.keyword === 'required' && packet.level >= 2) {
         const missingProp = error.params.missingProperty;
         const level = packet.level;
         const isLevelRequirement = levelRequirements[level]?.includes(missingProp);
-        
+
         if (isLevelRequirement) {
           message = `Level ${level} requires '${missingProp}' (missing)`;
           errors.push(message);
           return;
         }
       }
-      
+
       // Improve "additional properties" errors
       if (error.keyword === 'additionalProperties') {
         const additionalProp = error.params.additionalProperty;
@@ -98,7 +98,7 @@ function validatePacket(packet, schema, filePath, options = {}) {
         errors.push(`${field}: ${message}`);
         return;
       }
-      
+
       errors.push(`${field}: ${message}`);
     });
   }
@@ -155,35 +155,42 @@ function printResults(results, options) {
     console.log('┌──────────────────────────────────────────┬───────┬────────┬────────┐');
     console.log('│ File                                     │ Level │ Status │ Issues │');
     console.log('├──────────────────────────────────────────┼───────┼────────┼────────┤');
-    
+
     results.forEach(result => {
-      const fileName = result.file.length > MAX_FILENAME_WIDTH 
-        ? '...' + result.file.slice(-(MAX_FILENAME_WIDTH - TRUNCATED_FILENAME_PREFIX_LENGTH)) 
-        : result.file;
+      const fileName =
+        result.file.length > MAX_FILENAME_WIDTH
+          ? '...' + result.file.slice(-(MAX_FILENAME_WIDTH - TRUNCATED_FILENAME_PREFIX_LENGTH))
+          : result.file;
       const paddedFile = fileName.padEnd(MAX_FILENAME_WIDTH);
       const level = result.level ? result.level.toString().padEnd(5) : 'N/A  ';
       const status = result.valid ? '✓     ' : '✗     ';
       const statusColor = result.valid ? colors.green : colors.red;
       const issues = result.errors.length.toString().padEnd(6);
-      
-      console.log(`│ ${paddedFile} │ ${level} │ ${statusColor}${status}${colors.reset} │ ${issues} │`);
-      
+
+      console.log(
+        `│ ${paddedFile} │ ${level} │ ${statusColor}${status}${colors.reset} │ ${issues} │`
+      );
+
       if (result.valid) {
         totalValid++;
       } else {
         totalInvalid++;
       }
     });
-    
+
     console.log('└──────────────────────────────────────────┴───────┴────────┴────────┘');
     console.log('');
-    
+
     if (totalInvalid > 0) {
-      log(colors.red, '✗', `${totalInvalid} of ${results.length} failed. Run with --verbose for details.`);
+      log(
+        colors.red,
+        '✗',
+        `${totalInvalid} of ${results.length} failed. Run with --verbose for details.`
+      );
     } else {
       log(colors.green, '✓', `All ${totalValid} RIPP packets are valid.`);
     }
-    
+
     console.log('');
     return;
   }
@@ -199,7 +206,7 @@ function printResults(results, options) {
       log(colors.red, '✗', `${result.file}${levelInfo}`);
       result.errors.forEach(error => {
         console.log(`  ${colors.red}•${colors.reset} ${error}`);
-        
+
         // Track level-based missing fields
         const match = error.match(/Level (\d) requires '(\w+)'/);
         if (match) {
@@ -211,13 +218,17 @@ function printResults(results, options) {
           levelMissingFields.get(result.file).fields.push(field);
         }
       });
-      
+
       // Add helpful tips for level-based errors
       if (levelMissingFields.has(result.file)) {
         const info = levelMissingFields.get(result.file);
         console.log('');
-        console.log(`  ${colors.blue}💡 Tip:${colors.reset} Use level: 1 for basic contracts, or add missing sections for Level ${info.level}`);
-        console.log(`  ${colors.blue}📖 Docs:${colors.reset} https://dylan-natter.github.io/ripp-protocol/ripp-levels.html`);
+        console.log(
+          `  ${colors.blue}💡 Tip:${colors.reset} Use level: 1 for basic contracts, or add missing sections for Level ${info.level}`
+        );
+        console.log(
+          `  ${colors.blue}📖 Docs:${colors.reset} https://dylan-natter.github.io/ripp-protocol/ripp-levels.html`
+        );
       }
     }
 
@@ -734,7 +745,7 @@ async function handleAnalyzeCommand(args) {
   const options = {
     output: null,
     packetId: 'analyzed',
-    targetLevel: 1  // Default to Level 1
+    targetLevel: 1 // Default to Level 1
   };
 
   const outputIndex = args.indexOf('--output');
@@ -782,9 +793,9 @@ async function handleAnalyzeCommand(args) {
 
   try {
     // Analyze the input
-    const draftPacket = analyzeInput(inputPath, { 
+    const draftPacket = analyzeInput(inputPath, {
       packetId: options.packetId,
-      targetLevel: options.targetLevel 
+      targetLevel: options.targetLevel
     });
 
     // Auto-detect output format
@@ -822,7 +833,7 @@ async function handleAnalyzeCommand(args) {
     process.exit(0);
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
-    
+
     // Provide better error messages for unsupported formats
     if (error.message.includes('Failed to parse') || error.message.includes('Unsupported')) {
       console.log('');
@@ -831,7 +842,7 @@ async function handleAnalyzeCommand(args) {
       console.log('  • JSON Schema (.json)');
       console.log('');
     }
-    
+
     process.exit(1);
   }
 }
