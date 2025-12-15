@@ -31,6 +31,19 @@ jobs:
             ".github/workflows/"
           )
           
+          # Define config/tooling files that don't require docs
+          CONFIG_FILE_PATTERNS=(
+            "*.eslintrc.json"
+            "*.prettierrc*"
+            "*.editorconfig"
+            "tsconfig*.json"
+            "jest.config.*"
+            "*.gitignore"
+            "package-lock.json"
+            "yarn.lock"
+            "pnpm-lock.yaml"
+          )
+          
           # Get list of changed files
           git fetch origin main
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
@@ -40,13 +53,29 @@ jobs:
           # Check for high-impact paths that require docs
           HIGH_IMPACT=""
           while IFS= read -r file; do
-            for path in "${HIGH_IMPACT_PATHS[@]}"; do
-              if [[ "$file" == $path* ]]; then
-                HIGH_IMPACT="true"
-                echo "High-impact file detected: $file (matches $path)"
+            # Skip empty lines
+            [[ -z "$file" ]] && continue
+            
+            # Check if file matches any config pattern
+            IS_CONFIG=""
+            for pattern in "${CONFIG_FILE_PATTERNS[@]}"; do
+              if [[ "$(basename "$file")" == $pattern ]]; then
+                IS_CONFIG="true"
+                echo "Config file detected (docs not required): $file"
                 break
               fi
             done
+            
+            # Only check high-impact paths if not a config file
+            if [[ "$IS_CONFIG" != "true" ]]; then
+              for path in "${HIGH_IMPACT_PATHS[@]}"; do
+                if [[ "$file" == $path* ]]; then
+                  HIGH_IMPACT="true"
+                  echo "High-impact file detected: $file (matches $path)"
+                  break
+                fi
+              done
+            fi
           done <<< "$CHANGED_FILES"
           
           # Check if docs were updated
