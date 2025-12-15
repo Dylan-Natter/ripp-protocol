@@ -479,9 +479,39 @@ repos:
 
 ### VS Code
 
-**JSON Schema IntelliSense:**
+#### RIPP VS Code Extension (Recommended)
 
-Add to `.vscode/settings.json`:
+The official RIPP VS Code extension provides a complete UI-driven workflow for managing RIPP packets.
+
+**Features:**
+
+- **Activity Bar Integration**: Dedicated RIPP sidebar with status, validation results, and quick actions
+- **Problems Panel**: Validation errors appear as native VS Code diagnostics with click-to-navigate
+- **Validation Report Viewer**: Webview panel with detailed results and export options (JSON/Markdown)
+- **GitHub CI Integration**: One-click access to GitHub Actions workflows
+- **Initialize RIPP**: Safe repository initialization with file preview and confirmation
+- **Workspace Trust**: Respects VS Code security model - no CLI execution in untrusted workspaces
+
+**Installation:**
+
+Search for "RIPP Protocol" in the VS Code Extensions Marketplace, or install from VSIX.
+
+**Documentation:**
+
+- [User Guide](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/docs/UI-FEATURES.md) - How to use all UI features
+- [Implementation Details](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/docs/IMPLEMENTATION.md) - Architecture and design
+- [Visual Mockups](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/docs/UI-MOCKUP.md) - UI element reference
+
+**Quick Start:**
+
+1. Install the extension
+2. Open a workspace with RIPP packets (or create one)
+3. Click the RIPP icon in the Activity Bar
+4. Use sidebar actions to initialize, validate, and manage packets
+
+#### JSON Schema IntelliSense (Alternative)
+
+For basic schema validation without the extension, add to `.vscode/settings.json`:
 
 ```json
 {

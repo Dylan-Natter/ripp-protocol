@@ -34,13 +34,34 @@
   "homepage": "https://dylan-natter.github.io/ripp-protocol",
   "main": "./out/extension.js",
   "activationEvents": [
-    "onCommand:ripp.validate",
-    "onCommand:ripp.lint",
-    "onCommand:ripp.package",
-    "onCommand:ripp.analyze",
-    "onCommand:ripp.init"
+    "onView:rippStatus"
   ],
   "contributes": {
+    "views": {
+      "rippActivityBar": [
+        {
+          "id": "rippStatus",
+          "name": "RIPP Status",
+          "icon": "$(package)",
+          "contextualTitle": "RIPP Protocol"
+        },
+        {
+          "type": "webview",
+          "id": "ripp.reportView",
+          "name": "Validation Report",
+          "contextualTitle": "RIPP Validation Report"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rippActivityBar",
+          "title": "RIPP",
+          "icon": "$(package)"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ripp.validate",
@@ -66,8 +87,33 @@
         "command": "ripp.init",
         "title": "RIPP: Initialize Repository",
         "category": "RIPP"
+      },
+      {
+        "command": "ripp.openDocs",
+        "title": "RIPP: Open Documentation",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.openCI",
+        "title": "RIPP: Open CI / GitHub Actions",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.refreshStatus",
+        "title": "RIPP: Refresh Status",
+        "category": "RIPP",
+        "icon": "$(refresh)"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "ripp.refreshStatus",
+          "when": "view == rippStatus",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "RIPP Protocol",
       "properties": {

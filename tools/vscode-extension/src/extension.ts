@@ -3,6 +3,9 @@ import { execFile } from 'child_process';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as fs from 'fs';
+import { RippStatusProvider, ValidationResult } from './rippStatusProvider';
+import { RippDiagnosticsProvider } from './diagnosticsProvider';
+import { RippReportViewProvider, ValidationReport, Finding } from './reportViewProvider';
 
 const execFileAsync = promisify(execFile);
 
@@ -19,10 +22,16 @@ const execFileAsync = promisify(execFile);
  * - Never executes arbitrary user input
  * - Never logs secrets or env values
  * - Never mutates *.ripp.yaml or *.ripp.json files
+ * - Respects VS Code Workspace Trust
  */
 
 // Shared output channel
 let outputChannel: vscode.OutputChannel;
+
+// Providers
+let statusProvider: RippStatusProvider;
+let diagnosticsProvider: RippDiagnosticsProvider;
+let reportViewProvider: RippReportViewProvider;
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('RIPP Protocol extension is now active');
@@ -30,6 +39,25 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create shared output channel
 	outputChannel = vscode.window.createOutputChannel('RIPP');
 	context.subscriptions.push(outputChannel);
+
+	// Initialize providers
+	statusProvider = new RippStatusProvider();
+	diagnosticsProvider = new RippDiagnosticsProvider();
+	reportViewProvider = new RippReportViewProvider(context.extensionUri);
+
+	// Register TreeView for sidebar
+	const treeView = vscode.window.createTreeView('rippStatus', {
+		treeDataProvider: statusProvider
+	});
+	context.subscriptions.push(treeView);
+
+	// Register WebView for report viewer
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			RippReportViewProvider.viewType,
+			reportViewProvider
+		)
+	);
 
 	// Register commands
 	context.subscriptions.push(
@@ -51,6 +79,21 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ripp.init', () => initRepository())
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.openDocs', () => openDocs())
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.openCI', () => openCI())
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.refreshStatus', () => statusProvider.refresh())
+	);
+
+	// Register diagnostics provider
+	context.subscriptions.push(diagnosticsProvider);
 }
 
 export function deactivate() {
@@ -67,6 +110,24 @@ function getWorkspaceRoot(): string | undefined {
 		return undefined;
 	}
 	return workspaceFolders[0].uri.fsPath;
+}
+
+/**
+ * Check if workspace is trusted
+ */
+function checkWorkspaceTrust(): boolean {
+	if (!vscode.workspace.isTrusted) {
+		vscode.window.showErrorMessage(
+			'RIPP commands cannot run in an untrusted workspace. Please trust this workspace first.',
+			'Learn More'
+		).then(selection => {
+			if (selection === 'Learn More') {
+				vscode.env.openExternal(vscode.Uri.parse('https://code.visualstudio.com/docs/editor/workspace-trust'));
+			}
+		});
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -242,7 +303,7 @@ async function executeRippCommand(
  */
 async function validatePackets() {
 	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot) {
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
 		return;
 	}
 
@@ -254,21 +315,46 @@ async function validatePackets() {
 		},
 		async () => {
 			try {
+				diagnosticsProvider.clear();
 				const packets = await discoverPackets();
 				
 				if (packets.length === 0) {
 					vscode.window.showWarningMessage('No RIPP packets found in workspace');
+					statusProvider.setLastValidationResult({
+						status: 'fail',
+						timestamp: Date.now(),
+						message: 'No packets found'
+					});
 					return;
 				}
 
 				// Validate all packets in the workspace
-				// We'll validate the directory to find all packets
-				await executeRippCommand(['validate', '.'], workspaceRoot);
+				const result = await executeRippCommand(['validate', '.'], workspaceRoot);
+				
+				// Parse output for diagnostics
+				diagnosticsProvider.parseAndSetDiagnostics(result.stdout + result.stderr, workspaceRoot);
+
+				// Parse output for report
+				const report = parseValidationOutput(result.stdout + result.stderr);
+				reportViewProvider.updateReport(report);
+
+				// Update status
+				const validationResult: ValidationResult = {
+					status: report.status,
+					timestamp: Date.now(),
+					message: `${packets.length} packet(s), ${report.findings.length} issue(s)`
+				};
+				statusProvider.setLastValidationResult(validationResult);
 				
 				vscode.window.showInformationMessage(
 					`RIPP validation complete. Found ${packets.length} packet(s).`
 				);
 			} catch (error: any) {
+				statusProvider.setLastValidationResult({
+					status: 'fail',
+					timestamp: Date.now(),
+					message: 'Validation failed'
+				});
 				handleCommandError(error, 'validation');
 			}
 		}
@@ -280,7 +366,7 @@ async function validatePackets() {
  */
 async function lintPackets() {
 	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot) {
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
 		return;
 	}
 
@@ -323,7 +409,7 @@ async function lintPackets() {
  */
 async function packageHandoff() {
 	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot) {
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
 		return;
 	}
 
@@ -397,7 +483,7 @@ async function packageHandoff() {
  */
 async function analyzeProject() {
 	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot) {
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
 		return;
 	}
 
@@ -466,32 +552,38 @@ async function analyzeProject() {
  */
 async function initRepository() {
 	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot) {
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
 		return;
 	}
 
-	// Ask user to confirm initialization
-	const selectedOption = await vscode.window.showQuickPick(
-		[
-			{
-				label: 'Standard',
-				description: 'Create RIPP files (skip existing)',
-				force: false
-			},
-			{
-				label: 'Force',
-				description: 'Overwrite existing files',
-				force: true
-			}
-		],
-		{
-			placeHolder: 'Initialize RIPP in this repository?'
-		}
+	// Show preview of files that will be created
+	const previewItems = [
+		'ripp/',
+		'ripp/README.md',
+		'ripp/features/',
+		'ripp/handoffs/',
+		'ripp/packages/',
+		'ripp/.gitignore',
+		'.github/workflows/',
+		'.github/workflows/ripp-validate.yml'
+	];
+
+	const previewMessage = `RIPP will create the following files and directories:\n\n${previewItems.map(item => `  • ${item}`).join('\n')}\n\nExisting files will not be overwritten unless you choose "Force".`;
+
+	// Show confirmation dialog
+	const choice = await vscode.window.showInformationMessage(
+		'Initialize RIPP in this repository?',
+		{ modal: true, detail: previewMessage },
+		'Initialize',
+		'Force (Overwrite)',
+		'Cancel'
 	);
 
-	if (!selectedOption) {
+	if (!choice || choice === 'Cancel') {
 		return;
 	}
+
+	const force = choice === 'Force (Overwrite)';
 
 	await vscode.window.withProgress(
 		{
@@ -502,18 +594,119 @@ async function initRepository() {
 		async () => {
 			try {
 				const args = ['init'];
-				if (selectedOption.force) {
+				if (force) {
 					args.push('--force');
 				}
 
 				await executeRippCommand(args, workspaceRoot);
 				
+				// Refresh sidebar
+				statusProvider.refresh();
+				
 				vscode.window.showInformationMessage(
 					'RIPP initialized successfully! Check the RIPP output for details.'
 				);
+
+				// Offer to open diff or create PR
+				const action = await vscode.window.showInformationMessage(
+					'RIPP has been initialized',
+					'Open RIPP Folder',
+					'View Changes'
+				);
+
+				if (action === 'Open RIPP Folder') {
+					const rippUri = vscode.Uri.file(path.join(workspaceRoot, 'ripp'));
+					await vscode.commands.executeCommand('revealInExplorer', rippUri);
+				} else if (action === 'View Changes') {
+					await vscode.commands.executeCommand('workbench.view.scm');
+				}
 			} catch (error: any) {
 				handleCommandError(error, 'initialization');
 			}
 		}
 	);
+}
+
+/**
+ * Command: Open RIPP Documentation
+ */
+async function openDocs() {
+	const url = 'https://dylan-natter.github.io/ripp-protocol';
+	await vscode.env.openExternal(vscode.Uri.parse(url));
+}
+
+/**
+ * Command: Open CI / GitHub Actions
+ */
+async function openCI() {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot) {
+		return;
+	}
+
+	try {
+		// Try to detect GitHub remote
+		const result = await execFileAsync('git', ['remote', 'get-url', 'origin'], {
+			cwd: workspaceRoot
+		});
+
+		const remoteUrl = result.stdout.trim();
+		
+		// Parse GitHub URL
+		// Supports: https://github.com/user/repo.git and git@github.com:user/repo.git
+		const match = remoteUrl.match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
+		
+		if (match) {
+			const [, owner, repo] = match;
+			const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
+			await vscode.env.openExternal(vscode.Uri.parse(actionsUrl));
+		} else {
+			vscode.window.showWarningMessage('Could not detect GitHub repository from git remote');
+		}
+	} catch (error) {
+		vscode.window.showWarningMessage('Could not detect GitHub repository. Is this a git repository with a GitHub remote?');
+	}
+}
+
+/**
+ * Parse validation output into a report
+ */
+function parseValidationOutput(output: string): ValidationReport {
+	const findings: Finding[] = [];
+	const lines = output.split('\n');
+
+	// Simple parsing - look for error/warning patterns
+	for (const line of lines) {
+		// Pattern: FILE:LINE: SEVERITY: MESSAGE
+		let match = line.match(/^(.+?):(\d+):\s*(error|warning|info):\s*(.+)$/i);
+		if (match) {
+			const [, file, lineStr, severity, message] = match;
+			findings.push({
+				severity: severity.toLowerCase() as 'error' | 'warning' | 'info',
+				file,
+				line: parseInt(lineStr, 10),
+				message
+			});
+			continue;
+		}
+
+		// Pattern: Error/Warning in FILE: MESSAGE
+		match = line.match(/^(error|warning|info)\s+in\s+(.+?):\s*(.+)$/i);
+		if (match) {
+			const [, severity, file, message] = match;
+			findings.push({
+				severity: severity.toLowerCase() as 'error' | 'warning' | 'info',
+				file,
+				message
+			});
+		}
+	}
+
+	const hasErrors = findings.some(f => f.severity === 'error');
+	
+	return {
+		status: hasErrors ? 'fail' : 'pass',
+		timestamp: Date.now(),
+		findings
+	};
 }
