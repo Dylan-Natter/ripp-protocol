@@ -120,11 +120,13 @@ npm version 1.2.3
 ```
 
 The `npm version` command:
+
 1. Updates the `version` field in `package.json`
 2. Creates a git commit with the new version
 3. Creates a git tag (e.g., `v0.1.1`)
 
 After bumping the version:
+
 1. Update `CHANGELOG.md` with release notes
 2. Run `npm run package` to create the new VSIX with updated version
 3. Push the changes and tags: `git push && git push --tags`
