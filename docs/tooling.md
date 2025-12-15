@@ -297,6 +297,7 @@ ripp package --in feature.ripp.yaml --out handoff.md --force
 ```
 
 **Benefits:**
+
 - Maintains history of handoff packages
 - Clear audit trail of deliveries
 - Easy rollback to previous versions
@@ -322,6 +323,7 @@ ripp package --in feature.ripp.yaml --out handoff.md
 ```
 
 **Use cases for flexible validation:**
+
 - Delivering WIP handoffs for review/feedback
 - Partial implementations (Level 1 → Level 2 transition)
 - Documentation-only packages
@@ -349,6 +351,7 @@ Packaged files include comprehensive metadata for traceability:
 ```
 
 **Metadata fields:**
+
 - `packaged_at` - ISO 8601 timestamp
 - `ripp_cli_version` - CLI version used for packaging
 - `package_version` - Explicit version (when `--package-version` used)

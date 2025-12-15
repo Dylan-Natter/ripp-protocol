@@ -59,6 +59,8 @@ When uncertain about:
 - Add new sections, don't rewrite existing ones
 - Clarifications must preserve original meaning
 - Link to new documents; don't embed large content blocks in existing pages
+- **ALWAYS run Prettier on documentation files before committing**: `npx prettier --write docs/**/*.md`
+- Markdown formatting rules: blank line required before bullet lists, code blocks, and headings
 
 ### Working with Tooling
 - Validators must be read-only (never modify source packets)
@@ -71,6 +73,10 @@ When uncertain about:
 - Maintain test coverage for all changes
 - Ensure backward compatibility with prior releases
 - Run validation, linting, and tests before submitting
+- **ALWAYS run code quality checks before committing**:
+  - `npm run format:check` (or `npx prettier --write .` to auto-fix)
+  - `npm run lint`
+- All code must pass Prettier formatting and ESLint linting
 
 ---
 
