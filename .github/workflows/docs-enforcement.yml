@@ -86,7 +86,7 @@ jobs:
           DOCS_UPDATED=""
           while IFS= read -r file; do
             case "$file" in
-              docs/*)
+              docs/*|.github/copilot-instructions.md)
                 DOCS_UPDATED="true"
                 echo "Documentation update detected: $file"
                 ;;
