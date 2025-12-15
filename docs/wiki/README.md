@@ -148,6 +148,7 @@ The wiki is documentation, not specification. When in conflict:
 **Manual sync** (for testing or troubleshooting only):
 
 > **Note:** The `deploy-wiki.sh` script is not included by default in this repository. You may need to create or adapt this script for your local environment if you wish to perform a manual sync.
+
 ```bash
 cd docs/wiki
 ./deploy-wiki.sh
