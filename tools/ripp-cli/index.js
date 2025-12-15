@@ -6,6 +6,7 @@ const yaml = require('js-yaml');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const { glob } = require('glob');
+const { execSync } = require('child_process');
 const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./lib/linter');
 const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
 const { analyzeInput } = require('./lib/analyzer');
@@ -282,6 +283,10 @@ ${colors.green}Package Options:${colors.reset}
   --in <file>                       Input RIPP packet file (required)
   --out <file>                      Output file path (required)
   --format <json|yaml|md>           Output format (auto-detected from extension)
+  --package-version <version>       Version string for the package (e.g., 1.0.0)
+  --force                           Overwrite existing output file without versioning
+  --skip-validation                 Skip validation entirely
+  --warn-on-invalid                 Validate but continue packaging on errors
 
 ${colors.green}Analyze Options:${colors.reset}
   <input>                           Input file (OpenAPI, JSON Schema)
@@ -298,6 +303,9 @@ ${colors.green}Examples:${colors.reset}
   ripp lint examples/
   ripp lint examples/ --strict
   ripp package --in feature.ripp.yaml --out handoff.md
+  ripp package --in feature.ripp.yaml --out handoff.md --package-version 1.0.0
+  ripp package --in feature.ripp.yaml --out handoff.md --force
+  ripp package --in feature.ripp.yaml --out handoff.md --warn-on-invalid
   ripp package --in feature.ripp.yaml --out packaged.json --format json
   ripp analyze openapi.json --output draft-api.ripp.yaml
   ripp analyze openapi.json --output draft.ripp.yaml --target-level 2
@@ -314,6 +322,74 @@ ${colors.gray}Learn more: https://dylan-natter.github.io/ripp-protocol${colors.r
 function showVersion() {
   const pkg = require('./package.json');
   console.log(`ripp-cli v${pkg.version}`);
+}
+
+/**
+ * Apply a version string to a file path
+ * Examples:
+ *   applyVersionToPath('handoff.zip', '1.0.0') => 'handoff-v1.0.0.zip'
+ *   applyVersionToPath('handoff.md', '2.1.0') => 'handoff-v2.1.0.md'
+ */
+function applyVersionToPath(filePath, version) {
+  const dir = path.dirname(filePath);
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath, ext);
+
+  // Remove existing version suffix if present
+  const cleanBase = base.replace(/-v\d+(\.\d+)*$/, '');
+
+  // Add version prefix if not already present
+  const versionStr = version.startsWith('v') ? version : `v${version}`;
+
+  const newBase = `${cleanBase}-${versionStr}${ext}`;
+  return path.join(dir, newBase);
+}
+
+/**
+ * Get the next auto-increment version path
+ * Examples:
+ *   handoff.zip exists => handoff-v2.zip
+ *   handoff-v2.zip exists => handoff-v3.zip
+ */
+function getNextVersionPath(filePath) {
+  const dir = path.dirname(filePath);
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath, ext);
+
+  // Remove existing version suffix if present
+  const cleanBase = base.replace(/-v\d+$/, '');
+
+  let version = 2; // Start with v2 since v1 is the existing file
+  let newPath;
+
+  do {
+    newPath = path.join(dir, `${cleanBase}-v${version}${ext}`);
+    version++;
+  } while (fs.existsSync(newPath));
+
+  return newPath;
+}
+
+/**
+ * Get git information from the current repository
+ * Returns null if not in a git repo or git is not available
+ */
+function getGitInfo() {
+  try {
+    // Check if we're in a git repo
+    execSync('git rev-parse --git-dir', { stdio: 'pipe' });
+
+    const commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+
+    return {
+      commit,
+      branch
+    };
+  } catch (error) {
+    // Not in a git repo or git not available
+    return null;
+  }
 }
 
 async function main() {
@@ -632,7 +708,11 @@ async function handlePackageCommand(args) {
   const options = {
     input: null,
     output: null,
-    format: null
+    format: null,
+    version: null,
+    force: args.includes('--force'),
+    skipValidation: args.includes('--skip-validation'),
+    warnOnInvalid: args.includes('--warn-on-invalid')
   };
 
   const inIndex = args.indexOf('--in');
@@ -648,6 +728,11 @@ async function handlePackageCommand(args) {
   const formatIndex = args.indexOf('--format');
   if (formatIndex !== -1 && args[formatIndex + 1]) {
     options.format = args[formatIndex + 1].toLowerCase();
+  }
+
+  const versionIndex = args.indexOf('--package-version');
+  if (versionIndex !== -1 && args[versionIndex + 1]) {
+    options.version = args[versionIndex + 1];
   }
 
   // Validate required options
@@ -697,21 +782,79 @@ async function handlePackageCommand(args) {
   console.log(`${colors.blue}Packaging RIPP packet...${colors.reset}`);
 
   try {
-    // Load and validate the packet
+    // Load the packet
     const packet = loadPacket(options.input);
     const schema = loadSchema();
-    const validation = validatePacket(packet, schema, options.input);
 
-    if (!validation.valid) {
-      console.error(`${colors.red}Error: Input packet failed validation${colors.reset}`);
-      validation.errors.forEach(error => {
-        console.error(`  ${colors.red}•${colors.reset} ${error}`);
-      });
-      process.exit(1);
+    // Validation handling
+    let validation = { valid: true, errors: [], warnings: [] };
+    let validationStatus = 'unvalidated';
+
+    if (!options.skipValidation) {
+      validation = validatePacket(packet, schema, options.input);
+
+      if (!validation.valid) {
+        validationStatus = 'invalid';
+
+        if (options.warnOnInvalid) {
+          // Warn but continue
+          console.log(
+            `${colors.yellow}⚠ Warning: Input packet has validation errors${colors.reset}`
+          );
+          validation.errors.forEach(error => {
+            console.log(`  ${colors.yellow}•${colors.reset} ${error}`);
+          });
+          console.log('');
+        } else {
+          // Fail on validation error (default behavior)
+          console.error(`${colors.red}Error: Input packet failed validation${colors.reset}`);
+          validation.errors.forEach(error => {
+            console.error(`  ${colors.red}•${colors.reset} ${error}`);
+          });
+          console.log('');
+          console.log(
+            `${colors.blue}💡 Tip:${colors.reset} Use --warn-on-invalid to package anyway, or --skip-validation to skip validation`
+          );
+          process.exit(1);
+        }
+      } else {
+        validationStatus = 'valid';
+      }
     }
 
-    // Package the packet
-    const packaged = packagePacket(packet);
+    // Determine final output path with versioning
+    let finalOutputPath = options.output;
+
+    if (!options.force && fs.existsSync(options.output)) {
+      // File exists and --force not specified, apply versioning
+      if (options.version) {
+        // Explicit version provided
+        finalOutputPath = applyVersionToPath(options.output, options.version);
+      } else {
+        // Auto-increment version
+        finalOutputPath = getNextVersionPath(options.output);
+      }
+
+      console.log(
+        `${colors.yellow}ℹ${colors.reset} Output file exists. Versioning applied: ${path.basename(finalOutputPath)}`
+      );
+      console.log('');
+    } else if (options.version) {
+      // Explicit version provided, use it even if file doesn't exist
+      finalOutputPath = applyVersionToPath(options.output, options.version);
+    }
+
+    // Get git information if available
+    const gitInfo = getGitInfo();
+
+    // Package the packet with enhanced metadata
+    const packaged = packagePacket(packet, {
+      version: options.version,
+      gitInfo,
+      validationStatus,
+      validationErrors: validation.errors.length,
+      sourceFile: path.basename(options.input)
+    });
 
     // Format according to requested format
     let output;
@@ -724,11 +867,17 @@ async function handlePackageCommand(args) {
     }
 
     // Write to output file
-    fs.writeFileSync(options.output, output);
+    fs.writeFileSync(finalOutputPath, output);
 
-    log(colors.green, '✓', `Packaged successfully: ${options.output}`);
+    log(colors.green, '✓', `Packaged successfully: ${finalOutputPath}`);
     console.log(`  ${colors.gray}Format: ${options.format}${colors.reset}`);
     console.log(`  ${colors.gray}Level: ${packet.level}${colors.reset}`);
+    if (options.version) {
+      console.log(`  ${colors.gray}Package Version: ${options.version}${colors.reset}`);
+    }
+    if (validationStatus !== 'valid') {
+      console.log(`  ${colors.gray}Validation: ${validationStatus}${colors.reset}`);
+    }
     console.log('');
 
     process.exit(0);
