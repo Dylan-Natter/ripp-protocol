@@ -361,10 +361,6 @@ function generateRippGitignore() {
 # These are built artifacts that should not be committed
 packages/
 
-# Build artifacts
-*.zip
-*.tar.gz
-
 # Keep directory structure
 !.gitkeep
 `;

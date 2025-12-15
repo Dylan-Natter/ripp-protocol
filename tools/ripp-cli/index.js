@@ -21,6 +21,11 @@ const colors = {
   gray: '\x1b[90m'
 };
 
+// Configuration constants
+const MIN_FILES_FOR_TABLE = 4;
+const MAX_FILENAME_WIDTH = 40;
+const TRUNCATED_FILENAME_PREFIX_LENGTH = 3;
+
 function log(color, symbol, message) {
   console.log(`${color}${symbol}${colors.reset} ${message}`);
 }
@@ -146,14 +151,16 @@ function printResults(results, options) {
   const levelMissingFields = new Map(); // Track missing fields by level
 
   // Show summary table for multiple files when not verbose
-  if (results.length > 3 && !options.verbose) {
+  if (results.length >= MIN_FILES_FOR_TABLE && !options.verbose) {
     console.log('┌──────────────────────────────────────────┬───────┬────────┬────────┐');
     console.log('│ File                                     │ Level │ Status │ Issues │');
     console.log('├──────────────────────────────────────────┼───────┼────────┼────────┤');
     
     results.forEach(result => {
-      const fileName = result.file.length > 40 ? '...' + result.file.slice(-37) : result.file;
-      const paddedFile = fileName.padEnd(40);
+      const fileName = result.file.length > MAX_FILENAME_WIDTH 
+        ? '...' + result.file.slice(-(MAX_FILENAME_WIDTH - TRUNCATED_FILENAME_PREFIX_LENGTH)) 
+        : result.file;
+      const paddedFile = fileName.padEnd(MAX_FILENAME_WIDTH);
       const level = result.level ? result.level.toString().padEnd(5) : 'N/A  ';
       const status = result.valid ? '✓     ' : '✗     ';
       const statusColor = result.valid ? colors.green : colors.red;
