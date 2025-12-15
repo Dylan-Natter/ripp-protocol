@@ -8,6 +8,10 @@
 
 RIPP is an open standard for capturing feature requirements as structured, machine-readable, human-reviewable specifications. A RIPP packet is a single YAML or JSON file that describes what a feature does, how it works, what can go wrong, and how to verify correctness—before any code is written.
 
+<!-- // Added for clarity: AI positioning -->
+
+**RIPP is deterministic by default—AI is optional and additive.**
+
 RIPP solves **intent erosion**: the problem where clear ideas degrade into fragmented requirements, undocumented edge cases, and production surprises. By making the specification the primary artifact, RIPP enables teams to review, validate, and ship features with confidence.
 
 **RIPP is an intent-as-protocol specification layer**—not an IaC tool, not a policy engine, not a code generator. It sits above implementation, defining the "why" and "what" that other tools execute and enforce. [Learn more about RIPP's category and positioning →](docs/category/)
