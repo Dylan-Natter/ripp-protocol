@@ -33,12 +33,16 @@ jobs:
           
           # Define config/tooling files that don't require docs
           CONFIG_FILE_PATTERNS=(
-            "*.eslintrc.json"
-            "*.prettierrc*"
-            "*.editorconfig"
-            "tsconfig*.json"
-            "jest.config.*"
-            "*.gitignore"
+            ".eslintrc.json"
+            ".prettierrc"
+            ".prettierrc.json"
+            ".prettierrc.yml"
+            ".prettierrc.yaml"
+            ".editorconfig"
+            "tsconfig.json"
+            "jest.config.js"
+            "jest.config.ts"
+            ".gitignore"
             "package-lock.json"
             "yarn.lock"
             "pnpm-lock.yaml"
