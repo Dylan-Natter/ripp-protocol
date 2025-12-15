@@ -53,22 +53,22 @@ jobs:
       # - name: Run tests
       #   run: npm test
       
-      - name: Package extension
-        run: npm run package
+      - name: Package extension (Marketplace-ready)
+        run: npx @vscode/vsce package --no-dependencies --out dist/
       
       - name: Verify VSIX package
         run: |
-          if [ ! -f *.vsix ]; then
+          if [ ! -f dist/*.vsix ]; then
             echo "❌ Error: No .vsix file was produced"
             exit 1
           fi
-          echo "✅ VSIX package verified"
+          echo "✅ VSIX package verified (Marketplace-ready)"
       
       - name: Upload .vsix artifact
         uses: actions/upload-artifact@v4
         with:
           name: vscode-extension-${{ github.sha }}
-          path: tools/vscode-extension/*.vsix
+          path: tools/vscode-extension/dist/*.vsix
           retention-days: 30
           if-no-files-found: error
       
@@ -81,10 +81,10 @@ jobs:
           echo "**Ref:** \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f *.vsix ]; then
-            VSIX_FILE=$(ls -1 *.vsix)
-            VSIX_SIZE=$(du -h *.vsix | cut -f1)
-            echo "**Status:** ✅ Build successful" >> $GITHUB_STEP_SUMMARY
+          if [ -f dist/*.vsix ]; then
+            VSIX_FILE=$(ls -1 dist/*.vsix | xargs basename)
+            VSIX_SIZE=$(du -h dist/*.vsix | cut -f1)
+            echo "**Status:** ✅ Build successful (Marketplace-ready)" >> $GITHUB_STEP_SUMMARY
             echo "**Package:** \`$VSIX_FILE\`" >> $GITHUB_STEP_SUMMARY
             echo "**Size:** $VSIX_SIZE" >> $GITHUB_STEP_SUMMARY
           else
