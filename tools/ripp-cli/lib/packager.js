@@ -11,6 +11,7 @@
  */
 
 const yaml = require('js-yaml');
+const pkg = require('../package.json');
 
 /**
  * Package a RIPP packet into a normalized artifact
@@ -20,8 +21,6 @@ const yaml = require('js-yaml');
  */
 function packagePacket(packet, options = {}) {
   const normalized = normalizePacket(packet);
-
-  const pkg = require('../package.json');
   
   const packaged = {
     _meta: {

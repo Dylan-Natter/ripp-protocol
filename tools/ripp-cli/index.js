@@ -6,6 +6,7 @@ const yaml = require('js-yaml');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const { glob } = require('glob');
+const { execSync } = require('child_process');
 const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./lib/linter');
 const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
 const { analyzeInput } = require('./lib/analyzer');
@@ -375,8 +376,6 @@ function getNextVersionPath(filePath) {
  */
 function getGitInfo() {
   try {
-    const { execSync } = require('child_process');
-    
     // Check if we're in a git repo
     execSync('git rev-parse --git-dir', { stdio: 'pipe' });
     
