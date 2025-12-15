@@ -61,7 +61,7 @@ jobs:
       
       - name: Verify VSIX package
         run: |
-          if [ ! -f dist/*.vsix ]; then
+          if [ ! -f dist/ripp-protocol.vsix ]; then
             echo "❌ Error: No .vsix file was produced"
             exit 1
           fi
@@ -84,9 +84,9 @@ jobs:
           echo "**Ref:** \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f dist/*.vsix ]; then
-            VSIX_FILE=$(ls -1 dist/*.vsix | xargs basename)
-            VSIX_SIZE=$(du -h dist/*.vsix | cut -f1)
+          if [ -f dist/ripp-protocol.vsix ]; then
+            VSIX_FILE=$(ls -1 dist/ripp-protocol.vsix | xargs basename)
+            VSIX_SIZE=$(du -h dist/ripp-protocol.vsix | cut -f1)
             echo "**Status:** ✅ Build successful (Marketplace-ready)" >> $GITHUB_STEP_SUMMARY
             echo "**Package:** \`$VSIX_FILE\`" >> $GITHUB_STEP_SUMMARY
             echo "**Size:** $VSIX_SIZE" >> $GITHUB_STEP_SUMMARY
