@@ -21,6 +21,11 @@ const colors = {
   gray: '\x1b[90m'
 };
 
+// Configuration constants
+const MIN_FILES_FOR_TABLE = 4;
+const MAX_FILENAME_WIDTH = 40;
+const TRUNCATED_FILENAME_PREFIX_LENGTH = 3;
+
 function log(color, symbol, message) {
   console.log(`${color}${symbol}${colors.reset} ${message}`);
 }
@@ -62,12 +67,38 @@ function validatePacket(packet, schema, filePath, options = {}) {
 
   const errors = [];
   const warnings = [];
+  const levelRequirements = {
+    2: ['api_contracts', 'permissions', 'failure_modes'],
+    3: ['api_contracts', 'permissions', 'failure_modes', 'audit_events', 'nfrs', 'acceptance_tests']
+  };
 
-  // Schema validation errors
+  // Schema validation errors with enhanced messaging
   if (!valid) {
     validate.errors.forEach(error => {
       const field = error.instancePath || 'root';
-      const message = error.message;
+      let message = error.message;
+
+      // Enhanced error messages for level-based requirements
+      if (error.keyword === 'required' && packet.level >= 2) {
+        const missingProp = error.params.missingProperty;
+        const level = packet.level;
+        const isLevelRequirement = levelRequirements[level]?.includes(missingProp);
+
+        if (isLevelRequirement) {
+          message = `Level ${level} requires '${missingProp}' (missing)`;
+          errors.push(message);
+          return;
+        }
+      }
+
+      // Improve "additional properties" errors
+      if (error.keyword === 'additionalProperties') {
+        const additionalProp = error.params.additionalProperty;
+        message = `unexpected property '${additionalProp}'`;
+        errors.push(`${field}: ${message}`);
+        return;
+      }
+
       errors.push(`${field}: ${message}`);
     });
   }
@@ -117,17 +148,88 @@ function printResults(results, options) {
 
   let totalValid = 0;
   let totalInvalid = 0;
+  const levelMissingFields = new Map(); // Track missing fields by level
 
+  // Show summary table for multiple files when not verbose
+  if (results.length >= MIN_FILES_FOR_TABLE && !options.verbose) {
+    console.log('┌──────────────────────────────────────────┬───────┬────────┬────────┐');
+    console.log('│ File                                     │ Level │ Status │ Issues │');
+    console.log('├──────────────────────────────────────────┼───────┼────────┼────────┤');
+
+    results.forEach(result => {
+      const fileName =
+        result.file.length > MAX_FILENAME_WIDTH
+          ? '...' + result.file.slice(-(MAX_FILENAME_WIDTH - TRUNCATED_FILENAME_PREFIX_LENGTH))
+          : result.file;
+      const paddedFile = fileName.padEnd(MAX_FILENAME_WIDTH);
+      const level = result.level ? result.level.toString().padEnd(5) : 'N/A  ';
+      const status = result.valid ? '✓     ' : '✗     ';
+      const statusColor = result.valid ? colors.green : colors.red;
+      const issues = result.errors.length.toString().padEnd(6);
+
+      console.log(
+        `│ ${paddedFile} │ ${level} │ ${statusColor}${status}${colors.reset} │ ${issues} │`
+      );
+
+      if (result.valid) {
+        totalValid++;
+      } else {
+        totalInvalid++;
+      }
+    });
+
+    console.log('└──────────────────────────────────────────┴───────┴────────┴────────┘');
+    console.log('');
+
+    if (totalInvalid > 0) {
+      log(
+        colors.red,
+        '✗',
+        `${totalInvalid} of ${results.length} failed. Run with --verbose for details.`
+      );
+    } else {
+      log(colors.green, '✓', `All ${totalValid} RIPP packets are valid.`);
+    }
+
+    console.log('');
+    return;
+  }
+
+  // Detailed output for verbose mode or small number of files
   results.forEach(result => {
     if (result.valid) {
       totalValid++;
       log(colors.green, '✓', `${result.file} is valid (Level ${result.level})`);
     } else {
       totalInvalid++;
-      log(colors.red, '✗', result.file);
+      const levelInfo = result.level ? ` (Level ${result.level})` : '';
+      log(colors.red, '✗', `${result.file}${levelInfo}`);
       result.errors.forEach(error => {
         console.log(`  ${colors.red}•${colors.reset} ${error}`);
+
+        // Track level-based missing fields
+        const match = error.match(/Level (\d) requires '(\w+)'/);
+        if (match) {
+          const level = match[1];
+          const field = match[2];
+          if (!levelMissingFields.has(result.file)) {
+            levelMissingFields.set(result.file, { level, fields: [] });
+          }
+          levelMissingFields.get(result.file).fields.push(field);
+        }
       });
+
+      // Add helpful tips for level-based errors
+      if (levelMissingFields.has(result.file)) {
+        const info = levelMissingFields.get(result.file);
+        console.log('');
+        console.log(
+          `  ${colors.blue}💡 Tip:${colors.reset} Use level: 1 for basic contracts, or add missing sections for Level ${info.level}`
+        );
+        console.log(
+          `  ${colors.blue}📖 Docs:${colors.reset} https://dylan-natter.github.io/ripp-protocol/ripp-levels.html`
+        );
+      }
     }
 
     if (result.warnings.length > 0 && !options.quiet) {
@@ -170,6 +272,7 @@ ${colors.green}Init Options:${colors.reset}
 ${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
   --quiet                           Suppress warnings
+  --verbose                         Show detailed output for all files
 
 ${colors.green}Lint Options:${colors.reset}
   --strict                          Treat warnings as errors
@@ -184,6 +287,7 @@ ${colors.green}Analyze Options:${colors.reset}
   <input>                           Input file (OpenAPI, JSON Schema)
   --output <file>                   Output DRAFT RIPP packet file (required)
   --packet-id <id>                  Packet ID for generated RIPP (default: analyzed)
+  --target-level <1|2|3>            Target RIPP level (default: 1)
 
 ${colors.green}Examples:${colors.reset}
   ripp init
@@ -196,6 +300,7 @@ ${colors.green}Examples:${colors.reset}
   ripp package --in feature.ripp.yaml --out handoff.md
   ripp package --in feature.ripp.yaml --out packaged.json --format json
   ripp analyze openapi.json --output draft-api.ripp.yaml
+  ripp analyze openapi.json --output draft.ripp.yaml --target-level 2
   ripp analyze schema.json --output draft.ripp.yaml --packet-id my-api
 
 ${colors.green}Exit Codes:${colors.reset}
@@ -288,9 +393,14 @@ async function handleInitCommand(args) {
       log(colors.green, '✓', 'RIPP initialization complete!');
       console.log('');
       console.log(`${colors.blue}Next steps:${colors.reset}`);
-      console.log('  1. Review the generated files in ripp/');
+      console.log('  1. Add this script to your package.json:');
+      console.log('');
+      console.log('     "scripts": {');
+      console.log('       "ripp:validate": "ripp validate ripp/features/"');
+      console.log('     }');
+      console.log('');
       console.log('  2. Create your first RIPP packet in ripp/features/');
-      console.log('  3. Validate it: ripp validate ripp/features/');
+      console.log('  3. Validate it: npm run ripp:validate');
       console.log('  4. Commit the changes to your repository');
       console.log('');
       console.log(
@@ -317,7 +427,8 @@ async function handleValidateCommand(args) {
   // Parse options
   const options = {
     minLevel: null,
-    quiet: args.includes('--quiet')
+    quiet: args.includes('--quiet'),
+    verbose: args.includes('--verbose')
   };
 
   const minLevelIndex = args.indexOf('--min-level');
@@ -485,13 +596,11 @@ async function handleLintCommand(args) {
   const jsonReport = generateJsonReport(results);
   const jsonPath = path.join(options.outputDir, 'lint.json');
   fs.writeFileSync(jsonPath, jsonReport);
-  console.log(`${colors.blue}📄${colors.reset} JSON report: ${jsonPath}`);
 
   // Write Markdown report
   const mdReport = generateMarkdownReport(results);
   const mdPath = path.join(options.outputDir, 'lint.md');
   fs.writeFileSync(mdPath, mdReport);
-  console.log(`${colors.blue}📄${colors.reset} Markdown report: ${mdPath}`);
 
   console.log('');
 
@@ -503,6 +612,13 @@ async function handleLintCommand(args) {
   } else {
     log(colors.green, '✓', 'All packets passed linting checks');
   }
+
+  console.log('');
+  console.log(`${colors.blue}📊 Reports generated:${colors.reset}`);
+  console.log(`  ${colors.gray}•${colors.reset} ${jsonPath} (machine-readable)`);
+  console.log(`  ${colors.gray}•${colors.reset} ${mdPath} (human-readable)`);
+  console.log('');
+  console.log(`${colors.gray}View: cat ${mdPath}${colors.reset}`);
 
   console.log('');
 
@@ -628,7 +744,8 @@ async function handleAnalyzeCommand(args) {
   // Parse options
   const options = {
     output: null,
-    packetId: 'analyzed'
+    packetId: 'analyzed',
+    targetLevel: 1 // Default to Level 1
   };
 
   const outputIndex = args.indexOf('--output');
@@ -639,6 +756,15 @@ async function handleAnalyzeCommand(args) {
   const packetIdIndex = args.indexOf('--packet-id');
   if (packetIdIndex !== -1 && args[packetIdIndex + 1]) {
     options.packetId = args[packetIdIndex + 1];
+  }
+
+  const targetLevelIndex = args.indexOf('--target-level');
+  if (targetLevelIndex !== -1 && args[targetLevelIndex + 1]) {
+    options.targetLevel = parseInt(args[targetLevelIndex + 1]);
+    if (![1, 2, 3].includes(options.targetLevel)) {
+      console.error(`${colors.red}Error: --target-level must be 1, 2, or 3${colors.reset}`);
+      process.exit(1);
+    }
   }
 
   // Validate required options
@@ -667,7 +793,10 @@ async function handleAnalyzeCommand(args) {
 
   try {
     // Analyze the input
-    const draftPacket = analyzeInput(inputPath, { packetId: options.packetId });
+    const draftPacket = analyzeInput(inputPath, {
+      packetId: options.packetId,
+      targetLevel: options.targetLevel
+    });
 
     // Auto-detect output format
     const ext = path.extname(options.output).toLowerCase();
@@ -696,12 +825,24 @@ async function handleAnalyzeCommand(args) {
     console.log('  Pay special attention to:');
     console.log('    - Purpose (problem, solution, value)');
     console.log('    - UX Flow (user-facing steps)');
-    console.log('    - Permissions and failure modes');
+    if (draftPacket.level >= 2) {
+      console.log('    - Permissions and failure modes');
+    }
     console.log('');
 
     process.exit(0);
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+
+    // Provide better error messages for unsupported formats
+    if (error.message.includes('Failed to parse') || error.message.includes('Unsupported')) {
+      console.log('');
+      console.log(`${colors.blue}ℹ Supported formats:${colors.reset}`);
+      console.log('  • OpenAPI/Swagger (.json, .yaml)');
+      console.log('  • JSON Schema (.json)');
+      console.log('');
+    }
+
     process.exit(1);
   }
 }

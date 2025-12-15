@@ -52,8 +52,10 @@ This creates:
 
 - `ripp/` - Main directory for RIPP artifacts
 - `ripp/README.md` - Documentation about RIPP
-- `ripp/features/` - Feature RIPP packets
-- `ripp/intent-packages/` - Packaged artifacts for distribution
+- `ripp/features/` - Work-in-progress RIPP packets
+- `ripp/handoffs/` - Validated, ready-to-deliver RIPP packets
+- `ripp/packages/` - Generated output formats (gitignored)
+- `ripp/.gitignore` - Excludes generated packages
 - `.github/workflows/ripp-validate.yml` - GitHub Action for CI/CD
 
 The `init` command is:
@@ -79,6 +81,14 @@ ripp validate features/
 ```bash
 ripp validate --min-level 2 api/
 ```
+
+**Validate with verbose output:**
+
+```bash
+ripp validate features/ --verbose
+```
+
+When validating 4 or more files, the validator shows a summary table by default. Use `--verbose` to see detailed error messages for each file.
 
 **Exit codes:**
 
@@ -107,13 +117,162 @@ All 2 RIPP packets are valid.
 **Failure:**
 
 ```
-✗ user-registration.ripp.yaml
-  - Missing required field: purpose.problem
-  - Invalid status value: "pending" (must be draft|approved|implemented|deprecated)
-  - Level 2 declared but missing section: permissions
+✗ user-registration.ripp.yaml (Level 2)
+  • Level 2 requires 'api_contracts' (missing)
+  • Level 2 requires 'permissions' (missing)
+
+  💡 Tip: Use level: 1 for basic contracts, or add missing sections for Level 2
+  📖 Docs: https://dylan-natter.github.io/ripp-protocol/ripp-levels.html
 
 1 of 1 RIPP packets failed validation.
 ```
+
+**Bulk validation with summary table:**
+
+```
+┌──────────────────────────────────────────┬───────┬────────┬────────┐
+│ File                                     │ Level │ Status │ Issues │
+├──────────────────────────────────────────┼───────┼────────┼────────┤
+│ sample.ripp.yaml                         │ 1     │ ✓      │ 0      │
+│ ui-components.ripp.yaml                  │ 2     │ ✗      │ 12     │
+│ features.ripp.yaml                       │ 2     │ ✗      │ 4      │
+└──────────────────────────────────────────┴───────┴────────┴────────┘
+
+✗ 2 of 3 failed. Run with --verbose for details.
+```
+
+---
+
+## Linting RIPP Packets
+
+The linter checks for best practices and common issues that aren't caught by schema validation.
+
+### Basic Usage
+
+```bash
+# Lint all packets in a directory
+ripp lint ripp/features/
+
+# Strict mode - treat warnings as errors
+ripp lint ripp/features/ --strict
+
+# Custom output directory
+ripp lint ripp/features/ --output custom-reports/
+```
+
+### Reports
+
+The linter generates two types of reports:
+
+- `reports/lint.json` - Machine-readable JSON format
+- `reports/lint.md` - Human-readable Markdown format
+
+**Example output:**
+
+```
+✗ features.ripp.yaml - 1 error(s), 2 warning(s)
+
+✗ Found 1 error(s) and 2 warning(s)
+
+📊 Reports generated:
+  • reports/lint.json (machine-readable)
+  • reports/lint.md (human-readable)
+
+View: cat reports/lint.md
+```
+
+### What the Linter Checks
+
+- Missing critical optional sections (e.g., `purpose.out_of_scope`, `purpose.assumptions`)
+- Placeholder text (TODO, TBD, FIXME)
+- Undefined schema references
+- Vague verification steps in acceptance tests
+- Security NFRs for Level 2+ packets
+
+---
+
+## Analyzing Existing Code
+
+Generate DRAFT RIPP packets from existing code or schemas.
+
+### Supported Formats
+
+- OpenAPI/Swagger specifications (.json, .yaml)
+- JSON Schema (.json)
+
+### Basic Usage
+
+```bash
+# Generate Level 1 packet (default)
+ripp analyze openapi.json --output draft-api.ripp.yaml
+
+# Generate Level 2 packet
+ripp analyze openapi.json --output draft-api.ripp.yaml --target-level 2
+
+# Custom packet ID
+ripp analyze schema.json --output draft.ripp.yaml --packet-id my-api
+```
+
+### Understanding the Output
+
+**Important:** Generated packets are DRAFTS that require human review:
+
+- Status is always set to `draft`
+- Contains TODO placeholders for human input
+- Level 1 by default (simpler, fewer required fields)
+- Extracts only observable facts from code/schemas
+- Does NOT invent intent or business logic
+
+**Example output:**
+
+```
+Analyzing input...
+⚠ Generated packets are DRAFTS and require human review
+
+✓ DRAFT packet generated: draft-api.ripp.yaml
+  Status: draft (requires human review)
+  Level: 1
+
+⚠ IMPORTANT:
+  This is a DRAFT generated from observable code/schema facts.
+  Review and refine all TODO items before use.
+  Pay special attention to:
+    - Purpose (problem, solution, value)
+    - UX Flow (user-facing steps)
+```
+
+### Workflow
+
+1. **Analyze** existing code to generate a draft
+2. **Review** and fill in TODO items with actual intent
+3. **Validate** the refined packet
+4. **Move** to `ripp/handoffs/` when ready
+
+---
+
+## Packaging RIPP Packets
+
+Package RIPP packets into normalized artifacts for distribution.
+
+### Basic Usage
+
+```bash
+# Package to Markdown (default)
+ripp package --in feature.ripp.yaml --out handoff.md
+
+# Package to JSON
+ripp package --in feature.ripp.yaml --out packaged.json --format json
+
+# Package to YAML
+ripp package --in feature.ripp.yaml --out packaged.yaml --format yaml
+```
+
+The packager:
+
+- Validates the packet before packaging
+- Normalizes the structure
+- Adds packaging metadata
+- Generates clean, distribution-ready output
 
 ---
 
@@ -123,7 +282,7 @@ Automate RIPP validation in your CI/CD pipeline.
 
 ### Workflow File
 
-Create `.github/workflows/ripp-validate.yml`:
+The `ripp init` command automatically generates `.github/workflows/ripp-validate.yml` with the recommended configuration:
 
 ```yaml
 name: Validate RIPP Packets
@@ -131,28 +290,46 @@ name: Validate RIPP Packets
 on:
   pull_request:
     paths:
-      - '**.ripp.yaml'
-      - '**.ripp.json'
-  push:
-    branches:
-      - main
+      - 'ripp/**/*.ripp.yaml'
+      - 'ripp/**/*.ripp.json'
+  workflow_dispatch:
 
 jobs:
   validate:
+    name: Validate RIPP Packets
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Install RIPP CLI
-        run: npm install -g ripp-cli
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Validate RIPP Packets
-        run: ripp validate .
+      - name: Validate RIPP packets
+        run: npm run ripp:validate
+
+      - name: Summary
+        if: always()
+        run: echo "✅ RIPP validation complete"
+```
+
+**Note:** This workflow uses `npm ci` and `npm run ripp:validate` to work with the submodule + `file:` dependency pattern. Add this script to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "ripp:validate": "ripp validate ripp/features/"
+  }
+}
 ```
 
 ### Enforce Minimum Levels
