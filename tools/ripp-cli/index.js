@@ -254,6 +254,7 @@ ${colors.green}Init Options:${colors.reset}
 ${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
   --quiet                           Suppress warnings
+  --verbose                         Show detailed output for all files
 
 ${colors.green}Lint Options:${colors.reset}
   --strict                          Treat warnings as errors

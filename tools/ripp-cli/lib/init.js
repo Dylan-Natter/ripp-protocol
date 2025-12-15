@@ -70,39 +70,80 @@ function initRepository(options = {}) {
     results.errors.push(`Failed to create ripp/features/.gitkeep: ${error.message}`);
   }
 
-  // 5. Create /ripp/intent-packages directory
+  // 5. Create /ripp/handoffs directory (validated, ready-to-deliver packets)
   try {
     const rippDir = path.join(process.cwd(), 'ripp');
-    const intentPackagesDir = path.join(rippDir, 'intent-packages');
-    if (!fs.existsSync(intentPackagesDir)) {
-      fs.mkdirSync(intentPackagesDir, { recursive: true });
-      results.created.push('ripp/intent-packages/');
+    const handoffsDir = path.join(rippDir, 'handoffs');
+    if (!fs.existsSync(handoffsDir)) {
+      fs.mkdirSync(handoffsDir, { recursive: true });
+      results.created.push('ripp/handoffs/');
     } else {
-      results.skipped.push('ripp/intent-packages/ (already exists)');
+      results.skipped.push('ripp/handoffs/ (already exists)');
     }
   } catch (error) {
-    results.errors.push(`Failed to create ripp/intent-packages/: ${error.message}`);
+    results.errors.push(`Failed to create ripp/handoffs/: ${error.message}`);
   }
 
-  // 6. Create /ripp/intent-packages/README.md
+  // 6. Create /ripp/handoffs/.gitkeep
   try {
     const rippDir = path.join(process.cwd(), 'ripp');
-    const intentPackagesDir = path.join(rippDir, 'intent-packages');
-    const intentReadmePath = path.join(intentPackagesDir, 'README.md');
-    if (!fs.existsSync(intentReadmePath) || force) {
-      const intentReadme = generateIntentPackageReadme();
-      fs.writeFileSync(intentReadmePath, intentReadme);
-      results.created.push('ripp/intent-packages/README.md');
+    const handoffsDir = path.join(rippDir, 'handoffs');
+    const gitkeepPath = path.join(handoffsDir, '.gitkeep');
+    if (!fs.existsSync(gitkeepPath) || force) {
+      fs.writeFileSync(gitkeepPath, '');
+      results.created.push('ripp/handoffs/.gitkeep');
     } else {
-      results.skipped.push(
-        'ripp/intent-packages/README.md (already exists, use --force to overwrite)'
-      );
+      results.skipped.push('ripp/handoffs/.gitkeep (already exists, use --force to overwrite)');
     }
   } catch (error) {
-    results.errors.push(`Failed to create ripp/intent-packages/README.md: ${error.message}`);
+    results.errors.push(`Failed to create ripp/handoffs/.gitkeep: ${error.message}`);
   }
 
-  // 7. Create .github/workflows directory
+  // 7. Create /ripp/packages directory (generated outputs, gitignored)
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
+    const packagesDir = path.join(rippDir, 'packages');
+    if (!fs.existsSync(packagesDir)) {
+      fs.mkdirSync(packagesDir, { recursive: true });
+      results.created.push('ripp/packages/');
+    } else {
+      results.skipped.push('ripp/packages/ (already exists)');
+    }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/packages/: ${error.message}`);
+  }
+
+  // 8. Create /ripp/packages/.gitkeep
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
+    const packagesDir = path.join(rippDir, 'packages');
+    const gitkeepPath = path.join(packagesDir, '.gitkeep');
+    if (!fs.existsSync(gitkeepPath) || force) {
+      fs.writeFileSync(gitkeepPath, '');
+      results.created.push('ripp/packages/.gitkeep');
+    } else {
+      results.skipped.push('ripp/packages/.gitkeep (already exists, use --force to overwrite)');
+    }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/packages/.gitkeep: ${error.message}`);
+  }
+
+  // 9. Create /ripp/.gitignore
+  try {
+    const rippDir = path.join(process.cwd(), 'ripp');
+    const gitignorePath = path.join(rippDir, '.gitignore');
+    if (!fs.existsSync(gitignorePath) || force) {
+      const gitignoreContent = generateRippGitignore();
+      fs.writeFileSync(gitignorePath, gitignoreContent);
+      results.created.push('ripp/.gitignore');
+    } else {
+      results.skipped.push('ripp/.gitignore (already exists, use --force to overwrite)');
+    }
+  } catch (error) {
+    results.errors.push(`Failed to create ripp/.gitignore: ${error.message}`);
+  }
+
+  // 10. Create .github/workflows directory
   try {
     const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
     if (!fs.existsSync(workflowsDir)) {
@@ -115,7 +156,7 @@ function initRepository(options = {}) {
     results.errors.push(`Failed to create .github/workflows/: ${error.message}`);
   }
 
-  // 8. Create GitHub Action workflow
+  // 11. Create GitHub Action workflow
   try {
     const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
     const workflowPath = path.join(workflowsDir, 'ripp-validate.yml');
@@ -181,21 +222,25 @@ A RIPP packet is a YAML or JSON document that describes:
 \`\`\`
 ripp/
 ├── README.md                  # This file
-├── features/                  # Feature RIPP packets
+├── .gitignore                 # Ignores generated packages
+├── features/                  # Work-in-progress RIPP packets (development, may contain TODOs)
 │   ├── auth-login.ripp.yaml
 │   ├── user-profile.ripp.yaml
 │   └── ...
-└── intent-packages/           # Packaged RIPP artifacts for distribution
-    ├── README.md
-    ├── latest.tar.gz         # Latest package (symlink)
-    └── archive/              # Previous versions
+├── handoffs/                  # Validated, approved RIPP packets ready for delivery
+│   ├── sample.ripp.yaml
+│   └── ...
+└── packages/                  # Generated output formats (.zip, .md, .json) [gitignored]
+    ├── handoff.zip
+    ├── sample.md
+    └── ...
 \`\`\`
 
-## Creating RIPP Packets
+## Workflow
 
-### 1. Create a new packet
+### 1. Create new packets in \`features/\`
 
-Place your RIPP packets in \`ripp/features/\` with the naming convention:
+Place your work-in-progress RIPP packets in \`ripp/features/\` with the naming convention:
 
 \`\`\`
 <feature-name>.ripp.yaml
@@ -240,18 +285,47 @@ data_contracts:
       description: "JWT access token"
 \`\`\`
 
-### 3. Validate your packet
+### 3. Validate your packets
 
 \`\`\`bash
+# Validate all packets in features/
+ripp validate ripp/features/
+
+# Validate a specific file
 ripp validate ripp/features/auth-login.ripp.yaml
+
+# Enforce minimum conformance level
+ripp validate ripp/features/ --min-level 2
 \`\`\`
 
-### 4. Learn more
+### 4. Lint for best practices
 
-- **Full Specification**: https://github.com/Dylan-Natter/ripp-protocol/blob/main/SPEC.md
-- **Schema Reference**: https://github.com/Dylan-Natter/ripp-protocol/blob/main/schema/ripp-1.0.schema.json
-- **Examples**: https://github.com/Dylan-Natter/ripp-protocol/tree/main/examples
-- **Documentation**: https://dylan-natter.github.io/ripp-protocol
+\`\`\`bash
+ripp lint ripp/features/
+ripp lint ripp/features/ --strict
+\`\`\`
+
+### 5. Move validated packets to \`handoffs/\`
+
+When a packet is validated and approved, move it to the handoffs directory:
+
+\`\`\`bash
+mv ripp/features/my-feature.ripp.yaml ripp/handoffs/
+\`\`\`
+
+### 6. Package for delivery
+
+\`\`\`bash
+# Package a single packet
+ripp package --in ripp/handoffs/my-feature.ripp.yaml --out ripp/packages/handoff.md
+
+# Package to JSON
+ripp package --in ripp/handoffs/my-feature.ripp.yaml --out ripp/packages/packaged.json
+\`\`\`
+
+### 7. Deliver the package
+
+Share the generated files in \`ripp/packages/\` with receiving teams or upload to artifact repositories.
 
 ## Validation
 
@@ -259,34 +333,15 @@ This repository includes automated RIPP validation via GitHub Actions.
 
 Every pull request that modifies RIPP files will be automatically validated.
 
-**Manual validation:**
-
-\`\`\`bash
-# Validate all RIPP files
-ripp validate ripp/
-
-# Validate a specific file
-ripp validate ripp/features/my-feature.ripp.yaml
-
-# Enforce minimum conformance level
-ripp validate ripp/features/ --min-level 2
-\`\`\`
-
 ## RIPP Levels
 
 RIPP supports three conformance levels:
 
 - **Level 1**: Basic (purpose, ux_flow, data_contracts)
-- **Level 2**: Standard (adds api_contracts, permissions, audit_events)
-- **Level 3**: Complete (adds failure_modes, nfrs, acceptance_tests)
+- **Level 2**: Standard (adds api_contracts, permissions, failure_modes)
+- **Level 3**: Complete (adds audit_events, nfrs, acceptance_tests)
 
 Choose the level appropriate for your feature's complexity and criticality.
-
-## Intent Packages
-
-Intent Packages are packaged RIPP artifacts for distribution and handoff.
-
-See \`ripp/intent-packages/README.md\` for details on creating and managing packages.
 
 ## Resources
 
@@ -301,165 +356,17 @@ See \`ripp/intent-packages/README.md\` for details on creating and managing pack
 `;
 }
 
-function generateIntentPackageReadme() {
-  return `# Intent Packages
+function generateRippGitignore() {
+  return `# Generated packages (deliverables)
+# These are built artifacts that should not be committed
+packages/
 
-This directory contains packaged RIPP artifacts for distribution and handoff between teams.
+# Build artifacts
+*.zip
+*.tar.gz
 
-## What are Intent Packages?
-
-Intent Packages are bundled collections of RIPP packets, schemas, and related artifacts that can be shared with:
-- Production engineering teams
-- External partners
-- Downstream consumers
-- Documentation systems
-
-Each package is a snapshot of RIPP specifications at a point in time.
-
-## Directory Structure
-
-\`\`\`
-intent-packages/
-├── README.md           # This file
-├── latest.tar.gz      # Symlink to most recent package
-└── archive/           # Historical packages (keep last 3)
-    ├── v1.0.0.tar.gz
-    ├── v1.0.1.tar.gz
-    └── v1.0.2.tar.gz
-\`\`\`
-
-## Creating a Package
-
-### Manual Packaging
-
-1. **Bundle your RIPP files:**
-
-\`\`\`bash
-# Create a timestamped package
-tar -czf intent-packages/archive/v1.0.0.tar.gz ripp/features/*.ripp.yaml
-
-# Update latest symlink
-cd intent-packages
-ln -sf archive/v1.0.0.tar.gz latest.tar.gz
-\`\`\`
-
-2. **Maintain only the last 3 packages:**
-
-\`\`\`bash
-# Remove old packages (keep only 3 most recent)
-cd intent-packages/archive
-ls -t *.tar.gz | tail -n +4 | xargs rm -f
-\`\`\`
-
-### Using RIPP CLI (if available)
-
-\`\`\`bash
-# Package a RIPP file
-ripp package --in ripp/features/my-feature.ripp.yaml --out handoff.md
-
-# Package to JSON
-ripp package --in ripp/features/my-feature.ripp.yaml --out packaged.json
-\`\`\`
-
-## Stable Download Link
-
-The \`latest.tar.gz\` symlink provides a stable download location:
-
-\`\`\`bash
-# Download latest package (via GitHub raw URL)
-curl -L -O https://raw.githubusercontent.com/<org>/<repo>/main/ripp/intent-packages/latest.tar.gz
-
-# Extract
-tar -xzf latest.tar.gz
-\`\`\`
-
-Replace \`<org>\` and \`<repo>\` with your GitHub organization and repository names.
-
-## Package Lifecycle
-
-### Retention Policy
-
-- **Keep**: Last 3 packages in \`archive/\`
-- **Latest**: Always points to most recent
-- **Remove**: Packages older than 3 versions
-
-### Versioning
-
-Use semantic versioning for package names:
-- \`v1.0.0\` - Initial release
-- \`v1.0.1\` - Minor updates
-- \`v1.1.0\` - New features
-- \`v2.0.0\` - Breaking changes
-
-### When to Create a Package
-
-Create a new package when:
-- Releasing a major feature
-- Significant RIPP updates
-- Preparing for production handoff
-- Archiving a stable snapshot
-
-## Automation (Optional)
-
-You can automate package creation using GitHub Actions:
-
-\`\`\`yaml
-# .github/workflows/package-ripp.yml
-name: Package RIPP Intent
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-jobs:
-  package:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Create package
-        run: |
-          mkdir -p ripp/intent-packages/archive
-          tar -czf ripp/intent-packages/archive/\${GITHUB_REF_NAME}.tar.gz ripp/features/*.ripp.yaml
-          cd ripp/intent-packages
-          ln -sf archive/\${GITHUB_REF_NAME}.tar.gz latest.tar.gz
-      
-      - name: Commit package
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ripp/intent-packages/
-          git commit -m "Package RIPP intent: \${GITHUB_REF_NAME}"
-          git push
-\`\`\`
-
-## Best Practices
-
-1. **Validate before packaging**: Always run \`ripp validate\` before creating a package
-2. **Tag releases**: Use Git tags to mark package creation points
-3. **Document changes**: Include a changelog or release notes
-4. **Clean up regularly**: Maintain the 3-package limit to avoid bloat
-5. **Stable URLs**: Keep \`latest.tar.gz\` symlink for downstream consumers
-
-## Consumption
-
-Teams consuming Intent Packages can:
-
-1. Download the latest package
-2. Extract RIPP specifications
-3. Validate against their environment
-4. Implement features based on preserved intent
-
-## Resources
-
-- **RIPP CLI**: https://github.com/Dylan-Natter/ripp-protocol/tree/main/tools/ripp-cli
-- **Packaging Guide**: https://dylan-natter.github.io/ripp-protocol/tooling
-- **Protocol Spec**: https://github.com/Dylan-Natter/ripp-protocol/blob/main/SPEC.md
-
----
-
-**Package intent. Preserve knowledge. Enable handoff.**
+# Keep directory structure
+!.gitkeep
 `;
 }
 
@@ -505,6 +412,6 @@ jobs:
 module.exports = {
   initRepository,
   generateRippReadme,
-  generateIntentPackageReadme,
+  generateRippGitignore,
   generateGitHubActionWorkflow
 };
