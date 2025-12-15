@@ -213,50 +213,18 @@ tools/vscode-extension/
 
 ## CI/CD Integration
 
-Example GitHub Actions workflow for automated builds:
+The repository includes a GitHub Actions workflow (`.github/workflows/vscode-extension-build.yml`) that automatically builds and packages the extension when changes are pushed to the `tools/vscode-extension` directory.
 
-```yaml
-name: Build VS Code Extension
+The workflow:
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'tools/vscode-extension/**'
+1. Runs on pushes to `main` and `copilot/**` branches
+2. Installs dependencies with `npm ci`
+3. Compiles TypeScript with `npm run compile`
+4. Lints code with `npm run lint`
+5. Packages extension with `npm run package`
+6. Uploads the `.vsix` file as a build artifact
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools/vscode-extension
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Compile TypeScript
-        run: npm run compile
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Package extension
-        run: npm run package
-
-      - name: Upload .vsix artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vscode-extension
-          path: tools/vscode-extension/*.vsix
-```
+You can download the packaged extension from the Actions tab in the repository after a successful build.
 
 ## Support
 
