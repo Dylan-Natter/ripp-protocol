@@ -49,6 +49,15 @@ title: 'What RIPP Is and Is Not'
 - Same RIPP packet can guide implementations in Python, Go, JavaScript, etc.
 - Focus on contracts, not implementation details
 
+<!-- // Added for clarity: AI independence -->
+
+✅ **Deterministic by design**
+
+- RIPP normalizes explicitly declared structure—no inference required
+- AI is optional: useful when intent is implicit, lost, or ambiguous
+- Operates as a structure compiler when types, contracts, and workflows are explicit
+- Real-world use has produced complete handoffs without AI when source systems encoded intent structurally
+
 ---
 
 ## What RIPP Is Not
@@ -118,6 +127,15 @@ title: 'What RIPP Is and Is Not'
 - RIPP provides the specification; prompts may reference it
 - RIPP complements AI workflows; it doesn't manage prompts
 
+<!-- // Added for clarity: AI dependency clarification -->
+
+❌ **Not an AI-dependent system**
+
+- RIPP does not require AI to function
+- RIPP operates deterministically when structure is explicit
+- AI assists when intent is implicit, not as a core requirement
+- RIPP is a structure compiler first, AI-assisted recovery tool second
+
 ---
 
 ## Common Misconceptions
@@ -167,6 +185,42 @@ title: 'What RIPP Is and Is Not'
 - **Key insight**: Intent erosion happens whether code is written by humans or AI
 
 **RIPP is for anyone who wants to preserve the "why" alongside the "what."**
+
+---
+
+<!-- // Added for clarity: AI dependency misconception -->
+
+### Misconception 4a: "RIPP requires AI to be effective"
+
+**Reality**: RIPP is deterministic by default—AI is optional and additive.
+
+When a system's intent is already structurally encoded (through data models, UI components, workflows, and contracts), RIPP operates as a **structure compiler**:
+
+- **What RIPP does**: Extracts and normalizes explicitly declared architecture
+- **No AI needed when**:
+  - Types are defined (TypeScript, OpenAPI, schema files)
+  - Contracts are explicit (API routes, validation rules)
+  - Workflows are documented (state machines, UI flows)
+  - Structure is observable (component hierarchies, data models)
+
+**When AI adds value**:
+
+- ❌ Intent is implicit (requirements only in conversations)
+- ❌ Intent is ambiguous (multiple interpretations possible)
+- ❌ Intent is lost (legacy systems with no documentation)
+
+**In these cases, AI assists by**:
+
+- Proposing candidate specifications from incomplete information
+- Identifying patterns in undocumented code
+- Flagging inconsistencies for human review
+
+**Key distinction**:
+
+- **Deterministic extraction** (structure-driven): RIPP compiles what is declared
+- **AI-assisted recovery** (semantic inference): AI helps reconstruct lost intent
+
+**Real-world proof**: RIPP CLI has generated complete production-ready handoffs without invoking AI when source systems had explicit structure.
 
 ---
 

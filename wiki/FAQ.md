@@ -608,6 +608,99 @@ Expand as you see value.
 
 ## AI and RIPP
 
+<!-- // Added for clarity: Questions about AI dependency -->
+
+### Does RIPP require AI to be effective?
+
+**No.** RIPP is deterministic by default. AI is optional and additive.
+
+When a system's intent is already structurally encoded (through data models, UI components, workflows, and contracts), RIPP operates as a **structure compiler**—extracting and normalizing declared architecture without any semantic inference.
+
+**Real-world example**: RIPP CLI has generated complete, production-ready handoff packages without invoking AI when the source prototype had explicit:
+
+- Type definitions and data models
+- API routes and contracts
+- UI component hierarchies
+- Validation rules and workflows
+
+**No AI required** when structure is explicit. **AI assists** when structure is implicit or lost.
+
+---
+
+### How can RIPP generate a complete handoff without AI?
+
+RIPP operates in two modes:
+
+**1. Deterministic extraction (structure-driven):**
+
+- Reads explicitly declared types, contracts, and workflows
+- Maps them to RIPP's standardized schema
+- Packages them into a reviewable specification
+- **No inference, guessing, or interpretation required**
+
+**2. AI-assisted recovery (semantic inference):**
+
+- Analyzes implicit patterns in undocumented code
+- Proposes candidate specifications from incomplete information
+- Flags gaps and inconsistencies for human review
+- **Requires human approval before becoming authoritative**
+
+**When deterministic extraction works:**
+
+- ✅ Prototype uses TypeScript, OpenAPI, or similar type systems
+- ✅ Data contracts are declared in schemas or models
+- ✅ API routes and validation are explicit
+- ✅ UI components expose their structure
+
+**When AI assistance adds value:**
+
+- ❌ Legacy systems with no type definitions
+- ❌ Requirements exist only in conversation logs
+- ❌ Multiple interpretations are possible
+- ❌ Intent must be reconstructed from behavior
+
+**Key insight**: RIPP normalizes declared structure. AI helps when structure isn't declared.
+
+---
+
+### When does AI add value to RIPP?
+
+AI adds value in **three specific scenarios**:
+
+**1. Intent recovery from legacy systems:**
+
+- Extract patterns from undocumented code
+- Propose specifications when original intent is lost
+- Identify inconsistencies across modules
+
+**2. Ambiguity resolution:**
+
+- Suggest interpretations when requirements conflict
+- Flag edge cases that humans should decide
+- Highlight missing permissions or failure modes
+
+**3. Accelerated specification drafting:**
+
+- Generate candidate RIPP sections from prototypes
+- Propose acceptance tests based on UX flows
+- Suggest NFRs based on observed patterns
+
+**What AI does NOT do:**
+
+- ❌ Replace deterministic extraction
+- ❌ Make final decisions about intent
+- ❌ Become authoritative without human review
+
+**Workflow:**
+
+```
+AI proposes → Human reviews → Human approves → Specification becomes authoritative
+```
+
+**Remember**: AI is an **accelerator**, not the foundation. RIPP's deterministic mode is primary; AI assistance is supplementary.
+
+---
+
 ### Can AI invent or modify intent?
 
 **No.** AI cannot invent or modify intent without human approval.
