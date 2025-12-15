@@ -20,13 +20,44 @@ This extension integrates the official RIPP CLI into VS Code. It is a **thin wra
 
 ## Commands
 
-All commands are available via the Command Palette (Ctrl+Shift+P / Cmd+Shift+P):
+All commands are available via the Command Palette (Ctrl+Shift+P / Cmd+Shift+P) or from the RIPP sidebar:
 
 - **RIPP: Initialize Repository** - Set up RIPP structure in your repository (creates `ripp/`, GitHub Actions, etc.)
 - **RIPP: Validate Packet(s)** - Validate all RIPP packets in your workspace against the schema
 - **RIPP: Lint Packet(s)** - Run quality checks and best practice linting on your packets
 - **RIPP: Package Handoff** - Package a RIPP packet into a handoff document (Markdown, JSON, or YAML)
 - **RIPP: Analyze Project (Draft Packet)** - Generate a draft RIPP packet from existing documentation
+- **RIPP: Open Documentation** - Open the RIPP protocol documentation in your browser
+- **RIPP: Open CI / GitHub Actions** - Open your repository's GitHub Actions page (if available)
+- **RIPP: Refresh Status** - Refresh the RIPP sidebar status
+
+## Features
+
+### RIPP Activity Bar & Sidebar
+
+The extension adds a dedicated RIPP view in the VS Code Activity Bar (left sidebar). The RIPP sidebar shows:
+
+- **Initialization Status**: Whether RIPP is initialized in your workspace
+- **Last Validation Result**: Pass/fail status with timestamp from the last validation run
+- **Quick Actions**: Buttons to initialize, validate, open docs, and access CI
+
+Click the RIPP icon in the Activity Bar to open the sidebar.
+
+### Problems Panel Integration
+
+Validation errors and warnings appear directly in VS Code's Problems panel. Click on any issue to jump to the relevant file and line.
+
+### Validation Report Viewer
+
+After running validation, view detailed results in the RIPP Report webview panel. The report includes:
+
+- Summary (pass/fail status, issue count, timestamp)
+- Filterable table of all findings
+- Export options (copy to clipboard, export as JSON or Markdown)
+
+### Workspace Trust
+
+The extension respects VS Code's Workspace Trust feature. Commands that execute the RIPP CLI will only run in trusted workspaces, protecting you from potentially malicious code in untrusted repositories.
 
 ## Requirements
 
@@ -200,15 +231,24 @@ MIT
 
 ## Release Notes
 
-### 0.2.0 (Upcoming)
+### 0.2.0 (Current)
 
-New features:
+New UI features:
 
-- **RIPP: Initialize Repository** command for easy project setup
-- Prefer local `node_modules/.bin/ripp` over `npx` for better performance
-- Improved error messages with install guidance
-- Cross-platform binary detection (Windows `.cmd` support)
-- Updated documentation for RIPP v1.0 alignment
+- **RIPP Activity Bar**: Dedicated sidebar view showing initialization status, validation results, and quick actions
+- **Problems Panel Integration**: Validation errors and warnings appear in the VS Code Problems panel
+- **Validation Report Viewer**: Webview panel displaying detailed validation results with export capabilities
+- **GitHub CI Integration**: Quick access to GitHub Actions workflows from the sidebar
+- **Workspace Trust**: Respects VS Code Workspace Trust to prevent untrusted code execution
+- **Enhanced Initialize Command**: Shows preview of files before creation and requires explicit confirmation
+- **Improved Documentation**: Comprehensive feature documentation and screenshots
+
+Improvements:
+
+- **RIPP: Initialize Repository** command now shows file preview and requires confirmation before writing
+- Validation output streams to dedicated "RIPP" output channel
+- All CLI execution commands respect Workspace Trust settings
+- Better error messages and user guidance throughout
 
 ### 0.1.0
 
