@@ -25,9 +25,7 @@ async function discoverIntent(cwd, options = {}) {
   // Load evidence pack
   const evidencePath = path.join(cwd, '.ripp', 'evidence', 'evidence.index.json');
   if (!fs.existsSync(evidencePath)) {
-    throw new Error(
-      'Evidence pack not found. Run "ripp evidence build" first.'
-    );
+    throw new Error('Evidence pack not found. Run "ripp evidence build" first.');
   }
 
   const evidencePack = JSON.parse(fs.readFileSync(evidencePath, 'utf8'));

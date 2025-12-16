@@ -11,7 +11,7 @@ const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./li
 const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
 const { analyzeInput } = require('./lib/analyzer');
 const { initRepository } = require('./lib/init');
-const { loadConfig, checkAiEnabled, createDefaultConfig } = require('./lib/config');
+const { loadConfig, checkAiEnabled } = require('./lib/config');
 const { buildEvidencePack } = require('./lib/evidence');
 const { discoverIntent } = require('./lib/discovery');
 const { confirmIntent } = require('./lib/confirmation');
@@ -1039,7 +1039,7 @@ async function handleAnalyzeCommand(args) {
   }
 }
 
-async function handleEvidenceBuildCommand(args) {
+async function handleEvidenceBuildCommand() {
   const cwd = process.cwd();
 
   console.log(`${colors.blue}Building evidence pack...${colors.reset}\n`);
@@ -1048,7 +1048,7 @@ async function handleEvidenceBuildCommand(args) {
     const config = loadConfig(cwd);
     const result = await buildEvidencePack(cwd, config);
 
-    log(colors.green, '✓', `Evidence pack built successfully`);
+    log(colors.green, '✓', 'Evidence pack built successfully');
     console.log(`  ${colors.gray}Index: ${result.indexPath}${colors.reset}`);
     console.log(`  ${colors.gray}Files: ${result.index.stats.includedFiles}${colors.reset}`);
     console.log(
@@ -1057,11 +1057,17 @@ async function handleEvidenceBuildCommand(args) {
     console.log('');
 
     console.log(`${colors.blue}Evidence Summary:${colors.reset}`);
-    console.log(`  ${colors.gray}Dependencies: ${result.index.evidence.dependencies.length}${colors.reset}`);
+    console.log(
+      `  ${colors.gray}Dependencies: ${result.index.evidence.dependencies.length}${colors.reset}`
+    );
     console.log(`  ${colors.gray}Routes: ${result.index.evidence.routes.length}${colors.reset}`);
     console.log(`  ${colors.gray}Schemas: ${result.index.evidence.schemas.length}${colors.reset}`);
-    console.log(`  ${colors.gray}Auth Signals: ${result.index.evidence.auth.length}${colors.reset}`);
-    console.log(`  ${colors.gray}Workflows: ${result.index.evidence.workflows.length}${colors.reset}`);
+    console.log(
+      `  ${colors.gray}Auth Signals: ${result.index.evidence.auth.length}${colors.reset}`
+    );
+    console.log(
+      `  ${colors.gray}Workflows: ${result.index.evidence.workflows.length}${colors.reset}`
+    );
     console.log('');
 
     console.log(`${colors.yellow}⚠ Note:${colors.reset} Evidence pack contains code snippets.`);
@@ -1118,7 +1124,7 @@ async function handleDiscoverCommand(args) {
 
     const result = await discoverIntent(cwd, options);
 
-    log(colors.green, '✓', `Intent discovery complete`);
+    log(colors.green, '✓', 'Intent discovery complete');
     console.log(`  ${colors.gray}Candidates: ${result.totalCandidates}${colors.reset}`);
     console.log(`  ${colors.gray}Output: ${result.candidatesPath}${colors.reset}`);
     console.log('');
@@ -1164,7 +1170,7 @@ async function handleConfirmCommand(args) {
       console.log('  4. Run "ripp build" to compile confirmed intent');
       console.log('');
     } else {
-      log(colors.green, '✓', `Intent confirmation complete`);
+      log(colors.green, '✓', 'Intent confirmation complete');
       console.log(`  ${colors.gray}Confirmed: ${result.confirmedCount}${colors.reset}`);
       console.log(`  ${colors.gray}Rejected: ${result.rejectedCount}${colors.reset}`);
       console.log(`  ${colors.gray}Output: ${result.confirmedPath}${colors.reset}`);
@@ -1214,7 +1220,7 @@ async function handleBuildCommand(args) {
   try {
     const result = buildCanonicalArtifacts(cwd, options);
 
-    log(colors.green, '✓', `Build complete`);
+    log(colors.green, '✓', 'Build complete');
     console.log(`  ${colors.gray}RIPP Packet: ${result.packetPath}${colors.reset}`);
     console.log(`  ${colors.gray}Handoff MD: ${result.markdownPath}${colors.reset}`);
     console.log(`  ${colors.gray}Level: ${result.level}${colors.reset}`);

@@ -124,10 +124,7 @@ function detectFileType(filePath) {
     return 'workflow';
   }
 
-  if (
-    ext === '.json' &&
-    (filePath.includes('package.json') || filePath.includes('schema'))
-  ) {
+  if (ext === '.json' && (filePath.includes('package.json') || filePath.includes('schema'))) {
     return 'config';
   }
 

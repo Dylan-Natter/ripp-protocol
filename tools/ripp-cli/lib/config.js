@@ -58,7 +58,7 @@ function loadConfig(cwd = process.cwd()) {
       config = mergeConfig(config, repoConfig);
 
       // Validate against schema
-      const schemaPath = path.join(__dirname, '../../schema/ripp-config.schema.json');
+      const schemaPath = path.join(__dirname, '../../../schema/ripp-config.schema.json');
       const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 
       const ajv = new Ajv({ allErrors: true, strict: false });

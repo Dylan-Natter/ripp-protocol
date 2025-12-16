@@ -244,7 +244,11 @@ Return ONLY valid JSON matching the schema. No markdown, no explanations.`,
         throw new Error('All candidates must have source: "inferred"');
       }
 
-      if (typeof candidate.confidence !== 'number' || candidate.confidence < 0 || candidate.confidence > 1) {
+      if (
+        typeof candidate.confidence !== 'number' ||
+        candidate.confidence < 0 ||
+        candidate.confidence > 1
+      ) {
         throw new Error('All candidates must have confidence between 0.0 and 1.0');
       }
 

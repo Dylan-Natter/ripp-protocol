@@ -15,9 +15,7 @@ async function confirmIntent(cwd, options = {}) {
   const candidatesPath = path.join(cwd, '.ripp', 'intent.candidates.yaml');
 
   if (!fs.existsSync(candidatesPath)) {
-    throw new Error(
-      'No candidate intent found. Run "ripp discover" first.'
-    );
+    throw new Error('No candidate intent found. Run "ripp discover" first.');
   }
 
   const candidatesContent = fs.readFileSync(candidatesPath, 'utf8');
@@ -130,10 +128,8 @@ async function generateChecklistConfirm(cwd, candidates) {
   markdown += `Generated: ${new Date().toISOString()}\n\n`;
   markdown += `Total Candidates: ${candidates.candidates.length}\n\n`;
   markdown += '## Instructions\n\n';
-  markdown +=
-    '1. Review each candidate below\n';
-  markdown +=
-    '2. Check the box [ ] if you accept the candidate (change to [x])\n';
+  markdown += '1. Review each candidate below\n';
+  markdown += '2. Check the box [ ] if you accept the candidate (change to [x])\n';
   markdown += '3. Edit the content as needed\n';
   markdown +=
     '4. Save this file and run `ripp build --from-checklist` to compile confirmed intent\n\n';

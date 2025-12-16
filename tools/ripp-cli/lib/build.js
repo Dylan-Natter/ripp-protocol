@@ -14,9 +14,7 @@ function buildCanonicalArtifacts(cwd, options = {}) {
   const confirmedPath = path.join(cwd, '.ripp', 'intent.confirmed.yaml');
 
   if (!fs.existsSync(confirmedPath)) {
-    throw new Error(
-      'No confirmed intent found. Run "ripp confirm" first.'
-    );
+    throw new Error('No confirmed intent found. Run "ripp confirm" first.');
   }
 
   const confirmedContent = fs.readFileSync(confirmedPath, 'utf8');
@@ -32,17 +30,11 @@ function buildCanonicalArtifacts(cwd, options = {}) {
   // Validate the packet
   const validation = validatePacket(packet);
   if (!validation.valid) {
-    throw new Error(
-      `Generated packet failed validation: ${validation.errors.join(', ')}`
-    );
+    throw new Error(`Generated packet failed validation: ${validation.errors.join(', ')}`);
   }
 
   // Write canonical packet
-  const packetPath = path.join(
-    cwd,
-    '.ripp',
-    options.outputName || 'handoff.ripp.yaml'
-  );
+  const packetPath = path.join(cwd, '.ripp', options.outputName || 'handoff.ripp.yaml');
   fs.writeFileSync(packetPath, yaml.dump(packet, { indent: 2, lineWidth: 100 }), 'utf8');
 
   // Generate handoff.ripp.md (consolidated markdown)
@@ -159,11 +151,7 @@ function determineLevel(confirmed) {
   const sections = new Set(confirmed.map(b => b.section));
 
   // Level 3 requirements
-  if (
-    sections.has('audit_events') ||
-    sections.has('nfrs') ||
-    sections.has('acceptance_tests')
-  ) {
+  if (sections.has('audit_events') || sections.has('nfrs') || sections.has('acceptance_tests')) {
     return 3;
   }
 
