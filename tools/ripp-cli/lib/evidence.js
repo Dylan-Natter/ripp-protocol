@@ -10,12 +10,15 @@ const yaml = require('js-yaml');
  */
 
 // Secret patterns for redaction (best-effort)
+// More conservative patterns to avoid false positives
 const SECRET_PATTERNS = [
   /api[_-]?key[s]?\s*[:=]\s*['"]([^'"]+)['"]/gi,
   /secret[_-]?key[s]?\s*[:=]\s*['"]([^'"]+)['"]/gi,
   /password[s]?\s*[:=]\s*['"]([^'"]+)['"]/gi,
   /token[s]?\s*[:=]\s*['"]([^'"]+)['"]/gi,
-  /[a-z0-9]{32,}/gi // Long alphanumeric strings (potential keys)
+  /bearer\s+([a-zA-Z0-9_\-\.]{20,})/gi, // Bearer tokens
+  /sk-[a-zA-Z0-9]{32,}/gi, // OpenAI-style keys
+  /ghp_[a-zA-Z0-9]{36,}/gi // GitHub tokens
 ];
 
 /**
@@ -30,7 +33,7 @@ async function buildEvidencePack(cwd, config) {
   }
 
   // Scan files
-  const files = await scanFiles(cwd, config.evidencePack);
+  const { files, excludedCount } = await scanFiles(cwd, config.evidencePack);
 
   // Extract evidence from files
   const evidence = await extractEvidence(files, cwd);
@@ -40,10 +43,10 @@ async function buildEvidencePack(cwd, config) {
     version: '1.0',
     created: new Date().toISOString(),
     stats: {
-      totalFiles: files.length,
+      totalFiles: files.length + excludedCount,
       totalSize: files.reduce((sum, f) => sum + f.size, 0),
       includedFiles: files.length,
-      excludedFiles: 0 // Could track this if needed
+      excludedFiles: excludedCount
     },
     includePatterns: config.evidencePack.includeGlobs,
     excludePatterns: config.evidencePack.excludeGlobs,

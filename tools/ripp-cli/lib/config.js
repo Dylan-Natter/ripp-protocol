@@ -58,7 +58,14 @@ function loadConfig(cwd = process.cwd()) {
       config = mergeConfig(config, repoConfig);
 
       // Validate against schema
-      const schemaPath = path.join(__dirname, '../../../schema/ripp-config.schema.json');
+      // Resolve schema path from project root (3 levels up from lib/)
+      const projectRoot = path.join(__dirname, '../../..');
+      const schemaPath = path.join(projectRoot, 'schema/ripp-config.schema.json');
+
+      if (!fs.existsSync(schemaPath)) {
+        throw new Error(`Schema file not found at: ${schemaPath}`);
+      }
+
       const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 
       const ajv = new Ajv({ allErrors: true, strict: false });
