@@ -46,6 +46,25 @@ Modern development moves fast. Ideas are prototyped in hours. But turning protot
 
 RIPP fixes this. Write a RIPP packet first. Review it. Approve it. Then build it. The specification becomes the contract, the documentation, and the validation checklist.
 
+### NEW: RIPP vNext — Intent Discovery Mode
+
+**RIPP vNext** adds an optional, AI-assisted workflow for extracting intent from existing codebases:
+
+1. **Build Evidence Pack** — Scan your repository to extract routes, dependencies, schemas
+2. **Discover Intent** (AI-assisted, optional) — Infer candidate RIPP sections with confidence scores
+3. **Confirm Intent** — Human review and approval of AI suggestions
+4. **Build Canonical Packet** — Compile into schema-validated RIPP artifacts
+
+**Key features:**
+
+- ✅ **Additive and optional** — All v1 workflows continue unchanged
+- ✅ **AI disabled by default** — Requires explicit opt-in (config + runtime env var)
+- ✅ **Human confirmation mandatory** — No AI content becomes canonical without approval
+- ✅ **Deterministic compilation** — Same confirmed intent → same output
+- ✅ **Backward compatible** — vNext artifacts work with all v1 tools
+
+**[📖 Read the Intent Discovery Mode Guide →](docs/INTENT-DISCOVERY-MODE.md)**
+
 ---
 
 ## User Story vs RIPP: A Comparison

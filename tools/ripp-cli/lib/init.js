@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { createDefaultConfig } = require('./config');
 
 /**
  * Initialize RIPP in a repository
@@ -171,6 +172,18 @@ function initRepository(options = {}) {
     }
   } catch (error) {
     results.errors.push(`Failed to create .github/workflows/ripp-validate.yml: ${error.message}`);
+  }
+
+  // 12. Create .ripp/config.yaml (vNext)
+  try {
+    const configResult = createDefaultConfig(process.cwd(), { force });
+    if (configResult.created) {
+      results.created.push('.ripp/config.yaml');
+    } else {
+      results.skipped.push('.ripp/config.yaml (already exists, use --force to overwrite)');
+    }
+  } catch (error) {
+    results.errors.push(`Failed to create .ripp/config.yaml: ${error.message}`);
   }
 
   return results;

@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dylan-natter.github.io/ripp-protocol/schema/evidence-pack.schema.json",
+  "title": "RIPP Evidence Pack Schema",
+  "description": "Schema for RIPP evidence pack index",
+  "type": "object",
+  "required": ["version", "created", "stats", "files"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Evidence pack schema version"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evidence pack creation"
+    },
+    "stats": {
+      "type": "object",
+      "required": ["totalFiles", "totalSize", "includedFiles", "excludedFiles"],
+      "properties": {
+        "totalFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of files scanned"
+        },
+        "totalSize": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total size of included files in bytes"
+        },
+        "includedFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of files included in evidence"
+        },
+        "excludedFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of files excluded from evidence"
+        }
+      }
+    },
+    "includePatterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob patterns used for inclusion"
+    },
+    "excludePatterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob patterns used for exclusion"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "hash", "size"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Relative path from repository root"
+          },
+          "hash": {
+            "type": "string",
+            "description": "SHA-256 hash of file content"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["source", "config", "schema", "workflow", "other"],
+            "description": "Detected file type"
+          }
+        }
+      },
+      "description": "List of files included in evidence pack"
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["runtime", "dev", "peer"]
+              },
+              "source": {
+                "type": "string",
+                "description": "File path where dependency was found"
+              }
+            }
+          },
+          "description": "Extracted dependencies"
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "File and line where route was found"
+              },
+              "snippet": {
+                "type": "string",
+                "description": "Code snippet"
+              }
+            }
+          },
+          "description": "Detected API routes"
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["model", "migration", "validation"]
+              },
+              "source": {
+                "type": "string"
+              },
+              "snippet": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Detected data schemas"
+        },
+        "auth": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["middleware", "guard", "config"]
+              },
+              "source": {
+                "type": "string"
+              },
+              "snippet": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Authentication/authorization signals"
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "triggers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "CI/CD workflow configurations"
+        }
+      }
+    }
+  }
+}
