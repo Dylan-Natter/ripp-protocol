@@ -60,7 +60,33 @@ jobs:
             exit 1
           }
           
+          # Get current version and calculate next version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: ${CURRENT_VERSION}"
+          
+          # Calculate next patch version
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]}"
+          PATCH="${VERSION_PARTS[2]}"
+          NEXT_PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
+          echo "Next version: ${NEW_VERSION}"
+          
+          # Update CHANGELOG.md with new version entry
+          CHANGELOG_DATE=$(date -u +%Y-%m-%d)
+          CHANGELOG_ENTRY="## [${NEW_VERSION}] - ${CHANGELOG_DATE}\n\n### Changed\n\n- Automated version bump and changelog update\n"
+          
+          # Insert new entry after the header (line 3)
+          sed -i "3a\\
+\\
+${CHANGELOG_ENTRY}" CHANGELOG.md
+          
+          # Stage CHANGELOG.md for commit
+          git add CHANGELOG.md
+          
           # Increment patch version (e.g., 0.1.0 -> 0.1.1)
+          # This will also commit the staged CHANGELOG.md changes
           npm version patch -m "chore: bump version to %s [skip ci]" || {
             echo "❌ Failed to increment version"
             exit 1
