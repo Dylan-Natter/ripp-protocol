@@ -43,6 +43,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Bump version for CI build
+        run: |
+          # Get base version from package.json
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          
+          # Create unique version identifier using timestamp and short SHA
+          TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          
+          # Create CI prerelease version: e.g., 0.1.0-ci.20251214120000.abc1234
+          CI_VERSION="${BASE_VERSION}-ci.${TIMESTAMP}.${SHORT_SHA}"
+          
+          echo "Base version: ${BASE_VERSION}"
+          echo "CI version: ${CI_VERSION}"
+          
+          # Update package.json version without creating git tag
+          npm version "${CI_VERSION}" --no-git-tag-version
+          
+          echo "CI_VERSION=${CI_VERSION}" >> $GITHUB_ENV
+      
       - name: Compile TypeScript
         run: npm run compile
       
@@ -84,6 +104,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Ref:** \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**CI Version:** \`${CI_VERSION:-N/A}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           VSIX_COUNT=$(ls -1 dist/*.vsix 2>/dev/null | wc -l)
