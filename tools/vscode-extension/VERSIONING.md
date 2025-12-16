@@ -28,37 +28,44 @@ The Microsoft VS Code Marketplace validates extension packages and **rejects** a
 
 ## CI/CD Versioning Strategy
 
-### Production Releases
+### Automatic Version Incrementing
 
-For Marketplace publication:
+The workflow **automatically increments** the patch version on every push to the `main` branch:
 
-1. Set the `version` in `package.json` to the release version (e.g., `0.1.0`)
-2. Run `npm run package` or `npx vsce package`
-3. Publish to Marketplace with `npx vsce publish`
+- **Trigger**: Push to `main` branch
+- **Action**: Runs `npm version patch` to increment (e.g., `0.1.0` → `0.1.1`)
+- **Commit**: Automatically commits the version bump with message `"chore: bump version to X.Y.Z [skip ci]"`
+- **Push**: Pushes the commit back to the repository
+- **Result**: Each build has a unique, Marketplace-compliant version
 
-The VSIX filename will match: `ripp-protocol-0.1.0.vsix`
+### How It Works
 
-### CI Builds
+1. Developer pushes code to `main`
+2. Workflow checks out the repository
+3. Workflow auto-increments the patch version in `package.json`
+4. Workflow commits and pushes the version change (with `[skip ci]` to prevent infinite loops)
+5. Workflow builds and packages the extension with the new version
+6. VSIX is created: `ripp-protocol-0.1.1.vsix` (Marketplace-compliant)
 
-For continuous integration and testing:
+### Pull Requests
 
-- The workflow reads the version from `package.json` but **never modifies it**
-- Build metadata (timestamp, commit SHA) is kept **outside** the package manifest
-- CI artifacts use descriptive names like `vscode-extension-0.1.0-build-20251216073528.462bdeb`
-- The VSIX package itself remains Marketplace-compliant: `ripp-protocol-0.1.0.vsix`
+For pull requests, the workflow:
 
-## Version Increment Guidelines
+- Does **NOT** auto-increment the version (to avoid conflicts)
+- Uses the existing version from `package.json` for packaging
+- Artifacts are named with build metadata: `vscode-extension-0.1.0-build-20251216073528.462bdeb`
 
-When preparing a new release:
+### Manual Version Updates
+
+If you need to increment the minor or major version:
 
 1. **Manually update** `version` in `package.json`
 2. Follow semantic versioning:
-   - Patch: Bug fixes (`0.1.0` → `0.1.1`)
-   - Minor: New features, backward-compatible (`0.1.0` → `0.2.0`)
-   - Major: Breaking changes (`0.1.0` → `1.0.0`)
-3. Update `CHANGELOG.md` with release notes
-4. Commit and tag the release
-5. Run `npx vsce publish` to publish to Marketplace
+   - Patch: Auto-incremented by CI (`0.1.0` → `0.1.1`)
+   - Minor: Manual update for new features (`0.1.0` → `0.2.0`)
+   - Major: Manual update for breaking changes (`0.1.0` → `1.0.0`)
+3. Commit and push to `main`
+4. CI will auto-increment from the new base (e.g., `0.2.0` → `0.2.1`)
 
 ## References
 

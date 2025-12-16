@@ -2,7 +2,7 @@
 
 ## Issue Resolution
 
-Successfully fixed the VS Code extension versioning to comply with Microsoft VS Code Marketplace requirements.
+Successfully fixed the VS Code extension versioning to comply with Microsoft VS Code Marketplace requirements with **automatic version incrementing**.
 
 ## Problem Statement
 
@@ -29,33 +29,32 @@ The workflow step "Bump version for CI build" was using `npm version` to modify 
 
 **Changes**:
 
-- ✅ Removed the "Bump version for CI build" step that modified `package.json`
-- ✅ Added a new "Get version from package.json" step that reads (but doesn't modify) the version
-- ✅ CI metadata (timestamp, SHA) is now stored in environment variables for artifact naming only
-- ✅ Updated artifact naming to include both version and build ID: `vscode-extension-0.1.0-build-20251216073528.abc1234`
-- ✅ Updated workflow summary to clearly indicate Marketplace compliance
+- ✅ Removed the invalid prerelease identifier approach
+- ✅ Implemented **automatic patch version incrementing** on each push to `main`
+- ✅ Version bump is committed back to the repository with `[skip ci]` tag to prevent loops
+- ✅ CI metadata (timestamp, SHA) is stored in environment variables for artifact naming only
+- ✅ PR builds use existing version without modification (to avoid conflicts)
+- ✅ Added `contents: write` permission for committing version bumps
 
 **Key Changes**:
 
 ```yaml
-# Before: Modified package.json with prerelease identifier
+# Before: Invalid prerelease identifier (Marketplace rejected)
 - name: Bump version for CI build
-  run: npm version "${CI_VERSION}" --no-git-tag-version
+  run: npm version prerelease --preid=ci.$(date +%Y%m%d%H%M%S).$(git rev-parse --short HEAD)
 
-# After: Read version without modification
-- name: Get version from package.json
+# After: Marketplace-compliant auto-increment
+- name: Auto-increment version (Marketplace-compliant)
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
   run: |
-    # Get version from package.json (used for artifact naming and summary)
-    # NOTE: We do NOT modify package.json here. Microsoft VS Code Marketplace
-    # requires versions to be numeric only (1-4 dot-separated integers).
-    # CI metadata (timestamp, SHA) is kept in artifact names, not in the manifest.
-    VERSION=$(node -p "require('./package.json').version")
-    TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
-    SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-
-    # Export for use in artifact naming and summary (not in package.json)
-    echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    echo "BUILD_ID=${TIMESTAMP}.${SHORT_SHA}" >> $GITHUB_ENV
+    git config user.name "github-actions[bot]"
+    git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+    # Increment patch version (e.g., 0.1.0 -> 0.1.1)
+    npm version patch -m "chore: bump version to %s [skip ci]"
+    
+    # Push the version bump commit
+    git push
 ```
 
 ### 2. Added Versioning Documentation
@@ -67,10 +66,35 @@ The workflow step "Bump version for CI build" was using `npm version` to modify 
 - ✅ Comprehensive explanation of Microsoft Marketplace version requirements
 - ✅ Examples of valid and invalid version formats
 - ✅ Error message documentation
-- ✅ CI/CD versioning strategy
-- ✅ Production release workflow
-- ✅ Version increment guidelines
+- ✅ **Automatic version incrementing strategy**
+- ✅ How auto-versioning works on push to `main`
+- ✅ Manual version increment guidelines for minor/major versions
 - ✅ References to official documentation
+
+## How Auto-Versioning Works
+
+### On Push to Main Branch
+
+1. **Developer pushes code** to `main` branch
+2. **Workflow auto-increments** patch version (e.g., `0.1.0` → `0.1.1`)
+3. **Workflow commits** version bump: `"chore: bump version to 0.1.1 [skip ci]"`
+4. **Workflow pushes** commit back to repository
+5. **Workflow builds** extension with new version
+6. **VSIX created**: `ripp-protocol-0.1.1.vsix` (Marketplace-compliant)
+
+### On Pull Requests
+
+- No version increment occurs (to avoid conflicts)
+- Uses existing version from `package.json`
+- Artifacts include build metadata in name only
+
+### Manual Version Changes
+
+For minor or major version bumps:
+
+1. Manually edit `package.json` to desired version (e.g., `0.2.0` or `1.0.0`)
+2. Push to `main`
+3. Future builds will auto-increment from the new base (e.g., `0.2.0` → `0.2.1`)
 
 ## Verification
 
@@ -88,19 +112,18 @@ npm run package         # Create VSIX
 
 ✅ **Results**:
 
-- VSIX created: `ripp-protocol-0.1.0.vsix`
-- Package size: 39.23 KB
-- Files: 13 files included
-- Version in package.json: `0.1.0` (unmodified)
-- Version in VSIX manifest: `Version="0.1.0"` (Marketplace-compliant)
-- No prerelease identifiers or build metadata
+- VSIX created: `ripp-protocol-0.1.0.vsix` (will be `0.1.1` on next main push)
+- Package size: ~39 KB
+- Version in package.json: Clean numeric format
+- Version in VSIX manifest: Marketplace-compliant
+- No prerelease identifiers or build metadata in package
 
 ✅ **Workflow Simulation**:
 
+- Auto-versioning: CONFIGURED
 - Version format validation: PASSED
 - TypeScript compilation: PASSED
 - VSIX packaging: PASSED
-- Version verification: PASSED
 - Marketplace compliance: PASSED
 
 ### Security Scan
@@ -114,7 +137,7 @@ npm run package         # Create VSIX
 - [x] No build metadata (+build, timestamps, git hashes)
 - [x] At least one version segment is non-zero
 - [x] Version defined only in package.json
-- [x] CI builds do not modify package.json
+- [x] **CI builds auto-increment version and commit to repository**
 - [x] VSIX manifest contains clean version
 - [x] Documentation explains Marketplace requirements
 - [x] Artifact naming preserves build metadata externally
