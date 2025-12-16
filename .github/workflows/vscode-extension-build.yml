@@ -75,22 +75,24 @@ jobs:
           CHANGELOG_DATE=$(date -u +%Y-%m-%d)
           
           # Insert new entry after "All notable changes" line using pattern matching
-          # This is more robust than line number insertion
-          sed -i "/^All notable changes/a\\
+          # This matches the full line in the CHANGELOG.md to be more specific
+          sed -i "/^All notable changes.*will be documented/a\\
 \\
 ## [${NEW_VERSION}] - ${CHANGELOG_DATE}\\
 \\
 ### Changed\\
 \\
-- Automated version bump\\
+- Version bump\\
 " CHANGELOG.md
           
           # Amend the version bump commit to include the CHANGELOG changes
           git add CHANGELOG.md
           git commit --amend --no-edit
           
-          # Update the git tag to point to the amended commit
-          git tag -f "v${NEW_VERSION}"
+          # Delete and recreate the git tag to point to the amended commit
+          # This is cleaner than force-updating the tag
+          git tag -d "v${NEW_VERSION}"
+          git tag "v${NEW_VERSION}"
           
           # Push the version bump commit and tags to main with lease for safe concurrent operations
           git push --force-with-lease origin main --tags || {
