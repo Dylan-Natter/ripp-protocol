@@ -53,11 +53,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Increment patch version (e.g., 0.1.0 -> 0.1.1)
-          npm version patch -m "chore: bump version to %s [skip ci]"
+          # Pull latest changes to avoid conflicts from concurrent builds
+          git pull --rebase origin main || {
+            echo "❌ Failed to pull latest changes"
+            exit 1
+          }
           
-          # Push the version bump commit
-          git push
+          # Increment patch version (e.g., 0.1.0 -> 0.1.1)
+          npm version patch -m "chore: bump version to %s [skip ci]" || {
+            echo "❌ Failed to increment version"
+            exit 1
+          }
+          
+          # Push the version bump commit with lease to ensure safe concurrent operations
+          git push --force-with-lease origin main || {
+            echo "❌ Failed to push version bump commit"
+            echo "This may indicate a concurrent build conflict or permission issue"
+            exit 1
+          }
       
       - name: Get version from package.json
         run: |

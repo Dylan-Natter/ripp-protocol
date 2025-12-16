@@ -35,17 +35,25 @@ The workflow **automatically increments** the patch version on every push to the
 - **Trigger**: Push to `main` branch
 - **Action**: Runs `npm version patch` to increment (e.g., `0.1.0` → `0.1.1`)
 - **Commit**: Automatically commits the version bump with message `"chore: bump version to X.Y.Z [skip ci]"`
-- **Push**: Pushes the commit back to the repository
+- **Push**: Pushes the commit back to the repository with `--force-with-lease` for safety
 - **Result**: Each build has a unique, Marketplace-compliant version
+- **Concurrency**: Workflow has concurrency control to prevent race conditions
 
 ### How It Works
 
 1. Developer pushes code to `main`
 2. Workflow checks out the repository
-3. Workflow auto-increments the patch version in `package.json`
-4. Workflow commits and pushes the version change (with `[skip ci]` to prevent infinite loops)
-5. Workflow builds and packages the extension with the new version
-6. VSIX is created: `ripp-protocol-0.1.1.vsix` (Marketplace-compliant)
+3. Workflow pulls latest changes to avoid conflicts (`git pull --rebase`)
+4. Workflow auto-increments the patch version in `package.json`
+5. Workflow commits and pushes the version change (with `[skip ci]` to prevent infinite loops)
+6. Workflow builds and packages the extension with the new version
+7. VSIX is created: `ripp-protocol-0.1.1.vsix` (Marketplace-compliant)
+
+**Safety Features:**
+- Concurrency control prevents multiple simultaneous builds on same branch
+- `git pull --rebase` ensures latest changes before version increment
+- `git push --force-with-lease` prevents overwriting concurrent changes
+- Error handling at each step with clear failure messages
 
 ### Pull Requests
 
