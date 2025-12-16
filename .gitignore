@@ -31,3 +31,12 @@ temp/
 # RIPP tooling outputs
 reports/
 *.ripp.packaged.*
+
+# RIPP vNext artifacts (Intent Discovery Mode)
+.ripp/evidence/
+.ripp/intent.candidates.yaml
+.ripp/intent.confirmed.yaml
+.ripp/intent.rejected.yaml
+.ripp/intent.checklist.md
+.ripp/handoff.ripp.yaml
+.ripp/handoff.ripp.md
