@@ -11,6 +11,11 @@ const { lintPacket, generateJsonReport, generateMarkdownReport } = require('./li
 const { packagePacket, formatAsJson, formatAsYaml, formatAsMarkdown } = require('./lib/packager');
 const { analyzeInput } = require('./lib/analyzer');
 const { initRepository } = require('./lib/init');
+const { loadConfig, checkAiEnabled, createDefaultConfig } = require('./lib/config');
+const { buildEvidencePack } = require('./lib/evidence');
+const { discoverIntent } = require('./lib/discovery');
+const { confirmIntent } = require('./lib/confirmation');
+const { buildCanonicalArtifacts } = require('./lib/build');
 
 // ANSI color codes
 const colors = {
@@ -264,11 +269,35 @@ ${colors.green}Commands:${colors.reset}
                                     Package RIPP packet into normalized artifact
   ripp analyze <input> --output <file>
                                     Analyze code/schema and generate DRAFT RIPP packet
+
+${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
+  ripp evidence build               Build evidence pack from repository
+  ripp discover                     Infer candidate intent (requires AI enabled)
+  ripp confirm                      Confirm candidate intent (interactive)
+  ripp build                        Build canonical RIPP artifacts from confirmed intent
+
   ripp --help                       Show this help message
   ripp --version                    Show version
 
 ${colors.green}Init Options:${colors.reset}
   --force                           Overwrite existing files
+
+${colors.green}Evidence Build Options:${colors.reset}
+  (Uses configuration from .ripp/config.yaml)
+
+${colors.green}Discover Options:${colors.reset}
+  --target-level <1|2|3>            Target RIPP level (default: 1)
+  (Requires: ai.enabled=true in config AND RIPP_AI_ENABLED=true)
+
+${colors.green}Confirm Options:${colors.reset}
+  --interactive                     Interactive confirmation mode (default)
+  --checklist                       Generate markdown checklist for manual review
+  --user <id>                       User identifier for confirmation
+
+${colors.green}Build Options:${colors.reset}
+  --packet-id <id>                  Packet ID for generated RIPP (default: discovered-intent)
+  --title <title>                   Title for generated RIPP packet
+  --output-name <file>              Output file name (default: handoff.ripp.yaml)
 
 ${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
@@ -310,6 +339,12 @@ ${colors.green}Examples:${colors.reset}
   ripp analyze openapi.json --output draft-api.ripp.yaml
   ripp analyze openapi.json --output draft.ripp.yaml --target-level 2
   ripp analyze schema.json --output draft.ripp.yaml --packet-id my-api
+
+${colors.blue}Intent Discovery Examples:${colors.reset}
+  ripp evidence build
+  RIPP_AI_ENABLED=true ripp discover --target-level 2
+  ripp confirm --interactive
+  ripp build --packet-id my-feature --title "My Feature"
 
 ${colors.green}Exit Codes:${colors.reset}
   0                                 All checks passed
@@ -417,6 +452,14 @@ async function main() {
     await handlePackageCommand(args);
   } else if (command === 'analyze') {
     await handleAnalyzeCommand(args);
+  } else if (command === 'evidence' && args[1] === 'build') {
+    await handleEvidenceBuildCommand(args);
+  } else if (command === 'discover') {
+    await handleDiscoverCommand(args);
+  } else if (command === 'confirm') {
+    await handleConfirmCommand(args);
+  } else if (command === 'build') {
+    await handleBuildCommand(args);
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
@@ -992,6 +1035,200 @@ async function handleAnalyzeCommand(args) {
       console.log('');
     }
 
+    process.exit(1);
+  }
+}
+
+async function handleEvidenceBuildCommand(args) {
+  const cwd = process.cwd();
+
+  console.log(`${colors.blue}Building evidence pack...${colors.reset}\n`);
+
+  try {
+    const config = loadConfig(cwd);
+    const result = await buildEvidencePack(cwd, config);
+
+    log(colors.green, '✓', `Evidence pack built successfully`);
+    console.log(`  ${colors.gray}Index: ${result.indexPath}${colors.reset}`);
+    console.log(`  ${colors.gray}Files: ${result.index.stats.includedFiles}${colors.reset}`);
+    console.log(
+      `  ${colors.gray}Size: ${(result.index.stats.totalSize / 1024).toFixed(2)} KB${colors.reset}`
+    );
+    console.log('');
+
+    console.log(`${colors.blue}Evidence Summary:${colors.reset}`);
+    console.log(`  ${colors.gray}Dependencies: ${result.index.evidence.dependencies.length}${colors.reset}`);
+    console.log(`  ${colors.gray}Routes: ${result.index.evidence.routes.length}${colors.reset}`);
+    console.log(`  ${colors.gray}Schemas: ${result.index.evidence.schemas.length}${colors.reset}`);
+    console.log(`  ${colors.gray}Auth Signals: ${result.index.evidence.auth.length}${colors.reset}`);
+    console.log(`  ${colors.gray}Workflows: ${result.index.evidence.workflows.length}${colors.reset}`);
+    console.log('');
+
+    console.log(`${colors.yellow}⚠ Note:${colors.reset} Evidence pack contains code snippets.`);
+    console.log('  Best-effort secret redaction applied, but review before sharing.');
+    console.log('');
+
+    process.exit(0);
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
+async function handleDiscoverCommand(args) {
+  const cwd = process.cwd();
+
+  // Parse options
+  const options = {
+    targetLevel: 1
+  };
+
+  const targetLevelIndex = args.indexOf('--target-level');
+  if (targetLevelIndex !== -1 && args[targetLevelIndex + 1]) {
+    options.targetLevel = parseInt(args[targetLevelIndex + 1]);
+    if (![1, 2, 3].includes(options.targetLevel)) {
+      console.error(`${colors.red}Error: --target-level must be 1, 2, or 3${colors.reset}`);
+      process.exit(1);
+    }
+  }
+
+  console.log(`${colors.blue}Discovering intent from evidence...${colors.reset}\n`);
+
+  try {
+    // Check AI is enabled
+    const config = loadConfig(cwd);
+    const aiCheck = checkAiEnabled(config);
+
+    if (!aiCheck.enabled) {
+      console.error(`${colors.red}Error: AI is not enabled${colors.reset}`);
+      console.error(`  ${aiCheck.reason}`);
+      console.log('');
+      console.log(`${colors.blue}To enable AI:${colors.reset}`);
+      console.log('  1. Set ai.enabled: true in .ripp/config.yaml');
+      console.log('  2. Set RIPP_AI_ENABLED=true environment variable');
+      console.log('  3. Set provider API key (e.g., OPENAI_API_KEY)');
+      console.log('');
+      process.exit(1);
+    }
+
+    console.log(`${colors.gray}AI Provider: ${config.ai.provider}${colors.reset}`);
+    console.log(`${colors.gray}Model: ${config.ai.model}${colors.reset}`);
+    console.log(`${colors.gray}Target Level: ${options.targetLevel}${colors.reset}`);
+    console.log('');
+
+    const result = await discoverIntent(cwd, options);
+
+    log(colors.green, '✓', `Intent discovery complete`);
+    console.log(`  ${colors.gray}Candidates: ${result.totalCandidates}${colors.reset}`);
+    console.log(`  ${colors.gray}Output: ${result.candidatesPath}${colors.reset}`);
+    console.log('');
+
+    console.log(`${colors.yellow}⚠ IMPORTANT:${colors.reset}`);
+    console.log('  All candidates are INFERRED and require human confirmation.');
+    console.log('  Run "ripp confirm" to review and approve candidates.');
+    console.log('');
+
+    process.exit(0);
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
+async function handleConfirmCommand(args) {
+  const cwd = process.cwd();
+
+  // Parse options
+  const options = {
+    interactive: !args.includes('--checklist'),
+    user: null
+  };
+
+  const userIndex = args.indexOf('--user');
+  if (userIndex !== -1 && args[userIndex + 1]) {
+    options.user = args[userIndex + 1];
+  }
+
+  console.log(`${colors.blue}Confirming candidate intent...${colors.reset}\n`);
+
+  try {
+    const result = await confirmIntent(cwd, options);
+
+    if (result.checklistPath) {
+      log(colors.green, '✓', `Checklist generated: ${result.checklistPath}`);
+      console.log('');
+      console.log(`${colors.blue}Next steps:${colors.reset}`);
+      console.log('  1. Review and edit the checklist');
+      console.log('  2. Mark accepted candidates with [x]');
+      console.log('  3. Save the file');
+      console.log('  4. Run "ripp build" to compile confirmed intent');
+      console.log('');
+    } else {
+      log(colors.green, '✓', `Intent confirmation complete`);
+      console.log(`  ${colors.gray}Confirmed: ${result.confirmedCount}${colors.reset}`);
+      console.log(`  ${colors.gray}Rejected: ${result.rejectedCount}${colors.reset}`);
+      console.log(`  ${colors.gray}Output: ${result.confirmedPath}${colors.reset}`);
+      console.log('');
+
+      if (result.confirmedCount > 0) {
+        console.log(`${colors.blue}Next steps:${colors.reset}`);
+        console.log('  Run "ripp build" to compile canonical RIPP artifacts');
+        console.log('');
+      }
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
+async function handleBuildCommand(args) {
+  const cwd = process.cwd();
+
+  // Parse options
+  const options = {
+    packetId: null,
+    title: null,
+    outputName: null
+  };
+
+  const packetIdIndex = args.indexOf('--packet-id');
+  if (packetIdIndex !== -1 && args[packetIdIndex + 1]) {
+    options.packetId = args[packetIdIndex + 1];
+  }
+
+  const titleIndex = args.indexOf('--title');
+  if (titleIndex !== -1 && args[titleIndex + 1]) {
+    options.title = args[titleIndex + 1];
+  }
+
+  const outputNameIndex = args.indexOf('--output-name');
+  if (outputNameIndex !== -1 && args[outputNameIndex + 1]) {
+    options.outputName = args[outputNameIndex + 1];
+  }
+
+  console.log(`${colors.blue}Building canonical RIPP artifacts...${colors.reset}\n`);
+
+  try {
+    const result = buildCanonicalArtifacts(cwd, options);
+
+    log(colors.green, '✓', `Build complete`);
+    console.log(`  ${colors.gray}RIPP Packet: ${result.packetPath}${colors.reset}`);
+    console.log(`  ${colors.gray}Handoff MD: ${result.markdownPath}${colors.reset}`);
+    console.log(`  ${colors.gray}Level: ${result.level}${colors.reset}`);
+    console.log('');
+
+    console.log(`${colors.blue}Next steps:${colors.reset}`);
+    console.log('  1. Review generated artifacts');
+    console.log('  2. Run "ripp validate .ripp/" to validate');
+    console.log('  3. Run "ripp package" to create handoff.zip');
+    console.log('');
+
+    process.exit(0);
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
     process.exit(1);
   }
 }
