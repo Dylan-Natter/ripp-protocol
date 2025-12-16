@@ -78,6 +78,16 @@ When uncertain about:
   - `npm run lint`
 - All code must pass Prettier formatting and ESLint linting
 
+### Working with GitHub Workflows
+- Test workflow changes locally when possible using workflow simulation
+- When modifying documentation enforcement workflows:
+  - Ensure config/tooling files (`.eslintrc.json`, `tsconfig.json`, etc.) are excluded from requiring docs
+  - Only source code files, specs, and user-facing documentation should trigger doc requirements
+- When updating CI workflows:
+  - Verify that existing workflows still pass with your changes
+  - Check that workflow filters and conditions are specific and correct
+  - Add comments explaining complex workflow logic
+
 ---
 
 ## RIPP Tooling Must Be Backward-Compatible
