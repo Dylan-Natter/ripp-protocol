@@ -527,6 +527,17 @@ For complete build and release instructions, see [BUILD.md](https://github.com/D
 
 The repository includes a CI/CD workflow (`.github/workflows/vscode-extension-build.yml`) that automatically builds versioned VSIX packages on every push to `main` and feature branches. Build artifacts are available in the GitHub Actions workflow runs.
 
+**CI Build Versioning:**
+
+CI builds automatically generate unique prerelease versions to prevent artifact collisions. Each build appends a timestamp and commit SHA to the base version:
+
+```
+Format: {base}-ci.{timestamp}.{sha}
+Example: 0.1.0-ci.20251216070944.abc1234
+```
+
+This ensures every CI-built VSIX is uniquely identifiable and traceable to its source commit, while keeping the base version in `package.json` unchanged in the repository.
+
 #### JSON Schema IntelliSense (Alternative)
 
 For basic schema validation without the extension, add to `.vscode/settings.json`:
