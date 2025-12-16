@@ -52,7 +52,7 @@ jobs:
           TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           
-          # Create CI prerelease version: e.g., 0.1.0-ci.20231214120000.abc1234
+          # Create CI prerelease version: e.g., 0.1.0-ci.20251214120000.abc1234
           CI_VERSION="${BASE_VERSION}-ci.${TIMESTAMP}.${SHORT_SHA}"
           
           echo "Base version: ${BASE_VERSION}"
