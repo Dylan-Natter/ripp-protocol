@@ -35,6 +35,8 @@ The workflow step "Bump version for CI build" was using `npm version` to modify 
 - ✅ CI metadata (timestamp, SHA) is stored in environment variables for artifact naming only
 - ✅ PR builds use existing version without modification (to avoid conflicts)
 - ✅ Added `contents: write` permission for committing version bumps
+- ✅ Added version validation to ensure Marketplace compliance before packaging
+- ✅ Added VSIX filename verification to catch any non-compliant versions
 
 **Key Changes**:
 
