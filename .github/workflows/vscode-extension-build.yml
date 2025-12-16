@@ -60,26 +60,18 @@ jobs:
             exit 1
           }
           
-          # Get current version and calculate next version
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "Current version: ${CURRENT_VERSION}"
+          # Increment patch version (e.g., 0.1.0 -> 0.1.1)
+          # npm version patch will: increment the version, create a commit, and create a git tag
+          npm version patch -m "chore: bump version to %s [skip ci]" || {
+            echo "❌ Failed to increment version"
+            exit 1
+          }
           
-          # Calculate next patch version (supports 3 or 4 part versions)
-          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
-          MAJOR="${VERSION_PARTS[0]}"
-          MINOR="${VERSION_PARTS[1]}"
-          PATCH="${VERSION_PARTS[2]}"
-          BUILD="${VERSION_PARTS[3]:-}"  # Optional fourth part
-          NEXT_PATCH=$((PATCH + 1))
+          # Get the new version that was just set
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: ${NEW_VERSION}"
           
-          if [ -n "$BUILD" ]; then
-            NEW_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}.${BUILD}"
-          else
-            NEW_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
-          fi
-          echo "Next version: ${NEW_VERSION}"
-          
-          # Update CHANGELOG.md with new version entry
+          # Update CHANGELOG.md with the new version entry
           CHANGELOG_DATE=$(date -u +%Y-%m-%d)
           
           # Insert new entry after "All notable changes" line using pattern matching
@@ -93,18 +85,15 @@ jobs:
 - Automated version bump\\
 " CHANGELOG.md
           
-          # Stage CHANGELOG.md for commit
+          # Amend the version bump commit to include the CHANGELOG changes
           git add CHANGELOG.md
+          git commit --amend --no-edit
           
-          # Increment patch version (e.g., 0.1.0 -> 0.1.1)
-          # This will also commit the staged CHANGELOG.md changes
-          npm version patch -m "chore: bump version to %s [skip ci]" || {
-            echo "❌ Failed to increment version"
-            exit 1
-          }
+          # Update the git tag to point to the amended commit
+          git tag -f "v${NEW_VERSION}"
           
-          # Push the version bump commit to main with lease for safe concurrent operations
-          git push --force-with-lease origin main || {
+          # Push the version bump commit and tags to main with lease for safe concurrent operations
+          git push --force-with-lease origin main --tags || {
             echo "❌ Failed to push version bump commit"
             echo "This may indicate a concurrent build conflict or permission issue"
             exit 1
