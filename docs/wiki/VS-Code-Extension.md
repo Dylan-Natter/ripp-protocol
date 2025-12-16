@@ -495,6 +495,44 @@ Currently, the extension has **no configurable settings**. All behavior is deter
 
 ---
 
+## Extension Build and Publishing
+
+### Marketplace Compliance
+
+The VS Code extension is built and packaged automatically using GitHub Actions. The build process ensures compliance with Microsoft VS Code Marketplace requirements:
+
+#### Version Requirements
+
+- ✅ **Numeric only**: Version must be 1-4 dot-separated integers (e.g., `0.1.1`, `1.2.3`)
+- ❌ **No prerelease labels**: Labels like `-alpha`, `-beta`, `-ci` are rejected by the Marketplace
+- ❌ **No build metadata**: Metadata like `+build.123` is not allowed
+
+#### Automated Validation
+
+The build workflow includes two validation layers:
+
+**Pre-packaging validation:**
+
+- Validates `package.json` version format before building
+- Fails the build immediately if non-compliant version detected
+- Prevents invalid VSIX packages from being created
+
+**Post-packaging validation:**
+
+- Verifies the generated `.vsix` filename matches expected format
+- Guards against edge cases where tooling might modify the version
+- Ensures the final artifact is Marketplace-ready
+
+#### Version Management
+
+- **Automatic incrementing**: Patch version auto-increments on each push to `main` branch
+- **Manual updates**: Minor/major versions can be updated manually in `package.json`
+- **Semantic versioning**: Follows [semver](https://semver.org/) conventions
+
+For detailed versioning information, see `tools/vscode-extension/VERSIONING.md` in the repository.
+
+---
+
 ## Next Steps
 
 - Install the extension from the VS Code Marketplace (search for "RIPP Protocol")
