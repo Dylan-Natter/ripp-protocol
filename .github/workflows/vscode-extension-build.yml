@@ -76,6 +76,8 @@ jobs:
           
           # Insert new entry after "All notable changes" line using pattern matching
           # This matches the full line in the CHANGELOG.md to be more specific
+          # NOTE: This assumes the CHANGELOG.md header doesn't change. If the header
+          # changes in the future, update this pattern or consider using a changelog tool.
           sed -i "/^All notable changes.*will be documented/a\\
 \\
 ## [${NEW_VERSION}] - ${CHANGELOG_DATE}\\
@@ -91,7 +93,8 @@ jobs:
           
           # Delete and recreate the git tag to point to the amended commit
           # This is cleaner than force-updating the tag
-          git tag -d "v${NEW_VERSION}"
+          # Use || true to handle case where tag deletion might fail
+          git tag -d "v${NEW_VERSION}" || true
           git tag "v${NEW_VERSION}"
           
           # Push the version bump commit and tags to main with lease for safe concurrent operations
