@@ -516,27 +516,16 @@ Search for "RIPP Protocol" in the VS Code Extensions Marketplace, or install fro
 
 The VS Code extension uses semantic versioning (e.g., `0.1.0`, `0.2.0`) defined in `package.json`. Each VSIX build includes the version number in its filename (e.g., `ripp-protocol-0.1.0.vsix`).
 
-The VS Code Marketplace requires each published version to be unique and incremental. Before publishing a new release:
+The VS Code Marketplace requires numeric-only versions (1-4 dot-separated integers, no suffixes). The CI workflow automatically increments the patch version on each push to `main`:
 
-1. Bump the version using `npm version [patch|minor|major]`
-2. Update `CHANGELOG.md` with release notes
-3. Build the VSIX package using `npm run package`
-4. Publish to the marketplace or upload manually
+- **Automatic patch increments**: `0.1.0` → `0.1.1` → `0.1.2` (on push to `main`)
+- **Manual version bumps**: Edit `package.json` for minor/major releases (e.g., `0.2.0` or `1.0.0`)
+- **CI commits back**: Version bump commits include `[skip ci]` to prevent loops
+- **Safety features**: Concurrency control, git pull with rebase, force-with-lease pushes
 
-For complete build and release instructions, see [BUILD.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/BUILD.md) and [RELEASE-CHECKLIST.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/RELEASE-CHECKLIST.md) in the extension directory.
+For complete build and release instructions, see [BUILD.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/BUILD.md), [VERSIONING.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/VERSIONING.md), and [RELEASE-CHECKLIST.md](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/vscode-extension/RELEASE-CHECKLIST.md) in the extension directory.
 
-The repository includes a CI/CD workflow (`.github/workflows/vscode-extension-build.yml`) that automatically builds versioned VSIX packages on every push to `main` and feature branches. Build artifacts are available in the GitHub Actions workflow runs.
-
-**CI Build Versioning:**
-
-CI builds automatically generate unique prerelease versions to prevent artifact collisions. Each build appends a timestamp and commit SHA to the base version:
-
-```
-Format: {base}-ci.{timestamp}.{sha}
-Example: 0.1.0-ci.20251216070944.abc1234
-```
-
-This ensures every CI-built VSIX is uniquely identifiable and traceable to its source commit, while keeping the base version in `package.json` unchanged in the repository.
+The repository includes a CI/CD workflow (`.github/workflows/vscode-extension-build.yml`) that automatically increments versions and builds VSIX packages on every push to `main`. Build artifacts are available in the GitHub Actions workflow runs.
 
 #### JSON Schema IntelliSense (Alternative)
 

@@ -2,7 +2,7 @@
   "name": "ripp-protocol",
   "displayName": "RIPP Protocol",
   "description": "VS Code integration for the Regenerative Intent Prompting Protocol (RIPP™) - validate, lint, and manage feature specification packets.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "RIPP",
   "license": "MIT",
   "engines": {

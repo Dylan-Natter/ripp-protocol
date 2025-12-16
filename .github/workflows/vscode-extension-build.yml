@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: read
+      contents: write  # Required for auto-versioning (committing version bumps)
     
     defaults:
       run:
@@ -43,25 +43,49 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Bump version for CI build
+      - name: Auto-increment version (Marketplace-compliant)
+        # Only runs on push to main branch (not on copilot/** branches or PRs)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # Get base version from package.json
-          BASE_VERSION=$(node -p "require('./package.json').version")
+          # Auto-increment patch version and commit back to repository
+          # This ensures each build has a unique, Marketplace-compliant version
+          # Microsoft requires numeric-only versions (1-4 dot-separated integers)
           
-          # Create unique version identifier using timestamp and short SHA
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Pull latest changes from main to avoid conflicts from concurrent builds
+          git pull --rebase origin main || {
+            echo "❌ Failed to pull latest changes"
+            exit 1
+          }
+          
+          # Increment patch version (e.g., 0.1.0 -> 0.1.1)
+          npm version patch -m "chore: bump version to %s [skip ci]" || {
+            echo "❌ Failed to increment version"
+            exit 1
+          }
+          
+          # Push the version bump commit to main with lease for safe concurrent operations
+          git push --force-with-lease origin main || {
+            echo "❌ Failed to push version bump commit"
+            echo "This may indicate a concurrent build conflict or permission issue"
+            exit 1
+          }
+      
+      - name: Get version from package.json
+        run: |
+          # Get the current version (either auto-incremented or existing)
+          VERSION=$(node -p "require('./package.json').version")
           TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           
-          # Create CI prerelease version: e.g., 0.1.0-ci.20251214120000.abc1234
-          CI_VERSION="${BASE_VERSION}-ci.${TIMESTAMP}.${SHORT_SHA}"
+          echo "Version: ${VERSION}"
+          echo "Build: ${TIMESTAMP}.${SHORT_SHA}"
           
-          echo "Base version: ${BASE_VERSION}"
-          echo "CI version: ${CI_VERSION}"
-          
-          # Update package.json version without creating git tag
-          npm version "${CI_VERSION}" --no-git-tag-version
-          
-          echo "CI_VERSION=${CI_VERSION}" >> $GITHUB_ENV
+          # Export for use in artifact naming and summary
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "BUILD_ID=${TIMESTAMP}.${SHORT_SHA}" >> $GITHUB_ENV
       
       - name: Compile TypeScript
         run: npm run compile
@@ -92,7 +116,7 @@ jobs:
       - name: Upload .vsix artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-extension-${{ github.sha }}
+          name: vscode-extension-${{ env.VERSION }}-build-${{ env.BUILD_ID }}
           path: tools/vscode-extension/dist/*.vsix
           retention-days: 30
           if-no-files-found: error
@@ -104,7 +128,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Ref:** \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**CI Version:** \`${CI_VERSION:-N/A}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${VERSION:-N/A}\` (Marketplace-compliant)" >> $GITHUB_STEP_SUMMARY
+          echo "**Build ID:** \`${BUILD_ID:-N/A}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           VSIX_COUNT=$(ls -1 dist/*.vsix 2>/dev/null | wc -l)
