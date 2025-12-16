@@ -83,6 +83,15 @@ jobs:
           echo "Version: ${VERSION}"
           echo "Build: ${TIMESTAMP}.${SHORT_SHA}"
           
+          # Validate version is Marketplace-compliant (numeric only, no prerelease tags)
+          if ! echo "${VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            echo "❌ Error: Version '${VERSION}' is not Marketplace-compliant"
+            echo "Version must be 1-4 dot-separated integers (e.g., 0.1.0 or 1.2.3.4)"
+            echo "No prerelease identifiers (-alpha, -beta, -ci, etc.) allowed"
+            exit 1
+          fi
+          echo "✅ Version ${VERSION} is Marketplace-compliant"
+          
           # Export for use in artifact naming and summary
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "BUILD_ID=${TIMESTAMP}.${SHORT_SHA}" >> $GITHUB_ENV
@@ -111,7 +120,18 @@ jobs:
             exit 1
           fi
           VSIX_FILE=$(ls -1 dist/*.vsix | head -1)
-          echo "✅ VSIX package verified (Marketplace-ready): $(basename $VSIX_FILE)"
+          VSIX_BASENAME=$(basename "$VSIX_FILE")
+          echo "✅ VSIX package created: $VSIX_BASENAME"
+          
+          # Verify the VSIX filename matches the expected Marketplace-compliant format
+          # Expected format: ripp-protocol-X.Y.Z.vsix (no prerelease tags)
+          if echo "$VSIX_BASENAME" | grep -qE '\-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?\.vsix$'; then
+            echo "✅ VSIX filename is Marketplace-compliant"
+          else
+            echo "❌ Error: VSIX filename '$VSIX_BASENAME' may not be Marketplace-compliant"
+            echo "Expected format: ripp-protocol-X.Y.Z.vsix (numeric version only)"
+            exit 1
+          fi
       
       - name: Upload .vsix artifact
         uses: actions/upload-artifact@v4
