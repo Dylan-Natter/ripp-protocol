@@ -44,6 +44,7 @@ jobs:
         run: npm ci
       
       - name: Auto-increment version (Marketplace-compliant)
+        # Only runs on push to main branch (not on copilot/** branches or PRs)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Auto-increment patch version and commit back to repository
@@ -53,7 +54,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Pull latest changes to avoid conflicts from concurrent builds
+          # Pull latest changes from main to avoid conflicts from concurrent builds
           git pull --rebase origin main || {
             echo "❌ Failed to pull latest changes"
             exit 1
@@ -65,7 +66,7 @@ jobs:
             exit 1
           }
           
-          # Push the version bump commit with lease to ensure safe concurrent operations
+          # Push the version bump commit to main with lease for safe concurrent operations
           git push --force-with-lease origin main || {
             echo "❌ Failed to push version bump commit"
             echo "This may indicate a concurrent build conflict or permission issue"
