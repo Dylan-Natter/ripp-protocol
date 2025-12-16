@@ -29,13 +29,17 @@ npm link
 
 ## Command Overview
 
-| Command         | Purpose                                   | Read-Only?                |
-| --------------- | ----------------------------------------- | ------------------------- |
-| `ripp init`     | Initialize RIPP in your repository        | ❌ Creates files          |
-| `ripp validate` | Validate RIPP packets against schema      | ✅ Yes                    |
-| `ripp lint`     | Check best practices                      | ✅ Yes                    |
-| `ripp package`  | Package RIPP packet into handoff artifact | ✅ Yes (creates new file) |
-| `ripp analyze`  | Generate DRAFT packet from code/schemas   | ✅ Yes (creates new file) |
+| Command         | Purpose                                    | Read-Only?                |
+| --------------- | ------------------------------------------ | ------------------------- |
+| `ripp init`     | Initialize RIPP in your repository         | ❌ Creates files          |
+| `ripp validate` | Validate RIPP packets against schema       | ✅ Yes                    |
+| `ripp lint`     | Check best practices                       | ✅ Yes                    |
+| `ripp package`  | Package RIPP packet into handoff artifact  | ✅ Yes (creates new file) |
+| `ripp analyze`  | Generate DRAFT packet from code/schemas    | ✅ Yes (creates new file) |
+| `ripp evidence` | Build evidence pack from repository        | ✅ Yes (creates new file) |
+| `ripp discover` | AI-assisted intent discovery (optional)    | ✅ Yes (creates new file) |
+| `ripp confirm`  | Confirm candidate intent (human-in-loop)   | ✅ Yes (creates new file) |
+| `ripp build`    | Build canonical RIPP from confirmed intent | ✅ Yes (creates new file) |
 
 ---
 
@@ -507,6 +511,353 @@ purpose:
 
 ---
 
+## `ripp evidence build`
+
+**vNext Feature** — Build evidence pack from repository for intent discovery.
+
+### Purpose
+
+Scans your repository to extract high-signal facts (dependencies, routes, schemas, auth signals) for AI-assisted intent discovery.
+
+### What It Does
+
+- ✅ Scans files according to configured glob patterns
+- ✅ Extracts dependencies from `package.json`, `requirements.txt`, etc.
+- ✅ Detects API routes (Express, FastAPI, Django, etc.)
+- ✅ Finds data schemas (ORMs, migrations, SQL)
+- ✅ Identifies authentication signals (middleware, guards)
+- ✅ Captures CI/CD workflows (`.github/workflows/`)
+- ✅ Applies best-effort secret redaction
+- ✅ Generates `.ripp/evidence/evidence.index.json`
+
+### What It Never Does
+
+- ❌ Modifies source code files
+- ❌ Commits changes to git
+- ❌ Uploads data externally
+
+### Usage
+
+```bash
+# Build evidence pack with default config
+ripp evidence build
+
+# Evidence pack is created at .ripp/evidence/
+```
+
+### Configuration
+
+Evidence collection is configured via `.ripp/config.yaml`:
+
+```yaml
+evidencePack:
+  includeGlobs:
+    - 'src/**'
+    - 'app/**'
+    - 'api/**'
+  excludeGlobs:
+    - '**/node_modules/**'
+    - '**/dist/**'
+    - '**/*.lock'
+  maxFileSize: 1048576 # 1MB
+```
+
+### Example Output
+
+```
+Building evidence pack...
+
+✓ Evidence pack built successfully
+  Index: .ripp/evidence/evidence.index.json
+  Files: 23
+  Size: 45.2 KB
+
+Evidence Summary:
+  Dependencies: 8
+  Routes: 12
+  Schemas: 3
+  Auth Signals: 5
+  Workflows: 2
+
+⚠ Note: Evidence pack contains code snippets.
+  Best-effort secret redaction applied, but review before sharing.
+```
+
+### Exit Codes
+
+- `0` — Evidence build successful
+- `1` — Build failed (configuration error, file access error)
+
+---
+
+## `ripp discover`
+
+**vNext Feature** — AI-assisted candidate intent inference from evidence pack.
+
+### Purpose
+
+Uses AI to infer candidate RIPP sections from the evidence pack, generating suggestions that require human confirmation.
+
+### What It Does
+
+- ✅ Reads evidence pack (never raw repository files)
+- ✅ Uses configured AI provider (OpenAI, Azure OpenAI, Ollama, custom)
+- ✅ Infers candidate RIPP sections with confidence scores
+- ✅ Links each candidate to source evidence (file:line references)
+- ✅ Validates output against schema (retry loop with feedback)
+- ✅ Generates `.ripp/intent.candidates.yaml`
+
+### What It Never Does
+
+- ❌ Modifies source code or RIPP packets
+- ❌ Produces canonical artifacts (requires human confirmation)
+- ❌ Runs without explicit AI enablement
+
+### ⚠️ AI Enablement Required
+
+AI is disabled by default. To use this command:
+
+1. **Enable in config** (`.ripp/config.yaml`):
+
+   ```yaml
+   ai:
+     enabled: true
+     provider: openai
+     model: gpt-4o-mini
+   ```
+
+2. **Enable at runtime** (environment variable):
+   ```bash
+   export RIPP_AI_ENABLED=true
+   export OPENAI_API_KEY=sk-your-key-here
+   ```
+
+Both are required. If either is false, the command fails.
+
+### Usage
+
+```bash
+# Discover intent (requires AI enabled)
+RIPP_AI_ENABLED=true ripp discover
+
+# Target specific RIPP level
+RIPP_AI_ENABLED=true ripp discover --target-level 2
+```
+
+### Options
+
+| Option                     | Description       | Default |
+| -------------------------- | ----------------- | ------- |
+| `--target-level <1\|2\|3>` | Target RIPP level | `1`     |
+
+### Example Output
+
+```
+Discovering intent from evidence...
+
+AI Provider: openai
+Model: gpt-4o-mini
+Target Level: 2
+
+✓ Intent discovery complete
+  Candidates: 8
+  Output: .ripp/intent.candidates.yaml
+
+⚠ IMPORTANT:
+  All candidates are INFERRED and require human confirmation.
+  Run "ripp confirm" to review and approve candidates.
+```
+
+### Candidate Structure
+
+All AI-inferred candidates include:
+
+- `source: inferred`
+- `confidence: 0.0–1.0`
+- `evidence: [{file, line, snippet}]`
+- `requires_human_confirmation: true`
+
+### Exit Codes
+
+- `0` — Discovery successful
+- `1` — Discovery failed (AI not enabled, API error, validation error)
+
+---
+
+## `ripp confirm`
+
+**vNext Feature** — Human confirmation workflow for AI-inferred candidate intent.
+
+### Purpose
+
+Reviews AI-inferred candidates and captures human approval decisions before compilation.
+
+### What It Does
+
+- ✅ Reads `.ripp/intent.candidates.yaml`
+- ✅ Presents each candidate for review (interactive or checklist)
+- ✅ Captures confirmation metadata (timestamp, user)
+- ✅ Generates `.ripp/intent.confirmed.yaml`
+- ✅ Optionally tracks rejected candidates in `.ripp/intent.rejected.yaml`
+
+### What It Never Does
+
+- ❌ Modifies source code or original candidates file
+- ❌ Auto-approves candidates
+- ❌ Uses AI
+
+### Usage
+
+```bash
+# Interactive confirmation (default)
+ripp confirm
+
+# Generate markdown checklist for manual review
+ripp confirm --checklist
+
+# Specify user identifier
+ripp confirm --user developer@example.com
+```
+
+### Options
+
+| Option          | Description                      | Default |
+| --------------- | -------------------------------- | ------- |
+| `--interactive` | Interactive terminal mode        | `true`  |
+| `--checklist`   | Generate markdown checklist      | `false` |
+| `--user <id>`   | User identifier for confirmation | None    |
+
+### Interactive Mode
+
+Presents each candidate sequentially with options:
+
+- **y** — Accept candidate
+- **n** — Reject candidate
+- **e** — Edit candidate (future feature)
+- **s** — Skip candidate
+
+### Checklist Mode
+
+Generates `.ripp/intent.checklist.md` for manual review:
+
+```markdown
+## Candidate 1: purpose
+
+- [ ] Accept this candidate
+
+### Content
+
+- problem: "Users need to..."
+- solution: "Provide..."
+```
+
+### Example Output
+
+```
+Confirming candidate intent...
+
+--- Candidate 1/8 ---
+Section: purpose
+Confidence: 87.0%
+
+Content:
+  problem: "Users need to retrieve their profile information"
+  solution: "Provide authenticated API endpoint"
+  value: "Enables personalized user experiences"
+
+Accept this candidate? (y/n/e/s): y
+✓ Accepted
+
+...
+
+✓ Intent confirmation complete
+  Confirmed: 6
+  Rejected: 2
+  Output: .ripp/intent.confirmed.yaml
+```
+
+### Exit Codes
+
+- `0` — Confirmation complete
+- `1` — Confirmation failed (candidates file missing or invalid)
+
+---
+
+## `ripp build`
+
+**vNext Feature** — Build canonical RIPP artifacts from confirmed intent.
+
+### Purpose
+
+Compiles human-confirmed intent blocks into schema-validated canonical RIPP packets.
+
+### What It Does
+
+- ✅ Reads `.ripp/intent.confirmed.yaml`
+- ✅ Assembles canonical RIPP packet from confirmed blocks
+- ✅ Validates against RIPP schema before writing
+- ✅ Generates `.ripp/handoff.ripp.yaml` (canonical packet)
+- ✅ Generates `.ripp/handoff.ripp.md` (human-readable handoff doc)
+- ✅ Includes full provenance metadata
+
+### What It Never Does
+
+- ❌ Modifies source code or confirmed intent file
+- ❌ Uses AI
+- ❌ Produces non-deterministic output
+
+### Usage
+
+```bash
+# Build with default settings
+ripp build
+
+# Specify packet ID and title
+ripp build --packet-id user-api --title "User API"
+
+# Custom output filename
+ripp build --output-name my-feature.ripp.yaml
+```
+
+### Options
+
+| Option                 | Description                     | Default             |
+| ---------------------- | ------------------------------- | ------------------- |
+| `--packet-id <id>`     | Packet ID for generated RIPP    | `discovered-intent` |
+| `--title <title>`      | Title for generated RIPP packet | `Discovered Intent` |
+| `--output-name <file>` | Output filename                 | `handoff.ripp.yaml` |
+
+### Example Output
+
+```
+Building canonical RIPP artifacts...
+
+✓ Build complete
+  RIPP Packet: .ripp/handoff.ripp.yaml
+  Handoff MD: .ripp/handoff.ripp.md
+  Level: 2
+
+Next steps:
+  1. Review generated artifacts
+  2. Run "ripp validate .ripp/" to validate
+  3. Run "ripp package" to create handoff.zip
+```
+
+### Deterministic Compilation
+
+Given the same confirmed intent:
+
+- Same packet structure is always generated
+- Same metadata is included
+- Output is reproducible
+
+### Exit Codes
+
+- `0` — Build successful
+- `1` — Build failed (confirmed intent missing, validation failed)
+
+---
+
 ## Expected Behavior in Monorepos
 
 The RIPP CLI supports monorepo structures:
@@ -555,12 +906,33 @@ It finds all `*.ripp.yaml` and `*.ripp.json` files in the repository.
 | `ripp lint`     | `0`     | `1` (errors, or warnings with `--strict`) |
 | `ripp package`  | `0`     | `1` (validation or packaging error)       |
 | `ripp analyze`  | `0`     | `1` (analysis failure)                    |
+| `ripp evidence` | `0`     | `1` (build failed)                        |
+| `ripp discover` | `0`     | `1` (AI not enabled, discovery failed)    |
+| `ripp confirm`  | `0`     | `1` (confirmation failed)                 |
+| `ripp build`    | `0`     | `1` (build failed, validation failed)     |
 
 ---
 
 ## Environment Variables
 
-None currently supported. Configuration is via command-line flags only.
+### RIPP vNext (Intent Discovery Mode)
+
+| Variable                | Purpose                               | Required For             |
+| ----------------------- | ------------------------------------- | ------------------------ |
+| `RIPP_AI_ENABLED`       | Enable AI at runtime (must be `true`) | `ripp discover`          |
+| `OPENAI_API_KEY`        | OpenAI API key                        | `ripp discover` (OpenAI) |
+| `AZURE_OPENAI_API_KEY`  | Azure OpenAI API key                  | `ripp discover` (Azure)  |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL             | `ripp discover` (Azure)  |
+| `RIPP_AI_PROVIDER`      | Override AI provider (optional)       | `ripp discover`          |
+| `RIPP_AI_MODEL`         | Override AI model (optional)          | `ripp discover`          |
+| `RIPP_AI_ENDPOINT`      | Custom AI endpoint (optional)         | `ripp discover` (custom) |
+
+**Note:** AI features require dual opt-in:
+
+1. `ai.enabled: true` in `.ripp/config.yaml`
+2. `RIPP_AI_ENABLED=true` environment variable
+
+If either is false, AI features are disabled.
 
 ---
 
