@@ -43,25 +43,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Bump version for CI build
+      - name: Get version from package.json
         run: |
-          # Get base version from package.json
-          BASE_VERSION=$(node -p "require('./package.json').version")
-          
-          # Create unique version identifier using timestamp and short SHA
+          # Get version from package.json (used for artifact naming and summary)
+          # NOTE: We do NOT modify package.json here. Microsoft VS Code Marketplace
+          # requires versions to be numeric only (1-4 dot-separated integers).
+          # CI metadata (timestamp, SHA) is kept in artifact names, not in the manifest.
+          VERSION=$(node -p "require('./package.json').version")
           TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           
-          # Create CI prerelease version: e.g., 0.1.0-ci.20251214120000.abc1234
-          CI_VERSION="${BASE_VERSION}-ci.${TIMESTAMP}.${SHORT_SHA}"
+          echo "Version: ${VERSION}"
+          echo "Build: ${TIMESTAMP}.${SHORT_SHA}"
           
-          echo "Base version: ${BASE_VERSION}"
-          echo "CI version: ${CI_VERSION}"
-          
-          # Update package.json version without creating git tag
-          npm version "${CI_VERSION}" --no-git-tag-version
-          
-          echo "CI_VERSION=${CI_VERSION}" >> $GITHUB_ENV
+          # Export for use in artifact naming and summary (not in package.json)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "BUILD_ID=${TIMESTAMP}.${SHORT_SHA}" >> $GITHUB_ENV
       
       - name: Compile TypeScript
         run: npm run compile
@@ -92,7 +89,7 @@ jobs:
       - name: Upload .vsix artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-extension-${{ github.sha }}
+          name: vscode-extension-${{ env.VERSION }}-build-${{ env.BUILD_ID }}
           path: tools/vscode-extension/dist/*.vsix
           retention-days: 30
           if-no-files-found: error
@@ -104,7 +101,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Ref:** \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**CI Version:** \`${CI_VERSION:-N/A}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${VERSION:-N/A}\` (Marketplace-compliant)" >> $GITHUB_STEP_SUMMARY
+          echo "**Build ID:** \`${BUILD_ID:-N/A}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           VSIX_COUNT=$(ls -1 dist/*.vsix 2>/dev/null | wc -l)
