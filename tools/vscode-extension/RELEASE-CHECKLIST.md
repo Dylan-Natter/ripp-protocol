@@ -95,7 +95,29 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 - [ ] Set expiration (recommended: 1 year)
 - [ ] Copy and save the token securely
 
-### 3. Update Publisher in package.json
+### 3. Bump Version Number
+
+**Important**: The VS Code Marketplace requires each published version to be unique. You must increment the version before publishing.
+
+- [ ] Decide on version increment (patch/minor/major)
+- [ ] Run version bump command:
+
+```bash
+# Patch version (0.1.0 → 0.1.1) - for bug fixes
+npm version patch
+
+# Minor version (0.1.0 → 0.2.0) - for new features
+npm version minor
+
+# Major version (0.1.0 → 1.0.0) - for breaking changes
+npm version major
+```
+
+- [ ] Update `CHANGELOG.md` with release notes for the new version
+- [ ] Commit the changelog: `git add CHANGELOG.md && git commit -m "Update changelog for vX.Y.Z"`
+- [ ] Push changes and tags: `git push && git push --tags`
+
+### 4. Update Publisher in package.json
 
 - [ ] Open `package.json`
 - [ ] Update `"publisher": "RIPP"` to `"publisher": "your-publisher-id"`
@@ -103,7 +125,7 @@ This checklist ensures the RIPP Protocol VS Code extension is ready for marketpl
 - [ ] Rebuild: `npm run compile`
 - [ ] Repackage: `npm run package`
 
-### 4. Publish Extension
+### 5. Publish Extension
 
 **Option A: Command Line (Recommended)**
 
@@ -116,15 +138,15 @@ npx vsce login your-publisher-id
 # Publish the extension
 npx vsce publish
 
-# Or publish from existing .vsix
-npx vsce publish --packagePath ripp-protocol-0.1.0.vsix
+# Or publish from existing .vsix (replace X.Y.Z with actual version)
+npx vsce publish --packagePath ripp-protocol-X.Y.Z.vsix
 ```
 
 **Option B: Manual Upload**
 
 - [ ] Go to https://marketplace.visualstudio.com/manage/publishers/your-publisher-id
 - [ ] Click "New Extension" → "Visual Studio Code"
-- [ ] Upload `ripp-protocol-0.1.0.vsix`
+- [ ] Upload `ripp-protocol-X.Y.Z.vsix` (use the actual version number)
 - [ ] Verify details and publish
 
 ### 5. Post-Publication Verification
@@ -171,23 +193,43 @@ code --list-extensions | grep ripp-protocol
 
 ## 🔄 Future Updates
 
-### Version Bump Commands
+### Version Bump and Publish
+
+When releasing a new version:
 
 ```bash
-# Patch version (0.1.0 → 0.1.1)
-npx vsce publish patch
+# Step 1: Bump version (choose one)
+npm version patch   # 0.1.0 → 0.1.1 (bug fixes)
+npm version minor   # 0.1.0 → 0.2.0 (new features)
+npm version major   # 0.1.0 → 1.0.0 (breaking changes)
 
-# Minor version (0.1.0 → 0.2.0)
-npx vsce publish minor
+# Step 2: Update changelog
+# Edit CHANGELOG.md with release notes
 
-# Major version (0.1.0 → 1.0.0)
-npx vsce publish major
+# Step 3: Commit changelog
+git add CHANGELOG.md
+git commit -m "Update changelog for vX.Y.Z"
+
+# Step 4: Push changes and tags
+git push && git push --tags
+
+# Step 5: Rebuild and package
+npm run compile
+npm run package
+
+# Step 6: Publish to marketplace
+npx vsce publish
+# Or use: npx vsce publish --packagePath ripp-protocol-X.Y.Z.vsix
 ```
+
+**Note**: `npm version` automatically updates `package.json` and creates a git tag. The marketplace requires unique, incremental version numbers for each release.
 
 ### Update Checklist
 
-- [ ] Update version in `package.json`
+- [ ] Bump version: `npm version [patch|minor|major]`
 - [ ] Add entry to `CHANGELOG.md`
+- [ ] Commit changelog changes
+- [ ] Push changes and tags
 - [ ] Compile: `npm run compile`
 - [ ] Test locally
 - [ ] Package: `npm run package`

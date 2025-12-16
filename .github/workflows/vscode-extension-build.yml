@@ -57,15 +57,17 @@ jobs:
         run: mkdir -p dist
       
       - name: Package extension (Marketplace-ready)
-        run: npx @vscode/vsce package --no-dependencies --out dist/ripp-protocol.vsix
+        run: npx @vscode/vsce package --no-dependencies --out dist/
       
       - name: Verify VSIX package
         run: |
-          if [ ! -f dist/ripp-protocol.vsix ]; then
+          VSIX_COUNT=$(ls -1 dist/*.vsix 2>/dev/null | wc -l)
+          if [ "$VSIX_COUNT" -eq 0 ]; then
             echo "❌ Error: No .vsix file was produced"
             exit 1
           fi
-          echo "✅ VSIX package verified (Marketplace-ready)"
+          VSIX_FILE=$(ls -1 dist/*.vsix | head -1)
+          echo "✅ VSIX package verified (Marketplace-ready): $(basename $VSIX_FILE)"
       
       - name: Upload .vsix artifact
         uses: actions/upload-artifact@v4
@@ -84,11 +86,13 @@ jobs:
           echo "**Ref:** \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f dist/ripp-protocol.vsix ]; then
-            VSIX_FILE=$(ls -1 dist/ripp-protocol.vsix | xargs basename)
-            VSIX_SIZE=$(du -h dist/ripp-protocol.vsix | cut -f1)
+          VSIX_COUNT=$(ls -1 dist/*.vsix 2>/dev/null | wc -l)
+          if [ "$VSIX_COUNT" -gt 0 ]; then
+            VSIX_FILE=$(ls -1 dist/*.vsix | head -1)
+            VSIX_BASENAME=$(basename "$VSIX_FILE")
+            VSIX_SIZE=$(du -h "$VSIX_FILE" | cut -f1)
             echo "**Status:** ✅ Build successful (Marketplace-ready)" >> $GITHUB_STEP_SUMMARY
-            echo "**Package:** \`$VSIX_FILE\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Package:** \`$VSIX_BASENAME\`" >> $GITHUB_STEP_SUMMARY
             echo "**Size:** $VSIX_SIZE" >> $GITHUB_STEP_SUMMARY
           else
             echo "**Status:** ❌ Build failed - no .vsix produced" >> $GITHUB_STEP_SUMMARY
