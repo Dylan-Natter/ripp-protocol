@@ -49,10 +49,10 @@ The workflow step "Bump version for CI build" was using `npm version` to modify 
   run: |
     git config user.name "github-actions[bot]"
     git config user.email "github-actions[bot]@users.noreply.github.com"
-    
+
     # Increment patch version (e.g., 0.1.0 -> 0.1.1)
     npm version patch -m "chore: bump version to %s [skip ci]"
-    
+
     # Push the version bump commit
     git push
 ```

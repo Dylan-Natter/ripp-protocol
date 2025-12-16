@@ -50,6 +50,7 @@ The workflow **automatically increments** the patch version on every push to the
 7. VSIX is created: `ripp-protocol-0.1.1.vsix` (Marketplace-compliant)
 
 **Safety Features:**
+
 - Concurrency control prevents multiple simultaneous builds on same branch
 - `git pull --rebase` ensures latest changes before version increment
 - `git push --force-with-lease` prevents overwriting concurrent changes
