@@ -160,5 +160,9 @@
     "@vscode/vsce": "^3.7.1",
     "eslint": "^8.56.0",
     "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.1"
   }
 }
