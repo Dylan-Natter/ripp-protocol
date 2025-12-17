@@ -872,21 +872,27 @@ async function editConnections(): Promise<void> {
 			placeHolder: 'https://your-resource.openai.azure.com'
 		});
 
-		if (!endpoint) {return;}
+		if (!endpoint) {
+			return;
+		}
 
 		const apiKey = await vscode.window.showInputBox({
 			prompt: 'Enter Azure OpenAI API key',
 			password: true
 		});
 
-		if (!apiKey) {return;}
+		if (!apiKey) {
+			return;
+		}
 
 		const deployment = await vscode.window.showInputBox({
 			prompt: 'Enter deployment name',
 			placeHolder: 'gpt-4'
 		});
 
-		if (!deployment) {return;}
+		if (!deployment) {
+			return;
+		}
 
 		const apiVersion = await vscode.window.showInputBox({
 			prompt: 'Enter API version',

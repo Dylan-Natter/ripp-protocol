@@ -106,7 +106,8 @@ export class CliRunner {
 				Object.entries(env).filter(([key]) => 
 					key.startsWith('RIPP_') || 
 					key.startsWith('OPENAI_') || 
-					key.startsWith('AZURE_OPENAI_')
+					key.startsWith('AZURE_OPENAI_') ||
+					key.startsWith('OLLAMA_')
 				)
 			)
 		};

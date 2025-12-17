@@ -188,7 +188,7 @@ export class RippWorkflowProvider implements vscode.TreeDataProvider<WorkflowTre
 		}
 
 		// Output files
-		if (step.outputFiles && step.outputFiles.length > 0) {
+		if (step.outputFiles && step.outputFiles.length > 0 && this.workspaceRoot) {
 			const outputsItem = new WorkflowTreeItem(
 				`Outputs (${step.outputFiles.length})`,
 				'',
