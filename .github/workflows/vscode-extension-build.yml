@@ -78,14 +78,34 @@ jobs:
           # This matches the full line in the CHANGELOG.md to be more specific
           # NOTE: This assumes the CHANGELOG.md header doesn't change. If the header
           # changes in the future, update this pattern or consider using a changelog tool.
-          sed -i "/^All notable changes.*will be documented/a\\
-\\
-## [${NEW_VERSION}] - ${CHANGELOG_DATE}\\
-\\
-### Changed\\
-\\
-- Version bump\\
-" CHANGELOG.md
+          # Build changelog notes from commits since the previous tag (if available)
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          CHANGELOG_NOTES=$(git log --format="* %s" "${PREV_TAG}..HEAD" || true)
+
+          # Fallback to a generic note if no commits were found (e.g., first tag or edge cases)
+          if [ -z "${CHANGELOG_NOTES}" ]; then
+            CHANGELOG_NOTES="* Version bump"
+          fi
+
+          # Insert a new changelog section after the "All notable changes..." line
+          awk -v ver="${NEW_VERSION}" -v date="${CHANGELOG_DATE}" -v notes="${CHANGELOG_NOTES}" '
+            /All notable changes.*will be documented/ {
+              print;
+              print "";
+              print "## [" ver "] - " date;
+              print "";
+              print "### Changed";
+              print "";
+              n = split(notes, lines, "\n");
+              for (i = 1; i <= n; i++) {
+                if (length(lines[i]) > 0) {
+                  print lines[i];
+                }
+              }
+              next;
+            }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           
           # Amend the version bump commit to include the CHANGELOG changes
           git add CHANGELOG.md
