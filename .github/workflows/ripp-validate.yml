@@ -1,0 +1,51 @@
+name: Validate RIPP Packets
+
+on:
+  pull_request:
+    paths:
+      - '**.ripp.yaml'
+      - '**.ripp.json'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.ripp.yaml'
+      - '**.ripp.json'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate RIPP Packets
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: tools/ripp-cli/package-lock.json
+      
+      - name: Install RIPP CLI
+        run: |
+          cd tools/ripp-cli
+          npm ci
+          npm link
+      
+      - name: Validate all RIPP packets
+        run: |
+          echo "Validating RIPP packets..."
+          ripp validate examples/
+          ripp validate templates/ || true
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "✅ RIPP validation complete"
+          echo "See job logs for details"

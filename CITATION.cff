@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use RIPP in your research or project, please cite it as below."
+title: "Regenerative Intent Prompting Protocol (RIPP)"
+version: 1.0.0
+date-released: 2025-12-13
+url: "https://dylan-natter.github.io/ripp-protocol"
+repository-code: "https://github.com/Dylan-Natter/ripp-protocol"
+type: software
+license: MIT
+authors:
+  - name: "RIPP Protocol Contributors"
+abstract: "An open standard for capturing feature requirements as structured, machine-readable, human-reviewable specifications. RIPP enables teams to review, validate, and ship features with confidence by making the specification the primary artifact."
+keywords:
+  - specification
+  - protocol
+  - requirements
+  - documentation
+  - software-engineering
+  - best-practices

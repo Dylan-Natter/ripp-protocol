@@ -1,0 +1,214 @@
+{
+  "name": "ripp-protocol",
+  "displayName": "RIPP Protocol",
+  "description": "World-class VS Code companion for RIPP™ with 5-step guided workflow, AI integration, and seamless CLI orchestration.",
+  "version": "0.2.0",
+  "publisher": "RIPP",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "ripp",
+    "protocol",
+    "validation",
+    "lint",
+    "spec",
+    "handoff",
+    "specification",
+    "yaml",
+    "json",
+    "ai",
+    "workflow",
+    "intent",
+    "evidence",
+    "packaging"
+  ],
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dylan-Natter/ripp-protocol"
+  },
+  "bugs": {
+    "url": "https://github.com/Dylan-Natter/ripp-protocol/issues"
+  },
+  "homepage": "https://dylan-natter.github.io/ripp-protocol",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onView:rippStatus"
+  ],
+  "contributes": {
+    "views": {
+      "rippActivityBar": [
+        {
+          "id": "rippStatus",
+          "name": "RIPP Status",
+          "icon": "$(package)",
+          "contextualTitle": "RIPP Protocol"
+        },
+        {
+          "type": "webview",
+          "id": "ripp.reportView",
+          "name": "Validation Report",
+          "contextualTitle": "RIPP Validation Report"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rippActivityBar",
+          "title": "RIPP",
+          "icon": "$(package)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ripp.validate",
+        "title": "RIPP: Validate Packet(s)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.lint",
+        "title": "RIPP: Lint Packet(s)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.package",
+        "title": "RIPP: Package Handoff",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.analyze",
+        "title": "RIPP: Analyze Project (Draft Packet)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.init",
+        "title": "RIPP: Initialize Repository",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.evidence.build",
+        "title": "RIPP: Build Evidence Pack",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.discover",
+        "title": "RIPP: Discover Intent (AI)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.confirm",
+        "title": "RIPP: Confirm Intent",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.build",
+        "title": "RIPP: Build Canonical Artifacts",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.config.edit",
+        "title": "RIPP: Edit Configuration",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.connections.edit",
+        "title": "RIPP: Manage AI Connections",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.openDocs",
+        "title": "RIPP: Open Documentation",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.openCI",
+        "title": "RIPP: Open CI / GitHub Actions",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.refreshStatus",
+        "title": "RIPP: Refresh Status",
+        "category": "RIPP",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "ripp.refreshStatus",
+          "when": "view == rippStatus",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "RIPP Protocol",
+      "properties": {
+        "ripp.cliMode": {
+          "type": "string",
+          "enum": [
+            "npx",
+            "npmScript"
+          ],
+          "default": "npx",
+          "description": "How to execute the RIPP CLI: 'npx' runs 'npx ripp', 'npmScript' uses workspace npm scripts."
+        },
+        "ripp.strict": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable strict mode for linting (treat warnings as errors)."
+        },
+        "ripp.paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/*.ripp.yaml",
+            "**/*.ripp.json"
+          ],
+          "description": "Glob patterns for discovering RIPP packet files."
+        },
+        "ripp.ai.enabledLocally": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable AI features locally (only works if repo config allows AI)."
+        },
+        "ripp.validateOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically validate RIPP files when saved."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.1"
+  }
+}
