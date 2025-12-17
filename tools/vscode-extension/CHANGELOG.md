@@ -2,6 +2,14 @@
 
 All notable changes to the RIPP Protocol VS Code extension will be documented in this file.
 
+## [0.1.1] - 2025-12-16
+
+### Fixed
+
+- Marketplace compliance: Fixed versioning to comply with VS Code Marketplace requirements
+- Build process now uses numeric-only versions (no prerelease identifiers)
+- Added automatic changelog generation in build workflow
+
 ## [0.1.0] - 2025-12-14
 
 ### Initial Release
