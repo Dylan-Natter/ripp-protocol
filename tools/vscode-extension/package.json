@@ -1,8 +1,8 @@
 {
   "name": "ripp-protocol",
   "displayName": "RIPP Protocol",
-  "description": "VS Code integration for the Regenerative Intent Prompting Protocol (RIPP™) - validate, lint, and manage feature specification packets.",
-  "version": "0.1.1",
+  "description": "World-class VS Code companion for RIPP™ with 5-step guided workflow, AI integration, and seamless CLI orchestration.",
+  "version": "0.2.0",
   "publisher": "RIPP",
   "license": "MIT",
   "engines": {
@@ -10,6 +10,7 @@
   },
   "categories": [
     "Linters",
+    "Programming Languages",
     "Other"
   ],
   "keywords": [
@@ -21,7 +22,12 @@
     "handoff",
     "specification",
     "yaml",
-    "json"
+    "json",
+    "ai",
+    "workflow",
+    "intent",
+    "evidence",
+    "packaging"
   ],
   "icon": "icon.png",
   "repository": {
