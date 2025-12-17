@@ -1,0 +1,134 @@
+name: Specification Change Proposal
+description: Propose a change to the RIPP specification
+title: "[Spec]: "
+labels: ["spec-change"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Proposing a Specification Change
+        
+        Changes to the RIPP specification require community discussion and consensus.
+        Please provide a detailed rationale and consider backward compatibility.
+  
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: Type of Change
+      description: What kind of change are you proposing?
+      options:
+        - New optional section
+        - New required section (breaking change)
+        - Modify existing section
+        - Clarification (non-normative)
+        - Deprecation
+        - Other
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: level
+    attributes:
+      label: Affected RIPP Level
+      description: Which conformance level does this affect?
+      options:
+        - All levels
+        - Level 1
+        - Level 2
+        - Level 3
+        - New level (Level 4+)
+    validations:
+      required: true
+  
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this change needed? What problem does it solve?
+      placeholder: "The current spec doesn't address..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Change
+      description: Describe the change in detail
+      placeholder: |
+        Add a new section called `deployment_config`:
+        
+        ```yaml
+        deployment_config:
+          environments: ["staging", "production"]
+          rollout_strategy: "canary"
+        ```
+    validations:
+      required: true
+  
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Use Cases
+      description: Provide real-world scenarios where this change is beneficial
+      placeholder: |
+        1. Teams deploying to multiple environments need...
+        2. Organizations with complex rollout strategies require...
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Breaking Change?
+      description: Would this break existing RIPP packets?
+      options:
+        - "No - backward compatible"
+        - "Yes - would break existing packets"
+        - "Potentially - needs discussion"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Backward Compatibility
+      description: How would this affect existing RIPP packets?
+      placeholder: "Existing packets would... Migration path would be..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches did you consider?
+      placeholder: "I also considered..."
+  
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Notes
+      description: How would this be implemented in schema, validator, etc.?
+      placeholder: |
+        Schema changes:
+        - Add new property to root object
+        - Update conditional validation for Level X
+        
+        Validator changes:
+        - Add new validation rule
+  
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-Submission Checklist
+      description: Please confirm the following before submitting
+      options:
+        - label: I have read the current SPEC.md
+          required: true
+        - label: I have checked for similar existing proposals
+          required: true
+        - label: I understand this requires community discussion and consensus
+          required: true
+        - label: I am willing to contribute to the implementation if approved
+          required: false

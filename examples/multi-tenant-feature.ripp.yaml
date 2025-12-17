@@ -1,0 +1,277 @@
+ripp_version: '1.0'
+packet_id: 'multi-tenant-feature'
+title: 'Multi-Tenant Data Isolation for Projects'
+created: '2025-12-13'
+updated: '2025-12-13'
+status: 'approved'
+level: 3
+
+purpose:
+  problem: 'Current system shares data across all users; enterprise customers require strict data isolation by organization'
+  solution: 'Implement tenant-aware data access layer with organization scoping and row-level security'
+  value: 'Enables enterprise sales, ensures regulatory compliance, prevents data leakage across organizations'
+  out_of_scope: 'Tenant-specific customization, white-labeling, separate database per tenant'
+  assumptions:
+    - 'All users belong to exactly one organization'
+    - 'Organization membership is verified at authentication time'
+    - 'Database supports row-level security (PostgreSQL RLS or equivalent)'
+
+ux_flow:
+  - step: 1
+    actor: 'User'
+    action: 'Logs in to application'
+    trigger: 'Submits credentials'
+  - step: 2
+    actor: 'System'
+    action: 'Authenticates user and loads organization context'
+    result: 'Session token includes organization_id claim'
+  - step: 3
+    actor: 'User'
+    action: 'Requests list of projects'
+    trigger: 'Navigates to Projects page'
+  - step: 4
+    actor: 'System'
+    action: 'Queries database with organization_id filter'
+    condition: "Only returns projects where organization_id matches user's organization"
+  - step: 5
+    actor: 'System'
+    action: 'Returns filtered project list'
+    result: 'User sees only projects in their organization'
+  - step: 6
+    actor: 'User'
+    action: 'Attempts to access project from different organization'
+    trigger: 'Manually crafts URL with different project_id'
+  - step: 7
+    actor: 'System'
+    action: 'Validates project ownership, denies access'
+    result: 'User receives 403 Forbidden error'
+
+data_contracts:
+  inputs:
+    - name: 'TenantContext'
+      description: 'Authentication context containing tenant information'
+      fields:
+        - name: 'user_id'
+          type: 'string'
+          required: true
+          description: 'UUID of authenticated user'
+          format: 'uuid'
+        - name: 'organization_id'
+          type: 'string'
+          required: true
+          description: "UUID of user's organization (tenant)"
+          format: 'uuid'
+        - name: 'roles'
+          type: 'array'
+          required: true
+          description: "User's roles within the organization"
+  outputs:
+    - name: 'ProjectListResponse'
+      description: "List of projects visible to the user's organization"
+      fields:
+        - name: 'projects'
+          type: 'array'
+          required: true
+          description: 'Array of project objects'
+        - name: 'total_count'
+          type: 'integer'
+          required: true
+          description: 'Total number of projects in organization'
+        - name: 'organization_id'
+          type: 'string'
+          required: true
+          description: 'Organization context for this response'
+          format: 'uuid'
+
+api_contracts:
+  - endpoint: '/api/v1/projects'
+    method: 'GET'
+    purpose: "List all projects accessible to the authenticated user's organization"
+    request:
+      parameters:
+        - name: 'Authorization'
+          in: 'header'
+          required: true
+          type: 'string'
+          description: 'Bearer token with organization_id claim'
+        - name: 'page'
+          in: 'query'
+          required: false
+          type: 'integer'
+          description: 'Page number for pagination'
+        - name: 'limit'
+          in: 'query'
+          required: false
+          type: 'integer'
+          description: 'Number of items per page'
+    response:
+      success:
+        status: 200
+        schema_ref: 'ProjectListResponse'
+        content_type: 'application/json'
+      errors:
+        - status: 401
+          description: 'Missing or invalid authentication token'
+        - status: 403
+          description: 'User does not have permission to list projects'
+        - status: 500
+          description: 'Internal server error'
+  - endpoint: '/api/v1/projects/{project_id}'
+    method: 'GET'
+    purpose: "Retrieve a specific project if it belongs to user's organization"
+    request:
+      parameters:
+        - name: 'Authorization'
+          in: 'header'
+          required: true
+          type: 'string'
+          description: 'Bearer token with organization_id claim'
+        - name: 'project_id'
+          in: 'path'
+          required: true
+          type: 'string'
+          description: 'UUID of the project'
+    response:
+      success:
+        status: 200
+        schema_ref: 'Project'
+        content_type: 'application/json'
+      errors:
+        - status: 401
+          description: 'Missing or invalid authentication token'
+        - status: 403
+          description: "Project does not belong to user's organization"
+        - status: 404
+          description: 'Project not found'
+
+permissions:
+  - action: 'read:projects'
+    required_roles: ['admin', 'member', 'viewer']
+    resource_scope: 'organization'
+    description: 'All organization members can view projects within their organization'
+
+failure_modes:
+  - scenario: 'User attempts to access project from different organization'
+    impact: 'Potential data leak if not handled correctly'
+    handling: 'Return 403 Forbidden, log security event, do not reveal project existence'
+    user_message: 'You do not have permission to access this resource.'
+  - scenario: 'Organization_id missing from session token'
+    impact: 'Cannot determine tenant context, all queries would fail'
+    handling: 'Return 401 Unauthorized, force re-authentication'
+    user_message: 'Your session is invalid. Please log in again.'
+  - scenario: 'Database row-level security policy fails'
+    impact: 'Query returns data from all organizations'
+    handling: 'Fail-safe: application-level filter as backup, log critical error, alert ops team'
+    user_message: 'Service temporarily unavailable. Please contact support.'
+  - scenario: 'User switches organization mid-session'
+    impact: 'Token still has old organization_id'
+    handling: 'Force token refresh on organization switch, invalidate old session'
+    user_message: 'Organization switched. Please refresh the page.'
+
+audit_events:
+  - event: 'project.accessed'
+    severity: 'info'
+    includes:
+      - 'user_id'
+      - 'organization_id'
+      - 'project_id'
+      - 'timestamp'
+      - 'ip_address'
+      - 'success'
+    retention: '365 days'
+    purpose: 'Track all project access for compliance and security audits'
+  - event: 'tenant.isolation_violation_attempt'
+    severity: 'error'
+    includes:
+      - 'user_id'
+      - 'user_organization_id'
+      - 'attempted_project_id'
+      - 'project_organization_id'
+      - 'timestamp'
+      - 'ip_address'
+      - 'request_url'
+    retention: '730 days'
+    purpose: 'Security monitoring for cross-tenant access attempts'
+  - event: 'tenant.context_missing'
+    severity: 'error'
+    includes:
+      - 'user_id'
+      - 'timestamp'
+      - 'ip_address'
+      - 'endpoint'
+    retention: '90 days'
+    purpose: 'Detect authentication or session management issues'
+
+nfrs:
+  performance:
+    response_time_p95: '100ms'
+    response_time_p99: '200ms'
+    throughput: '500 requests/second'
+  scalability:
+    max_concurrent_users: 50000
+    data_growth: '100,000 projects/year across all tenants'
+  availability:
+    uptime_target: '99.95%'
+    rpo: '15 minutes'
+    rto: '1 hour'
+  security:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    authentication_required: true
+    authorization_model: 'Multi-tenant RBAC with organization-scoped row-level security'
+  compliance:
+    standards:
+      - 'SOC 2 Type II'
+      - 'GDPR'
+      - 'HIPAA (for healthcare tenants)'
+    data_residency: 'Configurable per organization'
+    audit_requirements: 'All access logged for minimum 365 days'
+
+acceptance_tests:
+  - test_id: 'TC-001'
+    title: 'User can only list projects from their own organization'
+    given: 'User belongs to organization A, projects exist in organizations A and B'
+    when: 'User requests GET /api/v1/projects'
+    then: 'Response contains only organization A projects'
+    verification:
+      - 'HTTP 200 response received'
+      - "All returned projects have organization_id matching user's organization"
+      - 'Projects from organization B are not present'
+      - 'Total count reflects only organization A projects'
+  - test_id: 'TC-002'
+    title: 'User cannot access project from different organization via direct URL'
+    given: 'User belongs to organization A, project X belongs to organization B'
+    when: 'User requests GET /api/v1/projects/{project_X_id}'
+    then: 'Request is denied with 403 Forbidden'
+    verification:
+      - 'HTTP 403 response received'
+      - 'Response does not leak project details'
+      - "Audit event 'tenant.isolation_violation_attempt' is logged"
+  - test_id: 'TC-003'
+    title: 'Missing organization context results in authentication failure'
+    given: 'User token does not include organization_id claim'
+    when: 'User requests GET /api/v1/projects'
+    then: 'Request fails with 401 Unauthorized'
+    verification:
+      - 'HTTP 401 response received'
+      - 'Error message indicates invalid session'
+      - "Audit event 'tenant.context_missing' is logged"
+  - test_id: 'TC-004'
+    title: 'Database row-level security enforces isolation'
+    given: 'User belongs to organization A'
+    when: 'Application attempts raw SQL query without organization filter'
+    then: 'Database RLS policy prevents cross-tenant data access'
+    verification:
+      - 'Query returns only organization A data'
+      - 'Database policy is enabled and active'
+      - 'Application-level filter is also applied as defense-in-depth'
+  - test_id: 'TC-005'
+    title: 'User switching organizations gets new context'
+    given: 'User belongs to organizations A and B (multi-org user)'
+    when: 'User switches from organization A to organization B'
+    then: 'New token is issued with organization B context'
+    verification:
+      - 'New token contains organization_id for organization B'
+      - 'Old token is invalidated'
+      - 'Subsequent requests use organization B context'
+      - 'User can only see organization B projects'

@@ -1,0 +1,160 @@
+name: Documentation Enforcement
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, labeled, unlabeled]
+
+jobs:
+  check-docs-impact:
+    name: Check Documentation Impact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Define high-impact paths (single source of truth)
+          HIGH_IMPACT_PATHS=(
+            "SPEC.md"
+            "schema/"
+            "tools/ripp-cli/"
+            "tools/vscode-extension/"
+          )
+          
+          # Define config/tooling files that don't require docs
+          CONFIG_FILE_PATTERNS=(
+            ".eslintrc.json"
+            ".prettierrc"
+            ".prettierrc.json"
+            ".prettierrc.yml"
+            ".prettierrc.yaml"
+            ".editorconfig"
+            "tsconfig.json"
+            "jest.config.js"
+            "jest.config.ts"
+            ".gitignore"
+            "package-lock.json"
+            "yarn.lock"
+            "pnpm-lock.yaml"
+          )
+          
+          # Get list of changed files
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check for high-impact paths that require docs
+          HIGH_IMPACT=""
+          while IFS= read -r file; do
+            # Skip empty lines
+            [[ -z "$file" ]] && continue
+            
+            # Check if file matches any config pattern
+            IS_CONFIG=""
+            for pattern in "${CONFIG_FILE_PATTERNS[@]}"; do
+              if [[ "$(basename "$file")" == $pattern ]]; then
+                IS_CONFIG="true"
+                echo "Config file detected (docs not required): $file"
+                break
+              fi
+            done
+            
+            # Only check high-impact paths if not a config file
+            if [[ "$IS_CONFIG" != "true" ]]; then
+              for path in "${HIGH_IMPACT_PATHS[@]}"; do
+                if [[ "$file" == $path* ]]; then
+                  HIGH_IMPACT="true"
+                  echo "High-impact file detected: $file (matches $path)"
+                  break
+                fi
+              done
+            fi
+          done <<< "$CHANGED_FILES"
+          
+          # Check if docs were updated
+          DOCS_UPDATED=""
+          while IFS= read -r file; do
+            case "$file" in
+              docs/*|.github/copilot-instructions.md)
+                DOCS_UPDATED="true"
+                echo "Documentation update detected: $file"
+                ;;
+            esac
+          done <<< "$CHANGED_FILES"
+          
+          # Export high-impact paths for error message
+          HIGH_IMPACT_LIST=$(printf "  - %s\n" "${HIGH_IMPACT_PATHS[@]}")
+          
+          echo "high_impact=$HIGH_IMPACT" >> $GITHUB_OUTPUT
+          echo "docs_updated=$DOCS_UPDATED" >> $GITHUB_OUTPUT
+          {
+            echo "high_impact_list<<EOF"
+            echo "$HIGH_IMPACT_LIST"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Check for docs-not-needed label
+        id: check-label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            const hasLabel = labels.some(label => label.name === 'docs-not-needed');
+            console.log(`docs-not-needed label present: ${hasLabel}`);
+            return hasLabel;
+
+      - name: Verify documentation requirements
+        run: |
+          HIGH_IMPACT="${{ steps.changed-files.outputs.high_impact }}"
+          DOCS_UPDATED="${{ steps.changed-files.outputs.docs_updated }}"
+          HAS_LABEL="${{ steps.check-label.outputs.result }}"
+          
+          echo "High-impact changes: $HIGH_IMPACT"
+          echo "Documentation updated: $DOCS_UPDATED"
+          echo "docs-not-needed label: $HAS_LABEL"
+          
+          if [ "$HIGH_IMPACT" = "true" ]; then
+            if [ "$DOCS_UPDATED" = "true" ]; then
+              echo "✅ High-impact changes detected and documentation was updated"
+              exit 0
+            elif [ "$HAS_LABEL" = "true" ]; then
+              echo "⚠️  High-impact changes detected, but docs-not-needed label is present"
+              echo "Please ensure you've provided justification in the PR description"
+              exit 0
+            else
+              echo "❌ Documentation update required"
+              echo ""
+              echo "This PR modifies high-impact paths:"
+              echo "${{ steps.changed-files.outputs.high_impact_list }}"
+              echo ""
+              echo "You must either:"
+              echo "  1. Update documentation in /docs/ (recommended)"
+              echo "  2. Add the 'docs-not-needed' label with justification"
+              echo ""
+              echo "See CONTRIBUTING.md for documentation requirements."
+              exit 1
+            fi
+          else
+            echo "✅ No high-impact changes detected, docs check not required"
+            exit 0
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Documentation enforcement check complete"
+          echo "See job logs for details"
