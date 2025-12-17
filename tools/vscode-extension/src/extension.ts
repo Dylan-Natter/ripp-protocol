@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { RippWorkflowProvider } from './views/workflowProvider';
 import { RippDiagnosticsProvider } from './diagnosticsProvider';
 import { RippReportViewProvider, ValidationReport, Finding } from './reportViewProvider';
 import { CliRunner } from './services/cliRunner';
 import { ConfigService } from './services/configService';
 import { SecretService } from './services/secretService';
+
+const execFileAsync = promisify(execFile);
 
 /**
  * RIPP VS Code Extension vNext
@@ -922,10 +926,6 @@ async function openCI(): Promise<void> {
 
 	try {
 		// Try to get git remote
-		const { execFile } = require('child_process');
-		const { promisify } = require('util');
-		const execFileAsync = promisify(execFile);
-
 		const gitResult = await execFileAsync('git', ['remote', 'get-url', 'origin'], {
 			cwd: workspaceRoot
 		});

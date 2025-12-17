@@ -1,6 +1,45 @@
-# RIPP™ Protocol - VS Code Extension
+# RIPP™ Protocol - VS Code Extension vNext
 
-VS Code integration for the Regenerative Intent Prompting Protocol (RIPP™).
+**World-class protocol companion for RIPP™** — A guided 5-step workflow that makes RIPP effortless, trustworthy, and enterprise-ready.
+
+## What's New in vNext
+
+### 🎯 5-Step Guided Workflow
+
+The extension now features an intuitive workflow sidebar that guides you through the complete RIPP process:
+
+1. **Initialize** - Set up RIPP in your repository with `.ripp/` structure
+2. **Build Evidence Pack** - Extract repository signals (routes, schemas, auth, CI, deps)
+3. **Discover Intent (AI)** - Use AI to infer candidate intent from evidence
+4. **Confirm Intent** - Review and approve AI-discovered intent
+5. **Build + Validate + Package** - Generate canonical RIPP artifacts and handoff packages
+
+Each step shows:
+
+- ✓ Status (Not Started / Ready / In Progress / Done / Error)
+- ⏱ Last run timestamp
+- 📄 Generated output files with quick-open links
+- ▶️ Action buttons with prerequisite checking
+
+### 🤖 AI Integration (Optional)
+
+- **Secure Secrets Management** - API keys stored in VS Code SecretStorage (never in repo)
+- **Multiple Providers** - OpenAI, Azure OpenAI, or Ollama (local)
+- **Trust-First Policy** - AI must be enabled in both repo config AND locally
+- **Clear State Visibility** - See exactly why AI is enabled/disabled
+
+### ⚙️ Configuration Management
+
+- **Config Editor** - Edit `.ripp/config.yaml` directly or via UI
+- **Connections Manager** - Set up AI providers securely
+- **YAML Validation** - Config validated before saving
+
+### 🔧 Enhanced Developer Experience
+
+- **CLI Version Gating** - Automatic detection and upgrade prompts
+- **Streaming Output** - Real-time command feedback
+- **Better Error Messages** - Actionable guidance when things go wrong
+- **Workspace Trust** - Respects VS Code security model
 
 ## What This Extension Does
 
@@ -20,16 +59,30 @@ This extension integrates the official RIPP CLI into VS Code. It is a **thin wra
 
 ## Commands
 
-All commands are available via the Command Palette (Ctrl+Shift+P / Cmd+Shift+P) or from the RIPP sidebar:
+### Workflow Commands (5-Step Process)
 
-- **RIPP: Initialize Repository** - Set up RIPP structure in your repository (creates `ripp/`, GitHub Actions, etc.)
-- **RIPP: Validate Packet(s)** - Validate all RIPP packets in your workspace against the schema
-- **RIPP: Lint Packet(s)** - Run quality checks and best practice linting on your packets
-- **RIPP: Package Handoff** - Package a RIPP packet into a handoff document (Markdown, JSON, or YAML)
-- **RIPP: Analyze Project (Draft Packet)** - Generate a draft RIPP packet from existing documentation
-- **RIPP: Open Documentation** - Open the RIPP protocol documentation in your browser
-- **RIPP: Open CI / GitHub Actions** - Open your repository's GitHub Actions page (if available)
-- **RIPP: Refresh Status** - Refresh the RIPP sidebar status
+All workflow commands are available from the RIPP sidebar or Command Palette:
+
+- **RIPP: Initialize Repository** - Create `.ripp/` structure and config
+- **RIPP: Build Evidence Pack** - Extract repository signals for AI discovery
+- **RIPP: Discover Intent (AI)** - Use AI to infer candidate intent (requires AI setup)
+- **RIPP: Confirm Intent** - Review and approve discovered intent
+- **RIPP: Build Canonical Artifacts** - Generate final RIPP packets
+
+### Utility Commands
+
+- **RIPP: Edit Configuration** - Edit `.ripp/config.yaml`
+- **RIPP: Manage AI Connections** - Configure API keys securely
+- **RIPP: Validate Packet(s)** - Validate all RIPP packets against schema
+- **RIPP: Package Handoff** - Package RIPP into handoff document
+- **RIPP: Refresh Status** - Refresh workflow status
+- **RIPP: Open Documentation** - Open RIPP protocol docs
+- **RIPP: Open CI / GitHub Actions** - Quick link to GitHub Actions
+
+### Legacy Commands
+
+- **RIPP: Lint Packet(s)** - Run quality checks (legacy)
+- **RIPP: Analyze Project** - Redirects to new workflow
 
 ## Features
 
@@ -102,10 +155,13 @@ The extension falls back to `npx ripp` if no local installation is found, but th
 
 ## Security Notes
 
+- **Secrets in SecretStorage Only:** API keys stored securely in VS Code SecretStorage, never in repository files
 - **Read-only validation:** The extension never modifies RIPP packet files (`*.ripp.yaml`, `*.ripp.json`) during validation
-- **Local processing:** All validation, linting, and analysis happens locally via the RIPP CLI
-- **No credentials collected:** No secrets, tokens, or environment variables are collected or stored
-- **Explicit writes only:** Commands like `init`, `package`, and `analyze` only write files when you explicitly invoke them and choose output locations
+- **Local processing:** All validation, linting, and AI processing happens locally via the RIPP CLI
+- **AI Policy Enforcement:** AI must be enabled in repo config AND locally with secrets configured
+- **Workspace Trust:** Respects VS Code Workspace Trust to prevent untrusted code execution
+- **Explicit writes only:** Commands like `init`, `build`, and `package` only write files when you explicitly invoke them
+- **No telemetry:** No usage data sent externally (local-only in future versions)
 
 ## Installation
 
@@ -118,7 +174,52 @@ Install from the VS Code Marketplace:
 
 ## Quick Start
 
-### For New Users
+### 5-Minute Workflow (With AI)
+
+1. **Install RIPP CLI**
+
+   ```bash
+   npm install -D ripp-cli
+   ```
+
+2. **Open RIPP Sidebar**
+   - Click the RIPP icon in Activity Bar (left sidebar)
+
+3. **Follow the 5-Step Workflow**
+   - **Step 1: Initialize** - Click "Run 1. Initialize"
+   - **Step 2: Build Evidence** - Click "Run 2. Build Evidence Pack"
+   - **Step 3: Configure AI** (optional)
+     - Click "Connections" → Configure your AI provider
+     - Edit `.ripp/config.yaml` → Set `ai.enabled: true`
+   - **Step 3: Discover Intent** - Click "Run 3. Discover Intent (AI)"
+   - **Step 4: Confirm Intent** - Review and click "Run 4. Confirm Intent"
+   - **Step 5: Build & Package** - Click "Run 5. Build + Validate + Package"
+
+4. **View Results**
+   - Check Problems panel for validation issues
+   - Open `.ripp/` folder to see generated artifacts
+   - Use "Package Handoff" to create final deliverable
+
+### Without AI (Manual Mode)
+
+1. **Initialize**
+
+   ```bash
+   npm install -D ripp-cli
+   ```
+
+2. **Create Structure**
+   - Run **RIPP: Initialize Repository**
+
+3. **Create RIPP Packet Manually**
+   - Create `.ripp/my-feature.ripp.yaml`
+   - Follow RIPP schema (see docs)
+
+4. **Validate & Package**
+   - Run **RIPP: Validate Packet(s)**
+   - Run **RIPP: Package Handoff**
+
+### For New Users (Detailed)
 
 1. Open your project in VS Code
 2. Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
@@ -141,25 +242,31 @@ Install from the VS Code Marketplace:
 
 ## Standard Repository Layout
 
-RIPP uses a standard repository structure (created by `ripp init`):
+RIPP vNext uses this structure (created by `ripp init`):
 
 ```
 your-repo/
-├── ripp/                        # RIPP artifacts
-│   ├── README.md                # Documentation
-│   ├── features/                # Feature RIPP packets
-│   │   ├── auth-login.ripp.yaml
-│   │   └── user-profile.ripp.yaml
-│   └── intent-packages/         # Packaged artifacts
-│       ├── README.md
-│       └── latest.tar.gz
+├── .ripp/                          # RIPP workspace
+│   ├── config.yaml                 # Repository RIPP configuration
+│   ├── README.md                   # RIPP documentation
+│   ├── evidence/                   # Evidence pack (step 2)
+│   │   ├── evidence.index.json
+│   │   ├── routes.json
+│   │   ├── schemas.json
+│   │   ├── auth.json
+│   │   └── dependencies.json
+│   ├── candidates/                 # AI-discovered intent (step 3)
+│   │   └── intent.candidates.*.json
+│   ├── confirmed/                  # Confirmed intent (step 4)
+│   │   └── intent.confirmed.*.json
+│   └── *.ripp.yaml                 # Final RIPP packets (step 5)
 ├── .github/
 │   └── workflows/
-│       └── ripp-validate.yml    # CI validation
+│       └── ripp-validate.yml       # CI validation
 └── (your project files)
 ```
 
-The extension will discover RIPP packets anywhere in your workspace, but following this structure is recommended for consistency.
+**Migration Note:** Legacy `ripp/features/` layout is still supported but new workflows use `.ripp/` at repo root.
 
 ## Configuration
 
@@ -200,6 +307,62 @@ Glob patterns for discovering RIPP packet files:
 }
 ```
 
+### `ripp.ai.enabledLocally`
+
+Enable AI features locally (only works if repo config allows AI):
+
+```json
+{
+  "ripp.ai.enabledLocally": false
+}
+```
+
+**Note:** This setting works in conjunction with `.ripp/config.yaml`. Both must be true for AI to work.
+
+### `ripp.validateOnSave`
+
+Automatically validate RIPP files when saved:
+
+```json
+{
+  "ripp.validateOnSave": false
+}
+```
+
+## AI Configuration
+
+### Repository Config (`.ripp/config.yaml`)
+
+Controls whether AI is allowed in the repository:
+
+```yaml
+rippVersion: '1.0'
+ai:
+  enabled: true # Repo policy: allow AI
+  provider: openai
+  model: gpt-4o-mini
+  maxRetries: 3
+  timeout: 30000
+evidencePack:
+  includeGlobs:
+    - 'src/**'
+    - 'app/**'
+    - 'api/**'
+  excludeGlobs:
+    - '**/node_modules/**'
+    - '**/dist/**'
+```
+
+### Local Secrets (VS Code SecretStorage)
+
+Use **RIPP: Manage AI Connections** to configure:
+
+- **OpenAI**: API key
+- **Azure OpenAI**: Endpoint, API key, deployment, API version
+- **Ollama**: Base URL (for local models)
+
+Secrets are stored securely in VS Code and never written to repository files.
+
 ## File Naming Convention
 
 RIPP packet files must follow the naming convention:
@@ -225,13 +388,108 @@ Examples:
 - [GitHub Issues](https://github.com/Dylan-Natter/ripp-protocol/issues)
 - [GitHub Repository](https://github.com/Dylan-Natter/ripp-protocol)
 
+## Troubleshooting
+
+### CLI Not Found
+
+**Problem:** "RIPP CLI was not found"
+
+**Solutions:**
+
+1. Install RIPP CLI locally: `npm install -D ripp-cli`
+2. Check that `node_modules/.bin/ripp` exists
+3. Restart VS Code after installation
+
+### AI Not Working
+
+**Problem:** "AI is disabled" or discovery fails
+
+**Check:**
+
+1. **Repo Config**: `.ripp/config.yaml` has `ai.enabled: true`
+2. **Local Setting**: `ripp.ai.enabledLocally` is `true` in VS Code settings
+3. **Secrets**: Run **RIPP: Manage AI Connections** to configure API keys
+4. **Environment**: Check Output panel for error messages
+
+### Version Mismatch
+
+**Problem:** "RIPP CLI version X.X.X is installed, but Y.Y.Y or higher is required"
+
+**Solution:**
+
+```bash
+npm install -D ripp-cli@latest
+```
+
+### Workflow Steps Disabled
+
+**Problem:** Step shows "(prerequisites not met)"
+
+**Solution:** Complete prerequisite steps in order:
+
+1. Initialize → 2. Evidence → 3. Discover → 4. Confirm → 5. Build
+
+### Codespaces Issues
+
+**Problem:** Extension not working in GitHub Codespaces
+
+**Solutions:**
+
+1. Add `ripp-cli` to `devDependencies` in `package.json`
+2. Run `npm install` in Codespace terminal
+3. Check that Node.js >=18.0.0 is available
+
+### Output Not Showing
+
+**Problem:** Can't see command output
+
+**Solution:**
+
+1. View → Output
+2. Select "RIPP" from dropdown
+3. Check "Show Output" on command errors
+
 ## License
 
 MIT
 
 ## Release Notes
 
-### 0.2.0 (Current)
+### 0.2.0 - vNext (Current)
+
+🎉 **Major Update: 5-Step Workflow & AI Integration**
+
+**New Features:**
+
+- **5-Step Guided Workflow**: Complete redesign with intuitive step-by-step process
+  - Initialize → Build Evidence → Discover Intent → Confirm → Build & Package
+  - Real-time status tracking with timestamps
+  - Output file links for quick access
+  - Prerequisite checking
+
+- **AI Integration (Optional)**:
+  - Secure secrets management via VS Code SecretStorage
+  - Support for OpenAI, Azure OpenAI, and Ollama
+  - Trust-first AI policy enforcement
+  - Clear state visibility
+
+- **Enhanced Services**:
+  - Unified CLI runner with version gating
+  - Configuration service for `.ripp/config.yaml`
+  - Secrets service for secure API key storage
+
+- **Improved UX**:
+  - Better error messages with actionable guidance
+  - Streaming command output
+  - CLI installation helpers
+  - Workspace trust integration
+
+**Breaking Changes:**
+
+- New `.ripp/` directory structure at repo root (legacy `ripp/features/` still supported)
+- Analyze command deprecated in favor of workflow
+
+### 0.1.0
 
 New UI features:
 
