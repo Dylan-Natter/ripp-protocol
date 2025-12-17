@@ -69,6 +69,7 @@ export const DEFAULT_CONFIG: RippConfig = {
 
 export class ConfigService {
 	private static instance: ConfigService;
+	public static DEFAULT_CONFIG = DEFAULT_CONFIG;
 
 	private constructor() {}
 

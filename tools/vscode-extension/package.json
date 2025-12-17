@@ -89,6 +89,36 @@
         "category": "RIPP"
       },
       {
+        "command": "ripp.evidence.build",
+        "title": "RIPP: Build Evidence Pack",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.discover",
+        "title": "RIPP: Discover Intent (AI)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.confirm",
+        "title": "RIPP: Confirm Intent",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.build",
+        "title": "RIPP: Build Canonical Artifacts",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.config.edit",
+        "title": "RIPP: Edit Configuration",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.connections.edit",
+        "title": "RIPP: Manage AI Connections",
+        "category": "RIPP"
+      },
+      {
         "command": "ripp.openDocs",
         "title": "RIPP: Open Documentation",
         "category": "RIPP"
@@ -141,6 +171,16 @@
             "**/*.ripp.json"
           ],
           "description": "Glob patterns for discovering RIPP packet files."
+        },
+        "ripp.ai.enabledLocally": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable AI features locally (only works if repo config allows AI)."
+        },
+        "ripp.validateOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically validate RIPP files when saved."
         }
       }
     }

@@ -1,53 +1,60 @@
 import * as vscode from 'vscode';
-import { execFile } from 'child_process';
 import * as path from 'path';
-import { promisify } from 'util';
-import * as fs from 'fs';
-import { RippStatusProvider, ValidationResult } from './rippStatusProvider';
+import { RippWorkflowProvider } from './views/workflowProvider';
 import { RippDiagnosticsProvider } from './diagnosticsProvider';
 import { RippReportViewProvider, ValidationReport, Finding } from './reportViewProvider';
-
-const execFileAsync = promisify(execFile);
+import { CliRunner } from './services/cliRunner';
+import { ConfigService } from './services/configService';
+import { SecretService } from './services/secretService';
 
 /**
- * VS Code extension for RIPP Protocol
+ * RIPP VS Code Extension vNext
  * 
- * This extension is a thin wrapper around the RIPP CLI.
- * It discovers RIPP packets and executes CLI commands via child_process.
+ * World-class protocol UX with thin UI layer over deterministic CLI.
  * 
- * Security constraints:
- * - Uses execFile/spawn with shell: false
- * - Uses args array only (no command strings)
- * - Sets cwd to workspace root
- * - Never executes arbitrary user input
- * - Never logs secrets or env values
- * - Never mutates *.ripp.yaml or *.ripp.json files
- * - Respects VS Code Workspace Trust
+ * Architecture:
+ * - Services: CLI runner, config manager, secrets manager
+ * - Views: 5-step workflow sidebar, webviews for config/secrets/evidence/intent
+ * - Providers: Diagnostics, validation reports
+ * 
+ * Core Principles:
+ * - CLI is the engine and single source of truth
+ * - Extension is thin UI orchestration layer
+ * - No secrets in repo files (use SecretStorage)
+ * - Respect AI policy and precedence
+ * - Transparent logging for all operations
  */
 
-// Shared output channel
+// Global services and providers
 let outputChannel: vscode.OutputChannel;
-
-// Providers
-let statusProvider: RippStatusProvider;
+let cliRunner: CliRunner;
+let configService: ConfigService;
+let secretService: SecretService;
+let workflowProvider: RippWorkflowProvider;
 let diagnosticsProvider: RippDiagnosticsProvider;
 let reportViewProvider: RippReportViewProvider;
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('RIPP Protocol extension is now active');
+	console.log('RIPP Protocol extension vNext is activating...');
 	
 	// Create shared output channel
 	outputChannel = vscode.window.createOutputChannel('RIPP');
 	context.subscriptions.push(outputChannel);
 
+	// Initialize services
+	cliRunner = CliRunner.getInstance(outputChannel);
+	configService = ConfigService.getInstance();
+	secretService = SecretService.getInstance(context.secrets);
+
 	// Initialize providers
-	statusProvider = new RippStatusProvider();
+	workflowProvider = new RippWorkflowProvider();
 	diagnosticsProvider = new RippDiagnosticsProvider();
 	reportViewProvider = new RippReportViewProvider(context.extensionUri);
 
-	// Register TreeView for sidebar
+	// Register TreeView for workflow sidebar
 	const treeView = vscode.window.createTreeView('rippStatus', {
-		treeDataProvider: statusProvider
+		treeDataProvider: workflowProvider,
+		showCollapseAll: true
 	});
 	context.subscriptions.push(treeView);
 
@@ -59,45 +66,156 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
-	// Register commands
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.validate', () => validatePackets())
-	);
+	// Register workflow commands
+	registerWorkflowCommands(context);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.lint', () => lintPackets())
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.package', () => packageHandoff())
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.analyze', () => analyzeProject())
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.init', () => initRepository())
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.openDocs', () => openDocs())
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.openCI', () => openCI())
-	);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('ripp.refreshStatus', () => statusProvider.refresh())
-	);
+	// Register utility commands
+	registerUtilityCommands(context);
 
 	// Register diagnostics provider
 	context.subscriptions.push(diagnosticsProvider);
+
+	// Check CLI version on activation
+	checkCliVersion();
+
+	console.log('RIPP Protocol extension vNext is now active');
 }
 
 export function deactivate() {
 	// Cleanup if needed
+}
+
+/**
+ * Register 5-step workflow commands
+ */
+function registerWorkflowCommands(context: vscode.ExtensionContext) {
+	// Step 1: Initialize
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.init', async () => {
+			await executeWorkflowStep('init', async () => {
+				await initRepository();
+			});
+		})
+	);
+
+	// Step 2: Build Evidence Pack
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.evidence.build', async () => {
+			await executeWorkflowStep('evidence', async () => {
+				await buildEvidencePack();
+			});
+		})
+	);
+
+	// Step 3: Discover Intent (AI)
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.discover', async () => {
+			await executeWorkflowStep('discover', async () => {
+				await discoverIntent();
+			});
+		})
+	);
+
+	// Step 4: Confirm Intent
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.confirm', async () => {
+			await executeWorkflowStep('confirm', async () => {
+				await confirmIntent();
+			});
+		})
+	);
+
+	// Step 5: Build Canonical Artifacts
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.build', async () => {
+			await executeWorkflowStep('finalize', async () => {
+				await buildArtifacts();
+			});
+		})
+	);
+
+	// Also register validate and package under step 5
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.validate', async () => {
+			await validatePackets();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.package', async () => {
+			await packageHandoff();
+		})
+	);
+}
+
+/**
+ * Register utility commands
+ */
+function registerUtilityCommands(context: vscode.ExtensionContext) {
+	// Config editor
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.config.edit', async () => {
+			await editConfig();
+		})
+	);
+
+	// Connections editor
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.connections.edit', async () => {
+			await editConnections();
+		})
+	);
+
+	// Refresh workflow
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.refreshStatus', () => {
+			workflowProvider.refresh();
+		})
+	);
+
+	// Open docs
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.openDocs', () => {
+			vscode.env.openExternal(vscode.Uri.parse('https://dylan-natter.github.io/ripp-protocol'));
+		})
+	);
+
+	// Open CI
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.openCI', async () => {
+			await openCI();
+		})
+	);
+
+	// Legacy commands for backward compatibility
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.lint', async () => {
+			await lintPackets();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.analyze', async () => {
+			await analyzeProject();
+		})
+	);
+}
+
+/**
+ * Helper: Execute a workflow step with error handling and status updates
+ */
+async function executeWorkflowStep(
+	stepId: string,
+	action: () => Promise<void>
+): Promise<void> {
+	try {
+		workflowProvider.updateStepStatus(stepId, 'in-progress');
+		await action();
+		workflowProvider.updateStepStatus(stepId, 'done', Date.now());
+	} catch (error) {
+		workflowProvider.updateStepStatus(stepId, 'error');
+		throw error;
+	}
 }
 
 /**
@@ -131,177 +249,432 @@ function checkWorkspaceTrust(): boolean {
 }
 
 /**
- * Handle CLI execution errors with user-friendly messages
+ * Check CLI version and show help if needed
  */
-function handleCommandError(error: any, commandName: string) {
-	if ((error as any).code === 'CLI_NOT_FOUND') {
-		vscode.window.showErrorMessage(
-			'RIPP CLI not found. Install it with: npm install -D ripp-cli',
-			'Install Locally',
-			'Open Terminal'
-		).then(selection => {
-			if (selection === 'Install Locally') {
-				// Open terminal and suggest install command
-				vscode.commands.executeCommand('workbench.action.terminal.new').then(() => {
-					vscode.window.showInformationMessage(
-						'Run: npm install -D ripp-cli'
-					);
-				}, (err) => {
-					// Terminal failed to open
-					vscode.window.showErrorMessage(
-						`Could not open terminal: ${err.message}`
-					);
-				});
-			} else if (selection === 'Open Terminal') {
-				vscode.commands.executeCommand('workbench.action.terminal.new').then(undefined, (err) => {
-					vscode.window.showErrorMessage(
-						`Could not open terminal: ${err.message}`
-					);
-				});
-			}
-		});
-	} else {
-		vscode.window.showErrorMessage(`RIPP ${commandName} failed: ${error.message}`);
-	}
-}
-
-/**
- * Get configuration
- */
-function getConfig() {
-	const config = vscode.workspace.getConfiguration('ripp');
-	return {
-		cliMode: config.get<string>('cliMode', 'npx'),
-		strict: config.get<boolean>('strict', false),
-		paths: config.get<string[]>('paths', ['**/*.ripp.yaml', '**/*.ripp.json'])
-	};
-}
-
-/**
- * Discover RIPP packet files
- */
-async function discoverPackets(): Promise<vscode.Uri[]> {
-	const config = getConfig();
-	const patterns = config.paths;
-
-	const files: vscode.Uri[] = [];
-	for (const pattern of patterns) {
-		const found = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
-		files.push(...found);
-	}
-
-	return files;
-}
-
-/**
- * Execute RIPP CLI command
- */
-async function executeRippCommand(
-	args: string[],
-	workspaceRoot: string,
-	showOutput: boolean = true
-): Promise<{ stdout: string; stderr: string }> {
-	const config = getConfig();
-
-	if (showOutput) {
-		outputChannel.show();
-		outputChannel.appendLine(`Executing: ${args.join(' ')}`);
-		outputChannel.appendLine('---');
+async function checkCliVersion(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot) {
+		return;
 	}
 
 	try {
-		let command: string;
-		let commandArgs: string[];
-
-		if (config.cliMode === 'npx') {
-			// Try to use local binary first (prefer devDependency)
-			const binName = process.platform === 'win32' ? 'ripp.cmd' : 'ripp';
-			const localBinary = path.join(workspaceRoot, 'node_modules', '.bin', binName);
-			
-			// Note: Using fs.existsSync here is acceptable because:
-			// - It's checking a local file (very fast, <1ms)
-			// - The alternative (fs.promises.access) would add complexity
-			// - This is already in an async context (executeRippCommand)
-			if (fs.existsSync(localBinary)) {
-				// Use local binary directly
-				command = localBinary;
-				commandArgs = args;
-				if (showOutput) {
-					outputChannel.appendLine('Using local RIPP CLI from node_modules');
-				}
-			} else {
-				// Fallback to npx
-				command = 'npx';
-				commandArgs = ['ripp', ...args];
-				if (showOutput) {
-					outputChannel.appendLine('Using npx (no local RIPP CLI found)');
-				}
-			}
-		} else {
-			// Use npm run script
-			// Assumes workspace has npm scripts like "ripp:validate", "ripp:lint", etc.
-			command = 'npm';
-			const scriptName = `ripp:${args[0]}`;
-			commandArgs = ['run', scriptName, '--', ...args.slice(1)];
+		const versionCheck = await cliRunner.checkVersion(workspaceRoot);
+		
+		if (!versionCheck.isInstalled) {
+			// Don't show on every activation - only if user tries to run a command
+			return;
 		}
 
-		// Filter environment to only include safe variables
-		// Never pass sensitive env vars like tokens, keys, passwords
-		const safeEnv = {
-			PATH: process.env.PATH,
-			HOME: process.env.HOME,
-			NODE_ENV: process.env.NODE_ENV,
-			LANG: process.env.LANG,
-			LC_ALL: process.env.LC_ALL
-		};
-
-		const result = await execFileAsync(command, commandArgs, {
-			cwd: workspaceRoot,
-			maxBuffer: 10 * 1024 * 1024, // 10MB
-			env: safeEnv
-		});
-
-		if (showOutput) {
-			outputChannel.appendLine(result.stdout);
-			if (result.stderr) {
-				outputChannel.appendLine('STDERR:');
-				outputChannel.appendLine(result.stderr);
-			}
-		}
-
-		return result;
-	} catch (error: any) {
-		// Log technical details to output channel
-		if (showOutput) {
-			outputChannel.appendLine(`Error: ${error.message}`);
-			if (error.stdout) {
-				outputChannel.appendLine(error.stdout);
-			}
-			if (error.stderr) {
-				outputChannel.appendLine('STDERR:');
-				outputChannel.appendLine(error.stderr);
-			}
-		}
-
-		// Check if this is a CLI not found error
-		if (error.code === 'ENOENT' || error.message.includes('command not found') || error.message.includes('not recognized')) {
-			// Create user-friendly error for missing CLI
-			const cliNotFoundError = new Error(
-				'RIPP CLI was not found. Please verify that `npx ripp` works in your terminal.'
+		if (!versionCheck.isSufficient && versionCheck.currentVersion) {
+			await cliRunner.showVersionMismatchHelp(
+				versionCheck.currentVersion,
+				versionCheck.requiredVersion
 			);
-			(cliNotFoundError as any).code = 'CLI_NOT_FOUND';
-			(cliNotFoundError as any).originalError = error;
-			throw cliNotFoundError;
 		}
-
-		throw error;
+	} catch (error) {
+		// Silently fail - CLI might not be installed yet
 	}
 }
 
 /**
- * Command: Validate Packet(s)
+ * Get AI environment state
  */
-async function validatePackets() {
+async function getAiState(workspaceRoot: string): Promise<{
+	repoAllows: boolean;
+	locallyEnabled: boolean;
+	hasSecrets: boolean;
+	canUseAi: boolean;
+}> {
+	const repoAllows = configService.configExists(workspaceRoot) 
+		? configService.getAiEnabled(workspaceRoot)
+		: false;
+	
+	const config = vscode.workspace.getConfiguration('ripp');
+	const locallyEnabled = config.get<boolean>('ai.enabledLocally', false);
+	const hasSecrets = await secretService.hasSecrets();
+
+	const canUseAi = repoAllows && locallyEnabled && hasSecrets;
+
+	return { repoAllows, locallyEnabled, hasSecrets, canUseAi };
+}
+
+/**
+ * Get environment variables for CLI execution
+ */
+async function getCliEnvironment(workspaceRoot: string, enableAi: boolean = false): Promise<NodeJS.ProcessEnv> {
+	let env: NodeJS.ProcessEnv = {};
+
+	if (enableAi) {
+		const aiState = await getAiState(workspaceRoot);
+		if (aiState.canUseAi) {
+			env.RIPP_AI_ENABLED = 'true';
+			const secretEnv = await secretService.getEnvironmentVariables();
+			env = { ...env, ...secretEnv };
+		}
+	}
+
+	return env;
+}
+
+// ============================================================================
+// Workflow Commands Implementation
+// ============================================================================
+
+/**
+ * Step 1: Initialize Repository
+ */
+async function initRepository(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	// Check CLI first
+	const versionCheck = await cliRunner.checkVersion(workspaceRoot);
+	if (!versionCheck.isInstalled) {
+		await cliRunner.showInstallHelp();
+		return;
+	}
+	if (!versionCheck.isSufficient && versionCheck.currentVersion) {
+		await cliRunner.showVersionMismatchHelp(
+			versionCheck.currentVersion,
+			versionCheck.requiredVersion
+		);
+		return;
+	}
+
+	// Show preview
+	const previewItems = [
+		'.ripp/',
+		'.ripp/config.yaml',
+		'.ripp/README.md',
+		'.github/workflows/ripp-validate.yml (if .github exists)'
+	];
+
+	const previewMessage = `RIPP will create:\n\n${previewItems.map(item => `  • ${item}`).join('\n')}`;
+
+	const choice = await vscode.window.showInformationMessage(
+		'Initialize RIPP in this repository?',
+		{ modal: true, detail: previewMessage },
+		'Initialize',
+		'Cancel'
+	);
+
+	if (choice !== 'Initialize') {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Initializing repository...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const result = await cliRunner.execute({
+					args: ['init'],
+					cwd: workspaceRoot
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage('RIPP initialized successfully!');
+					workflowProvider.refresh();
+
+					// Offer to open config
+					const action = await vscode.window.showInformationMessage(
+						'RIPP has been initialized',
+						'Edit Config',
+						'View Folder'
+					);
+
+					if (action === 'Edit Config') {
+						await editConfig();
+					} else if (action === 'View Folder') {
+						const rippUri = vscode.Uri.file(path.join(workspaceRoot, '.ripp'));
+						await vscode.commands.executeCommand('revealInExplorer', rippUri);
+					}
+				} else {
+					vscode.window.showErrorMessage('RIPP initialization failed. Check output for details.');
+				}
+			} catch (error: any) {
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`RIPP initialization failed: ${error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Step 2: Build Evidence Pack
+ */
+async function buildEvidencePack(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Building evidence pack...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const result = await cliRunner.execute({
+					args: ['evidence', 'build'],
+					cwd: workspaceRoot
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage('Evidence pack built successfully!');
+					
+					// Update outputs
+					workflowProvider.updateStepOutputs('evidence', [
+						'.ripp/evidence/evidence.index.json',
+						'.ripp/evidence/routes.json',
+						'.ripp/evidence/schemas.json'
+					]);
+
+					// Offer to view
+					const action = await vscode.window.showInformationMessage(
+						'Evidence pack created',
+						'View Index',
+						'View Folder'
+					);
+
+					if (action === 'View Index') {
+						const indexUri = vscode.Uri.file(path.join(workspaceRoot, '.ripp', 'evidence', 'evidence.index.json'));
+						const doc = await vscode.workspace.openTextDocument(indexUri);
+						await vscode.window.showTextDocument(doc);
+					} else if (action === 'View Folder') {
+						const evidenceUri = vscode.Uri.file(path.join(workspaceRoot, '.ripp', 'evidence'));
+						await vscode.commands.executeCommand('revealInExplorer', evidenceUri);
+					}
+				} else {
+					vscode.window.showErrorMessage('Failed to build evidence pack. Check output for details.');
+				}
+			} catch (error: any) {
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Evidence build failed: ${error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Step 3: Discover Intent (AI)
+ */
+async function discoverIntent(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	// Check AI state
+	const aiState = await getAiState(workspaceRoot);
+	
+	if (!aiState.repoAllows) {
+		vscode.window.showErrorMessage(
+			'AI is disabled in repository config (.ripp/config.yaml). Enable it in config first.',
+			'Edit Config'
+		).then(selection => {
+			if (selection === 'Edit Config') {
+				editConfig();
+			}
+		});
+		return;
+	}
+
+	if (!aiState.locallyEnabled) {
+		const choice = await vscode.window.showInformationMessage(
+			'AI is not enabled locally. Enable it to use discovery?',
+			'Enable AI',
+			'Cancel'
+		);
+		
+		if (choice === 'Enable AI') {
+			await vscode.workspace.getConfiguration('ripp').update(
+				'ai.enabledLocally',
+				true,
+				vscode.ConfigurationTarget.Workspace
+			);
+		} else {
+			return;
+		}
+	}
+
+	if (!aiState.hasSecrets) {
+		const choice = await vscode.window.showErrorMessage(
+			'AI connection not configured. Set up your API keys first.',
+			'Configure Connection'
+		);
+		
+		if (choice === 'Configure Connection') {
+			await editConnections();
+		}
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Discovering intent with AI...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const env = await getCliEnvironment(workspaceRoot, true);
+				
+				const result = await cliRunner.execute({
+					args: ['discover'],
+					cwd: workspaceRoot,
+					env
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage('Intent discovery complete!');
+					workflowProvider.refresh();
+
+					// Offer to view candidates
+					const action = await vscode.window.showInformationMessage(
+						'Candidate intent discovered',
+						'View Candidates',
+						'Next: Confirm'
+					);
+
+					if (action === 'View Candidates') {
+						const candidatesDir = path.join(workspaceRoot, '.ripp', 'candidates');
+						await vscode.commands.executeCommand('revealInExplorer', vscode.Uri.file(candidatesDir));
+					} else if (action === 'Next: Confirm') {
+						await vscode.commands.executeCommand('ripp.confirm');
+					}
+				} else {
+					vscode.window.showErrorMessage('Intent discovery failed. Check output for details.');
+				}
+			} catch (error: any) {
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Intent discovery failed: ${error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Step 4: Confirm Intent
+ */
+async function confirmIntent(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Confirming intent...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const result = await cliRunner.execute({
+					args: ['confirm', '--interactive'],
+					cwd: workspaceRoot
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage('Intent confirmed successfully!');
+					workflowProvider.refresh();
+
+					// Offer to build
+					const action = await vscode.window.showInformationMessage(
+						'Intent confirmed',
+						'Next: Build Artifacts'
+					);
+
+					if (action === 'Next: Build Artifacts') {
+						await vscode.commands.executeCommand('ripp.build');
+					}
+				} else {
+					vscode.window.showErrorMessage('Intent confirmation failed. Check output for details.');
+				}
+			} catch (error: any) {
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Intent confirmation failed: ${error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Step 5: Build Canonical Artifacts
+ */
+async function buildArtifacts(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Building canonical artifacts...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const result = await cliRunner.execute({
+					args: ['build'],
+					cwd: workspaceRoot
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage('Artifacts built successfully!');
+					workflowProvider.refresh();
+
+					// Offer to validate
+					const action = await vscode.window.showInformationMessage(
+						'RIPP artifacts created',
+						'Validate',
+						'Package'
+					);
+
+					if (action === 'Validate') {
+						await vscode.commands.executeCommand('ripp.validate');
+					} else if (action === 'Package') {
+						await vscode.commands.executeCommand('ripp.package');
+					}
+				} else {
+					vscode.window.showErrorMessage('Build failed. Check output for details.');
+				}
+			} catch (error: any) {
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Build failed: ${error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Validate RIPP packets
+ */
+async function validatePackets(): Promise<void> {
 	const workspaceRoot = getWorkspaceRoot();
 	if (!workspaceRoot || !checkWorkspaceTrust()) {
 		return;
@@ -316,21 +689,12 @@ async function validatePackets() {
 		async () => {
 			try {
 				diagnosticsProvider.clear();
-				const packets = await discoverPackets();
 				
-				if (packets.length === 0) {
-					vscode.window.showWarningMessage('No RIPP packets found in workspace');
-					statusProvider.setLastValidationResult({
-						status: 'fail',
-						timestamp: Date.now(),
-						message: 'No packets found'
-					});
-					return;
-				}
+				const result = await cliRunner.execute({
+					args: ['validate', '.'],
+					cwd: workspaceRoot
+				});
 
-				// Validate all packets in the workspace
-				const result = await executeRippCommand(['validate', '.'], workspaceRoot);
-				
 				// Parse output for diagnostics
 				diagnosticsProvider.parseAndSetDiagnostics(result.stdout + result.stderr, workspaceRoot);
 
@@ -338,109 +702,37 @@ async function validatePackets() {
 				const report = parseValidationOutput(result.stdout + result.stderr);
 				reportViewProvider.updateReport(report);
 
-				// Update status
-				const validationResult: ValidationResult = {
-					status: report.status,
-					timestamp: Date.now(),
-					message: `${packets.length} packet(s), ${report.findings.length} issue(s)`
-				};
-				statusProvider.setLastValidationResult(validationResult);
-				
-				vscode.window.showInformationMessage(
-					`RIPP validation complete. Found ${packets.length} packet(s).`
-				);
+				if (result.success) {
+					vscode.window.showInformationMessage('Validation complete. No errors found.');
+				} else {
+					vscode.window.showWarningMessage('Validation found issues. Check Problems panel.');
+				}
 			} catch (error: any) {
-				statusProvider.setLastValidationResult({
-					status: 'fail',
-					timestamp: Date.now(),
-					message: 'Validation failed'
-				});
-				handleCommandError(error, 'validation');
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Validation failed: ${error.message}`);
+				}
 			}
 		}
 	);
 }
 
 /**
- * Command: Lint Packet(s)
+ * Package handoff
  */
-async function lintPackets() {
+async function packageHandoff(): Promise<void> {
 	const workspaceRoot = getWorkspaceRoot();
 	if (!workspaceRoot || !checkWorkspaceTrust()) {
-		return;
-	}
-
-	const config = getConfig();
-
-	await vscode.window.withProgress(
-		{
-			location: vscode.ProgressLocation.Notification,
-			title: 'RIPP: Linting packets...',
-			cancellable: false
-		},
-		async () => {
-			try {
-				const packets = await discoverPackets();
-				
-				if (packets.length === 0) {
-					vscode.window.showWarningMessage('No RIPP packets found in workspace');
-					return;
-				}
-
-				const args = ['lint', '.'];
-				if (config.strict) {
-					args.push('--strict');
-				}
-
-				await executeRippCommand(args, workspaceRoot);
-				
-				vscode.window.showInformationMessage(
-					'RIPP linting complete. Check output for details.'
-				);
-			} catch (error: any) {
-				handleCommandError(error, 'linting');
-			}
-		}
-	);
-}
-
-/**
- * Command: Package Handoff
- */
-async function packageHandoff() {
-	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot || !checkWorkspaceTrust()) {
-		return;
-	}
-
-	// Ask user to select a RIPP packet
-	const packets = await discoverPackets();
-	if (packets.length === 0) {
-		vscode.window.showWarningMessage('No RIPP packets found in workspace');
-		return;
-	}
-
-	const items = packets.map(uri => ({
-		label: path.basename(uri.fsPath),
-		description: path.relative(workspaceRoot, uri.fsPath),
-		uri
-	}));
-
-	const selected = await vscode.window.showQuickPick(items, {
-		placeHolder: 'Select a RIPP packet to package'
-	});
-
-	if (!selected) {
 		return;
 	}
 
 	// Ask for output file
 	const outputUri = await vscode.window.showSaveDialog({
-		defaultUri: vscode.Uri.file(path.join(workspaceRoot, 'handoff.md')),
+		defaultUri: vscode.Uri.file(path.join(workspaceRoot, 'handoff.ripp.md')),
 		filters: {
 			'Markdown': ['md'],
-			'JSON': ['json'],
-			'YAML': ['yaml', 'yml']
+			'ZIP Archive': ['zip']
 		}
 	});
 
@@ -456,206 +748,191 @@ async function packageHandoff() {
 		},
 		async () => {
 			try {
-				const inputPath = path.relative(workspaceRoot, selected.uri.fsPath);
-				const outputPath = path.relative(workspaceRoot, outputUri.fsPath);
-
-				await executeRippCommand(
-					['package', '--in', inputPath, '--out', outputPath],
-					workspaceRoot
-				);
+				const outputPath = outputUri.fsPath;
+				const ext = path.extname(outputPath);
 				
-				vscode.window.showInformationMessage(
-					`Package created: ${outputPath}`
-				);
+				const args = ext === '.zip' 
+					? ['package', '--format', 'zip', '--out', outputPath]
+					: ['package', '--out', outputPath];
 
-				// Open the created file
-				const doc = await vscode.workspace.openTextDocument(outputUri);
-				await vscode.window.showTextDocument(doc);
+				const result = await cliRunner.execute({
+					args,
+					cwd: workspaceRoot
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage(
+						`Package created: ${path.basename(outputPath)}`,
+						'Open File',
+						'Reveal in Finder'
+					).then(selection => {
+						if (selection === 'Open File' && ext !== '.zip') {
+							vscode.workspace.openTextDocument(outputUri).then(doc => {
+								vscode.window.showTextDocument(doc);
+							});
+						} else if (selection === 'Reveal in Finder') {
+							vscode.commands.executeCommand('revealFileInOS', outputUri);
+						}
+					});
+				} else {
+					vscode.window.showErrorMessage('Packaging failed. Check output for details.');
+				}
 			} catch (error: any) {
-				handleCommandError(error, 'packaging');
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Packaging failed: ${error.message}`);
+				}
 			}
 		}
 	);
 }
 
+// ============================================================================
+// Utility Commands Implementation
+// ============================================================================
+
 /**
- * Command: Analyze Project (Draft Packet)
+ * Edit RIPP config
  */
-async function analyzeProject() {
+async function editConfig(): Promise<void> {
 	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot || !checkWorkspaceTrust()) {
+	if (!workspaceRoot) {
 		return;
 	}
 
-	// Ask user to select an input file to analyze
-	const inputUri = await vscode.window.showOpenDialog({
-		canSelectFiles: true,
-		canSelectFolders: false,
-		canSelectMany: false,
-		openLabel: 'Select file to analyze',
-		filters: {
-			'All Files': ['*'],
-			'Text Files': ['txt', 'md'],
-			'Documents': ['doc', 'docx', 'pdf']
-		}
-	});
-
-	if (!inputUri || inputUri.length === 0) {
-		return;
-	}
-
-	// Ask for output file
-	const outputUri = await vscode.window.showSaveDialog({
-		defaultUri: vscode.Uri.file(path.join(workspaceRoot, 'analyzed.ripp.yaml')),
-		filters: {
-			'RIPP YAML': ['ripp.yaml'],
-			'RIPP JSON': ['ripp.json']
-		}
-	});
-
-	if (!outputUri) {
-		return;
-	}
-
-	await vscode.window.withProgress(
-		{
-			location: vscode.ProgressLocation.Notification,
-			title: 'RIPP: Analyzing project...',
-			cancellable: false
-		},
-		async () => {
+	const configPath = configService.getConfigPath(workspaceRoot);
+	
+	// Create default config if doesn't exist
+	if (!configService.configExists(workspaceRoot)) {
+		const choice = await vscode.window.showInformationMessage(
+			'No RIPP config found. Create default config?',
+			'Create',
+			'Cancel'
+		);
+		
+		if (choice === 'Create') {
 			try {
-				const inputPath = path.relative(workspaceRoot, inputUri[0].fsPath);
-				const outputPath = path.relative(workspaceRoot, outputUri.fsPath);
-
-				await executeRippCommand(
-					['analyze', inputPath, '--output', outputPath],
-					workspaceRoot
-				);
-				
-				vscode.window.showInformationMessage(
-					`Draft packet created: ${outputPath}. Please review before use.`
-				);
-
-				// Open the created file
-				const doc = await vscode.workspace.openTextDocument(outputUri);
-				await vscode.window.showTextDocument(doc);
+				await configService.saveConfig(workspaceRoot, ConfigService.DEFAULT_CONFIG);
 			} catch (error: any) {
-				handleCommandError(error, 'analysis');
+				vscode.window.showErrorMessage(`Failed to create config: ${error.message}`);
+				return;
 			}
+		} else {
+			return;
 		}
-	);
+	}
+
+	// Open config file in editor
+	const uri = vscode.Uri.file(configPath);
+	const doc = await vscode.workspace.openTextDocument(uri);
+	await vscode.window.showTextDocument(doc);
 }
 
 /**
- * Command: Initialize RIPP in Repository
+ * Edit AI connections/secrets
  */
-async function initRepository() {
-	const workspaceRoot = getWorkspaceRoot();
-	if (!workspaceRoot || !checkWorkspaceTrust()) {
-		return;
-	}
-
-	// Show preview of files that will be created
-	const previewItems = [
-		'ripp/',
-		'ripp/README.md',
-		'ripp/features/',
-		'ripp/handoffs/',
-		'ripp/packages/',
-		'ripp/.gitignore',
-		'.github/workflows/',
-		'.github/workflows/ripp-validate.yml'
+async function editConnections(): Promise<void> {
+	// Get current provider
+	const currentProvider = await secretService.getProvider();
+	
+	// Ask user to select provider
+	const providerChoices = [
+		{ label: 'OpenAI', value: 'openai' as const },
+		{ label: 'Azure OpenAI', value: 'azure-openai' as const },
+		{ label: 'Ollama (Local)', value: 'ollama' as const }
 	];
 
-	const previewMessage = `RIPP will create the following files and directories:\n\n${previewItems.map(item => `  • ${item}`).join('\n')}\n\nExisting files will not be overwritten unless you choose "Force".`;
+	const selected = await vscode.window.showQuickPick(providerChoices, {
+		placeHolder: `Current: ${currentProvider || 'None'} - Select AI provider to configure`
+	});
 
-	// Show confirmation dialog
-	const choice = await vscode.window.showInformationMessage(
-		'Initialize RIPP in this repository?',
-		{ modal: true, detail: previewMessage },
-		'Initialize',
-		'Force (Overwrite)',
-		'Cancel'
-	);
-
-	if (!choice || choice === 'Cancel') {
+	if (!selected) {
 		return;
 	}
 
-	const force = choice === 'Force (Overwrite)';
+	if (selected.value === 'openai') {
+		const apiKey = await vscode.window.showInputBox({
+			prompt: 'Enter your OpenAI API key',
+			password: true,
+			placeHolder: 'sk-...'
+		});
 
-	await vscode.window.withProgress(
-		{
-			location: vscode.ProgressLocation.Notification,
-			title: 'RIPP: Initializing repository...',
-			cancellable: false
-		},
-		async () => {
-			try {
-				const args = ['init'];
-				if (force) {
-					args.push('--force');
-				}
-
-				await executeRippCommand(args, workspaceRoot);
-				
-				// Refresh sidebar
-				statusProvider.refresh();
-				
-				vscode.window.showInformationMessage(
-					'RIPP initialized successfully! Check the RIPP output for details.'
-				);
-
-				// Offer to open diff or create PR
-				const action = await vscode.window.showInformationMessage(
-					'RIPP has been initialized',
-					'Open RIPP Folder',
-					'View Changes'
-				);
-
-				if (action === 'Open RIPP Folder') {
-					const rippUri = vscode.Uri.file(path.join(workspaceRoot, 'ripp'));
-					await vscode.commands.executeCommand('revealInExplorer', rippUri);
-				} else if (action === 'View Changes') {
-					await vscode.commands.executeCommand('workbench.view.scm');
-				}
-			} catch (error: any) {
-				handleCommandError(error, 'initialization');
-			}
+		if (apiKey) {
+			await secretService.setOpenAiSecrets({ apiKey });
+			vscode.window.showInformationMessage('OpenAI connection configured');
 		}
-	);
+	} else if (selected.value === 'azure-openai') {
+		const endpoint = await vscode.window.showInputBox({
+			prompt: 'Enter Azure OpenAI endpoint',
+			placeHolder: 'https://your-resource.openai.azure.com'
+		});
+
+		if (!endpoint) {return;}
+
+		const apiKey = await vscode.window.showInputBox({
+			prompt: 'Enter Azure OpenAI API key',
+			password: true
+		});
+
+		if (!apiKey) {return;}
+
+		const deployment = await vscode.window.showInputBox({
+			prompt: 'Enter deployment name',
+			placeHolder: 'gpt-4'
+		});
+
+		if (!deployment) {return;}
+
+		const apiVersion = await vscode.window.showInputBox({
+			prompt: 'Enter API version',
+			value: '2024-02-15-preview'
+		});
+
+		if (apiVersion) {
+			await secretService.setAzureOpenAiSecrets({
+				endpoint,
+				apiKey,
+				deployment,
+				apiVersion
+			});
+			vscode.window.showInformationMessage('Azure OpenAI connection configured');
+		}
+	} else if (selected.value === 'ollama') {
+		const baseUrl = await vscode.window.showInputBox({
+			prompt: 'Enter Ollama base URL',
+			value: 'http://localhost:11434'
+		});
+
+		if (baseUrl) {
+			await secretService.setOllamaSecrets({ baseUrl });
+			vscode.window.showInformationMessage('Ollama connection configured');
+		}
+	}
 }
 
 /**
- * Command: Open RIPP Documentation
+ * Open GitHub CI page
  */
-async function openDocs() {
-	const url = 'https://dylan-natter.github.io/ripp-protocol';
-	await vscode.env.openExternal(vscode.Uri.parse(url));
-}
-
-/**
- * Command: Open CI / GitHub Actions
- */
-async function openCI() {
+async function openCI(): Promise<void> {
 	const workspaceRoot = getWorkspaceRoot();
 	if (!workspaceRoot) {
 		return;
 	}
 
 	try {
-		// Try to detect GitHub remote
-		const result = await execFileAsync('git', ['remote', 'get-url', 'origin'], {
+		// Try to get git remote
+		const { execFile } = require('child_process');
+		const { promisify } = require('util');
+		const execFileAsync = promisify(execFile);
+
+		const gitResult = await execFileAsync('git', ['remote', 'get-url', 'origin'], {
 			cwd: workspaceRoot
 		});
 
-		const remoteUrl = result.stdout.trim();
-		
-		// Parse GitHub URL
-		// Supports: https://github.com/user/repo.git and git@github.com:user/repo.git
+		const remoteUrl = gitResult.stdout.trim();
 		const match = remoteUrl.match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
-		
+
 		if (match) {
 			const [, owner, repo] = match;
 			const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
@@ -669,13 +946,72 @@ async function openCI() {
 }
 
 /**
+ * Lint packets (legacy command)
+ */
+async function lintPackets(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	const config = vscode.workspace.getConfiguration('ripp');
+	const strict = config.get<boolean>('strict', false);
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Linting packets...',
+			cancellable: false
+		},
+		async () => {
+			try {
+				const args = ['lint', '.'];
+				if (strict) {
+					args.push('--strict');
+				}
+
+				const result = await cliRunner.execute({
+					args,
+					cwd: workspaceRoot
+				});
+
+				if (result.success) {
+					vscode.window.showInformationMessage('Linting complete. Check output for details.');
+				} else {
+					vscode.window.showWarningMessage('Linting found issues. Check output for details.');
+				}
+			} catch (error: any) {
+				if (error.code === 'CLI_NOT_FOUND') {
+					await cliRunner.showInstallHelp();
+				} else {
+					vscode.window.showErrorMessage(`Linting failed: ${error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Analyze project (legacy command)
+ */
+async function analyzeProject(): Promise<void> {
+	vscode.window.showInformationMessage(
+		'The analyze command has been replaced by the new 5-step workflow. Use the workflow sidebar instead.',
+		'Open Workflow'
+	).then(selection => {
+		if (selection === 'Open Workflow') {
+			vscode.commands.executeCommand('workbench.view.extension.rippActivityBar');
+		}
+	});
+}
+
+/**
  * Parse validation output into a report
  */
 function parseValidationOutput(output: string): ValidationReport {
 	const findings: Finding[] = [];
 	const lines = output.split('\n');
 
-	// Simple parsing - look for error/warning patterns
 	for (const line of lines) {
 		// Pattern: FILE:LINE: SEVERITY: MESSAGE
 		let match = line.match(/^(.+?):(\d+):\s*(error|warning|info):\s*(.+)$/i);
@@ -703,7 +1039,7 @@ function parseValidationOutput(output: string): ValidationReport {
 	}
 
 	const hasErrors = findings.some(f => f.severity === 'error');
-	
+
 	return {
 		status: hasErrors ? 'fail' : 'pass',
 		timestamp: Date.now(),
