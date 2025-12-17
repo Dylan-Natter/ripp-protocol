@@ -111,11 +111,8 @@ jobs:
           git add CHANGELOG.md
           git commit --amend --no-edit
           
-          # Delete and recreate the git tag to point to the amended commit
-          # This is cleaner than force-updating the tag
-          # Use || true to handle case where tag deletion might fail
-          git tag -d "v${NEW_VERSION}" || true
-          git tag "v${NEW_VERSION}"
+          # Force-update the git tag to point to the amended commit atomically
+          git tag -f "v${NEW_VERSION}"
           
           # Push the version bump commit and tags to main with lease for safe concurrent operations
           git push --force-with-lease origin main --tags || {
