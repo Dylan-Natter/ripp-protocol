@@ -88,6 +88,41 @@ When uncertain about:
   - Check that workflow filters and conditions are specific and correct
   - Add comments explaining complex workflow logic
 
+### Quality Checks Before Committing
+**ALWAYS run these checks before committing changes:**
+
+1. **Prettier Formatting**: All markdown files must have proper formatting
+   ```bash
+   npm run format:check  # Check formatting
+   npm run format:fix    # Auto-fix formatting issues
+   ```
+   - Markdown rules require blank lines before:
+     - Bullet lists
+     - Code blocks
+     - Headings (except after title)
+   - ALWAYS run `npx prettier --write` on any markdown files you create or modify
+
+2. **ESLint**: All code must pass linting
+   ```bash
+   npm run lint  # Check for linting issues
+   ```
+
+3. **Documentation Requirements**: High-impact changes require docs
+   - Changes to `SPEC.md`, `schema/`, `tools/ripp-cli/`, or `tools/vscode-extension/` require documentation
+   - Either update `/docs/` or add `docs-not-needed` label with justification
+   - Documentation should be added in the same PR as the code changes
+
+### Preventing Quality Check Failures
+To avoid CI failures:
+- Run `npm run format:check` before every commit
+- Run `npm run lint` before every commit
+- For VS Code extension work:
+  - Format markdown files in `tools/vscode-extension/` before committing
+  - Create or update corresponding documentation in `/docs/`
+- If you create summary or implementation documents:
+  - Run prettier on them immediately after creation
+  - These are considered documentation and must follow formatting rules
+
 ---
 
 ## RIPP Tooling Must Be Backward-Compatible

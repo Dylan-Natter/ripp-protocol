@@ -1,11 +1,13 @@
 # RIPP VS Code Extension vNext - Acceptance Test Checklist
 
 ## Prerequisites
+
 - [ ] VS Code Desktop installed (version 1.85.0 or higher)
 - [ ] Node.js 18+ installed
 - [ ] Test repository available (can be empty)
 
 ## Phase 1: Installation & Activation
+
 - [ ] Extension compiles without errors (`npm run compile`)
 - [ ] Extension lints without errors (`npm run lint`)
 - [ ] Extension packages successfully (`npm run package`)
@@ -13,6 +15,7 @@
 - [ ] No errors in VS Code Developer Console (Help → Toggle Developer Tools)
 
 ## Phase 2: Workspace Setup
+
 - [ ] Open test workspace in VS Code
 - [ ] RIPP icon appears in Activity Bar
 - [ ] Click RIPP icon - sidebar opens
@@ -20,12 +23,14 @@
 - [ ] Utilities section shows config/connections actions
 
 ## Phase 3: CLI Detection
+
 - [ ] Without CLI installed: Shows installation help
 - [ ] With CLI installed: Detects version correctly
 - [ ] CLI version check works (logs to Output panel)
 - [ ] Version mismatch shows upgrade prompt
 
 ## Phase 4: Workflow Step 1 - Initialize
+
 - [ ] Step 1 shows "Ready" status when not initialized
 - [ ] Click "Run 1. Initialize"
 - [ ] Confirmation dialog shows file preview
@@ -35,6 +40,7 @@
 - [ ] Option to "Edit Config" appears
 
 ## Phase 5: Config Management
+
 - [ ] Click "Configuration" in Utilities
 - [ ] `.ripp/config.yaml` opens in editor
 - [ ] File is valid YAML
@@ -42,6 +48,7 @@
 - [ ] Save file - no errors
 
 ## Phase 6: Secrets Management
+
 - [ ] Click "Connections" in Utilities
 - [ ] Provider selection appears (OpenAI, Azure, Ollama)
 - [ ] Select OpenAI
@@ -50,6 +57,7 @@
 - [ ] Secrets stored in SecretStorage (not in repo)
 
 ## Phase 7: Workflow Step 2 - Build Evidence
+
 - [ ] Step 2 shows "Ready" status after init
 - [ ] Click "Run 2. Build Evidence Pack"
 - [ ] Progress notification appears
@@ -60,6 +68,7 @@
 - [ ] Can click on output files to open them
 
 ## Phase 8: AI Policy Check
+
 - [ ] With `ai.enabled: false` in config:
   - [ ] Step 3 shows error message
   - [ ] Suggests editing config
@@ -70,6 +79,7 @@
   - [ ] Step 3 shows "Ready" status
 
 ## Phase 9: Workflow Step 3 - Discover Intent (AI)
+
 - [ ] Prerequisites met (evidence + AI configured)
 - [ ] Click "Run 3. Discover Intent (AI)"
 - [ ] Progress notification appears
@@ -80,6 +90,7 @@
 - [ ] Can view candidate files
 
 ## Phase 10: Workflow Step 4 - Confirm Intent
+
 - [ ] Step 4 shows "Ready" after discovery
 - [ ] Click "Run 4. Confirm Intent"
 - [ ] Interactive confirmation starts
@@ -89,6 +100,7 @@
 - [ ] Confirmed intent files created
 
 ## Phase 11: Workflow Step 5 - Build Artifacts
+
 - [ ] Step 5 shows "Ready" after confirmation
 - [ ] Click "Run 5. Build + Validate + Package"
 - [ ] Progress notification appears
@@ -97,6 +109,7 @@
 - [ ] `.ripp/*.ripp.yaml` files created
 
 ## Phase 12: Validation
+
 - [ ] Click "Validate" from Command Palette
 - [ ] Validation runs successfully
 - [ ] Problems panel shows any issues
@@ -104,6 +117,7 @@
 - [ ] Can click errors to jump to location
 
 ## Phase 13: Packaging
+
 - [ ] Click "RIPP: Package Handoff"
 - [ ] File save dialog appears
 - [ ] Choose output location and format (.md or .zip)
@@ -112,12 +126,14 @@
 - [ ] Packaged file contains expected content
 
 ## Phase 14: Diagnostics Integration
+
 - [ ] Validation errors appear in Problems panel
 - [ ] Click error - jumps to correct file/line
 - [ ] Errors have clear messages
 - [ ] Can see error severity (error/warning/info)
 
 ## Phase 15: Output Channel
+
 - [ ] View → Output → Select "RIPP"
 - [ ] All commands log to output
 - [ ] Command execution visible
@@ -125,6 +141,7 @@
 - [ ] Error messages clearly visible
 
 ## Phase 16: Workflow Status Persistence
+
 - [ ] Complete workflow steps 1-5
 - [ ] Close and reopen VS Code
 - [ ] Workflow status persists
@@ -132,18 +149,21 @@
 - [ ] Output files still accessible
 
 ## Phase 17: Error Handling
+
 - [ ] Run command without workspace open - shows error
 - [ ] Run AI command without config - shows helpful message
 - [ ] Run command with CLI missing - shows install help
 - [ ] Invalid config YAML - shows parse error
 
 ## Phase 18: Workspace Trust
+
 - [ ] Open untrusted workspace
 - [ ] Try to run RIPP command
 - [ ] Shows workspace trust error
 - [ ] Provides "Learn More" link
 
 ## Phase 19: GitHub Codespaces (Optional)
+
 - [ ] Open project in Codespaces
 - [ ] Install RIPP CLI in Codespace
 - [ ] Extension activates
@@ -151,11 +171,13 @@
 - [ ] Can configure AI in Codespace
 
 ## Phase 20: Cross-Platform (Optional)
+
 - [ ] Test on Windows (CLI detection with .cmd)
 - [ ] Test on macOS (standard binary)
 - [ ] Test on Linux (standard binary)
 
 ## Regression Tests
+
 - [ ] Legacy "Lint" command still works
 - [ ] Legacy "Validate" command still works
 - [ ] Legacy "Package" command still works
@@ -163,6 +185,7 @@
 - [ ] "Open CI" command works (with GitHub repo)
 
 ## Performance
+
 - [ ] Extension activates quickly (< 2 seconds)
 - [ ] Workflow sidebar renders quickly
 - [ ] Commands execute without blocking UI
@@ -170,6 +193,7 @@
 - [ ] Output channel doesn't slow down with large logs
 
 ## Security
+
 - [ ] API keys NOT in `.ripp/config.yaml`
 - [ ] API keys NOT in git history
 - [ ] Secrets only in VS Code SecretStorage
@@ -177,6 +201,7 @@
 - [ ] No secrets in Output panel logs
 
 ## Documentation
+
 - [ ] README accurately describes features
 - [ ] Quick Start guide works for new users
 - [ ] Configuration examples are correct
@@ -184,6 +209,7 @@
 - [ ] Release notes are accurate
 
 ## Polish
+
 - [ ] No TypeScript errors
 - [ ] No ESLint errors
 - [ ] All icons display correctly
@@ -193,6 +219,7 @@
 - [ ] Success messages are encouraging
 
 ## Final Verification
+
 - [ ] Can complete full workflow end-to-end
 - [ ] Can package and deliver handoff artifact
 - [ ] Extension behaves as thin wrapper over CLI
@@ -203,13 +230,13 @@
 
 ## Test Results
 
-**Date:** _______________  
-**Tester:** _______________  
-**Platform:** _______________  
-**VS Code Version:** _______________  
-**RIPP CLI Version:** _______________  
+**Date:** **\*\***\_\_\_**\*\***  
+**Tester:** **\*\***\_\_\_**\*\***  
+**Platform:** **\*\***\_\_\_**\*\***  
+**VS Code Version:** **\*\***\_\_\_**\*\***  
+**RIPP CLI Version:** **\*\***\_\_\_**\*\***
 
-**Pass Rate:** _____ / _____ tests passed
+**Pass Rate:** **\_** / **\_** tests passed
 
 **Critical Issues Found:**
 
