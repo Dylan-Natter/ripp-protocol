@@ -28,7 +28,6 @@ jobs:
             "schema/"
             "tools/ripp-cli/"
             "tools/vscode-extension/"
-            ".github/workflows/"
           )
           
           # Define config/tooling files that don't require docs
