@@ -74,8 +74,6 @@ For pull requests, the workflow:
 
 ### Version Update Guidelines
 
-### Version Update Guidelines
-
 Follow semantic versioning when updating versions:
 
 - **Patch** (`0.2.0` → `0.2.1`): Bug fixes, minor improvements
