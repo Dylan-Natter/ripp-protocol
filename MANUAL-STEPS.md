@@ -64,8 +64,10 @@ Since tag `v0.2.1` already exists, you'll need to either:
 
 ```bash
 cd tools/vscode-extension
-# Manually update package.json version to 0.2.1
+# Update version in package.json to 0.2.1
 npm version 0.2.1 --no-git-tag-version
+# Update package-lock.json to match
+npm install --package-lock-only
 git add package.json package-lock.json
 git commit -m "chore: sync version to match existing tag v0.2.1"
 git push origin main
