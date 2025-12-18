@@ -28,53 +28,57 @@ The Microsoft VS Code Marketplace validates extension packages and **rejects** a
 
 ## CI/CD Versioning Strategy
 
-### Automatic Version Incrementing
+### Manual Versioning (Updated December 2024)
 
-The workflow **automatically increments** the patch version on every push to the `main` branch:
+Due to GitHub branch protection rules that require changes to be made through pull requests, the workflow **no longer automatically increments** the version. Instead:
 
-- **Trigger**: Push to `main` branch
-- **Action**: Runs `npm version patch` to increment (e.g., `0.1.0` → `0.1.1`)
-- **Commit**: Automatically commits the version bump with message `"chore: bump version to X.Y.Z [skip ci]"`
-- **Push**: Pushes the commit back to the repository with `--force-with-lease` for safety
-- **Result**: Each build has a unique, Marketplace-compliant version
-- **Concurrency**: Workflow has concurrency control to prevent race conditions
+- **Version Control**: Version must be manually updated in `package.json`
+- **When to Update**: Before creating a PR or release
+- **How to Update**: Use `npm version` or manually edit `package.json`
+- **CI Behavior**: CI validates the version is Marketplace-compliant and builds the VSIX with that version
 
-### How It Works
+### How to Release a New Version
 
-1. Developer pushes code to `main`
-2. Workflow checks out the repository
-3. Workflow pulls latest changes to avoid conflicts (`git pull --rebase`)
-4. Workflow auto-increments the patch version in `package.json`
-5. Workflow commits and pushes the version change (with `[skip ci]` to prevent infinite loops)
-6. Workflow builds and packages the extension with the new version
-7. VSIX is created: `ripp-protocol-0.1.1.vsix` (Marketplace-compliant)
+1. **Update the version** in `package.json`:
 
-**Safety Features:**
+   ```bash
+   cd tools/vscode-extension
+   # For patch release (0.2.0 → 0.2.1)
+   npm version patch
+   # For minor release (0.2.0 → 0.3.0)
+   npm version minor
+   # For major release (0.2.0 → 1.0.0)
+   npm version major
+   ```
 
-- Concurrency control prevents multiple simultaneous builds on same branch
-- `git pull --rebase` ensures latest changes before version increment
-- `git push --force-with-lease` prevents overwriting concurrent changes
-- Error handling at each step with clear failure messages
+2. **Update CHANGELOG.md** with changes for the new version
+
+3. **Commit the version bump**:
+
+   ```bash
+   git add package.json package-lock.json CHANGELOG.md
+   git commit -m "chore: bump version to X.Y.Z"
+   ```
+
+4. **Create a PR** with the version bump or push to a feature branch
+
+5. **After merge to main**, the CI will build and package the extension with the new version
 
 ### Pull Requests
 
 For pull requests, the workflow:
 
-- Does **NOT** auto-increment the version (to avoid conflicts)
 - Uses the existing version from `package.json` for packaging
-- Artifacts are named with build metadata: `vscode-extension-0.1.0-build-20251216073528.462bdeb`
+- Validates the version is Marketplace-compliant
+- Artifacts are named with build metadata: `vscode-extension-0.2.0-build-20251217183528.f7fc498`
 
-### Manual Version Updates
+### Version Update Guidelines
 
-If you need to increment the minor or major version:
+Follow semantic versioning when updating versions:
 
-1. **Manually update** `version` in `package.json`
-2. Follow semantic versioning:
-   - Patch: Auto-incremented by CI (`0.1.0` → `0.1.1`)
-   - Minor: Manual update for new features (`0.1.0` → `0.2.0`)
-   - Major: Manual update for breaking changes (`0.1.0` → `1.0.0`)
-3. Commit and push to `main`
-4. CI will auto-increment from the new base (e.g., `0.2.0` → `0.2.1`)
+- **Patch** (`0.2.0` → `0.2.1`): Bug fixes, minor improvements
+- **Minor** (`0.2.0` → `0.3.0`): New features, backward-compatible changes
+- **Major** (`0.2.0` → `1.0.0`): Breaking changes, major rewrites
 
 ## References
 
