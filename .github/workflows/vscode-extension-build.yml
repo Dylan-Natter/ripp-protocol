@@ -23,15 +23,39 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: read  # Only read access needed for building
+      contents: write  # Required for auto-versioning commits and tags
     
     defaults:
       run:
         working-directory: tools/vscode-extension
     
     steps:
+      # ============================================================================
+      # GitHub App Authentication
+      # ============================================================================
+      # Generate an installation token from the GitHub App credentials.
+      # This token allows the workflow to bypass branch protection rules when
+      # pushing version bumps directly to main after a merge.
+      # 
+      # The token is only generated when pushing to main (not for PRs or other branches).
+      # It will be used for:
+      # - Checking out the repository with write access
+      # - Pushing version bump commits
+      # - Creating and pushing git tags
+      - name: Generate GitHub App Token
+        id: app-token
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RIPP_APP_ID }}
+          private-key: ${{ secrets.RIPP_APP_PRIVATE_KEY }}
+      
+      # Checkout with the App token for main branch pushes, regular token otherwise
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for version tagging
+          token: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.app-token.outputs.token) || github.token }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,18 +67,98 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Get version from package.json
+      # ============================================================================
+      # Auto-Increment Version (Main Branch Only)
+      # ============================================================================
+      # Automatically increment the patch version when code is merged to main.
+      # This step:
+      # 1. Configures git with the GitHub App bot identity
+      # 2. Increments the patch version in package.json
+      # 3. Updates CHANGELOG.md with the new version entry
+      # 4. Commits the changes with [skip ci] to prevent infinite loops
+      # 5. Creates a git tag for the new version
+      # 6. Pushes both the commit and tag to main using the App token (bypasses branch protection)
+      - name: Auto-increment version (main branch only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # Get the current version from package.json
-          # Note: Version must be manually updated in package.json before releases
+          # Configure git with GitHub App bot identity
+          git config user.name "ripp-automation[bot]"
+          git config user.email "ripp-automation[bot]@users.noreply.github.com"
+          
+          # Increment patch version (e.g., 0.2.0 → 0.2.1)
+          npm version patch -m "chore: bump version to %s [skip ci]"
+          
+          # Get the new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: ${NEW_VERSION}"
+          
+          # Update CHANGELOG.md
+          CHANGELOG_DATE=$(date -u +%Y-%m-%d)
+          
+          # Get the previous tag to generate changelog notes
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREV_TAG" ]; then
+            # Get commits since the previous tag (excluding the version bump commit we just made)
+            CHANGELOG_NOTES=$(git log --format="* %s" "${PREV_TAG}..HEAD^" 2>/dev/null || echo "* Version bump")
+          else
+            # No previous tag, this might be the first release
+            CHANGELOG_NOTES="* Initial release"
+          fi
+          
+          # Insert new changelog entry after the header
+          awk -v ver="${NEW_VERSION}" -v date="${CHANGELOG_DATE}" -v notes="${CHANGELOG_NOTES}" '
+            /All notable changes.*will be documented/ {
+              print;
+              print "";
+              print "## [" ver "] - " date;
+              print "";
+              print "### Changed";
+              print "";
+              n = split(notes, lines, "\n");
+              for (i = 1; i <= n; i++) {
+                if (length(lines[i]) > 0) print lines[i];
+              }
+              next;
+            }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+          
+          # Amend the version bump commit to include CHANGELOG changes
+          git add CHANGELOG.md
+          git commit --amend --no-edit
+          
+          # Update the tag to point to the amended commit
+          git tag -f "v${NEW_VERSION}"
+          
+          # Push the commit and tags to main using the App token
+          # The App has bypass permissions, so this won't be blocked by branch protection
+          git push origin main --tags
+          
+          # Export version for later steps
+          echo "VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+      
+      # Get version from package.json for PR builds (no auto-increment)
+      - name: Get version from package.json (PR builds)
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+        run: |
           VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+      
+      # Set build metadata for artifact naming
+      - name: Set build metadata
+        run: |
           TIMESTAMP=$(date -u +%Y%m%d%H%M%S)
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "BUILD_ID=${TIMESTAMP}.${SHORT_SHA}" >> $GITHUB_ENV
+      
+      # Validate version format for Marketplace compliance
+      - name: Validate version (Marketplace compliance)
+        run: |
+          VERSION="${{ env.VERSION }}"
           
           echo "Version: ${VERSION}"
-          echo "Build: ${TIMESTAMP}.${SHORT_SHA}"
           
-          # Validate version is Marketplace-compliant (numeric only, no prerelease tags)
           if ! echo "${VERSION}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
             echo "❌ Error: Version '${VERSION}' is not Marketplace-compliant"
             echo "Version must be 1-4 dot-separated integers (e.g., 0.1.0 or 1.2.3.4)"
@@ -62,10 +166,6 @@ jobs:
             exit 1
           fi
           echo "✅ Version ${VERSION} is Marketplace-compliant"
-          
-          # Export for use in artifact naming and summary
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "BUILD_ID=${TIMESTAMP}.${SHORT_SHA}" >> $GITHUB_ENV
       
       - name: Compile TypeScript
         run: npm run compile
