@@ -589,6 +589,62 @@ Custom path to RIPP CLI executable. Leave empty for automatic detection.
 
 ---
 
+## Build and Release Process
+
+### Versioning
+
+The VS Code Extension uses **manual versioning** to comply with GitHub branch protection rules:
+
+- **Version updates**: Version must be manually updated in `package.json` before releases
+- **Marketplace compliance**: Versions must be numeric only (e.g., `0.2.0`, `1.0.0`)
+- **No prerelease tags**: Microsoft Marketplace rejects versions with `-alpha`, `-beta`, etc.
+
+### Release Workflow
+
+1. **Update version** in `tools/vscode-extension/package.json`:
+
+   ```bash
+   cd tools/vscode-extension
+   npm version patch  # or minor/major
+   ```
+
+2. **Update CHANGELOG.md** with release notes
+
+3. **Create pull request** with version bump
+
+4. **After merge**, CI automatically:
+   - Validates version format (Marketplace-compliant)
+   - Compiles TypeScript
+   - Runs linters
+   - Packages VSIX
+   - Uploads artifact to workflow run
+
+### CI/CD Details
+
+**Workflow**: `.github/workflows/vscode-extension-build.yml`
+
+**Triggers**:
+
+- Push to `main` or `copilot/**` branches
+- Pull requests to `main`
+- Manual workflow dispatch
+
+**Artifacts**:
+
+- Marketplace-ready VSIX package
+- Named: `vscode-extension-{VERSION}-build-{TIMESTAMP}.{SHA}`
+- Retained for 30 days
+
+**Version validation**:
+
+- Ensures numeric-only format (`X.Y.Z` or `X.Y.Z.W`)
+- Rejects prerelease identifiers
+- Verifies VSIX filename compliance
+
+For detailed versioning rules, see `tools/vscode-extension/VERSIONING.md`.
+
+---
+
 ## Migration from Legacy Extension
 
 ### Breaking Changes
