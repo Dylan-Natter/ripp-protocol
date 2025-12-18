@@ -44,18 +44,18 @@ jobs:
       # - Creating and pushing git tags
       - name: Generate GitHub App Token
         id: app-token
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.RIPP_APP_ID }}
           private-key: ${{ secrets.RIPP_APP_PRIVATE_KEY }}
       
-      # Checkout with the App token for main branch pushes, regular token otherwise
+      # Checkout with the App token for main branch pushes/workflow_dispatch, regular token otherwise
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch full history for version tagging
-          token: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.app-token.outputs.token) || github.token }}
+          token: ${{ ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && steps.app-token.outputs.token) || github.token }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -70,7 +70,7 @@ jobs:
       # ============================================================================
       # Auto-Increment Version (Main Branch Only)
       # ============================================================================
-      # Automatically increment the patch version when code is merged to main.
+      # Automatically increment the patch version when code is merged to main or manually triggered.
       # This step:
       # 1. Configures git with the GitHub App bot identity
       # 2. Increments the patch version in package.json
@@ -79,7 +79,7 @@ jobs:
       # 5. Creates a git tag for the new version
       # 6. Pushes both the commit and tag to main using the App token (bypasses branch protection)
       - name: Auto-increment version (main branch only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         run: |
           # Configure git with GitHub App bot identity
           git config user.name "ripp-automation[bot]"
@@ -154,7 +154,7 @@ jobs:
       
       # Get version from package.json for PR builds (no auto-increment)
       - name: Get version from package.json (PR builds)
-        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+        if: (github.event_name != 'push' && github.event_name != 'workflow_dispatch') || github.ref != 'refs/heads/main'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
