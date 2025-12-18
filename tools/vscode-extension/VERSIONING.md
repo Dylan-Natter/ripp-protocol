@@ -28,16 +28,20 @@ The Microsoft VS Code Marketplace validates extension packages and **rejects** a
 
 ## CI/CD Versioning Strategy
 
-### Manual Versioning (Updated December 2024)
+### Manual Versioning
 
-Due to GitHub branch protection rules that require changes to be made through pull requests, the workflow **no longer automatically increments** the version. Instead:
+The VS Code extension uses **manual versioning only**. The CI/CD workflow does not automatically increment versions.
 
-- **Version Control**: Version must be manually updated in `package.json`
-- **When to Update**: Before creating a PR or release
-- **How to Update**: Use `npm version` or manually edit `package.json`
-- **CI Behavior**: CI validates the version is Marketplace-compliant and builds the VSIX with that version
+**How It Works:**
+
+- **Version Source**: The version in `package.json` is the single source of truth
+- **CI Behavior**: The workflow validates the version is Marketplace-compliant and builds the VSIX with that exact version
+- **All Events**: Both main branch builds and pull requests use the version from `package.json` without modification
+- **No Auto-Increment**: The workflow never modifies `package.json` or creates git tags
 
 ### How to Release a New Version
+
+To publish a new version of the extension:
 
 1. **Update the version** in `package.json`:
 
@@ -51,26 +55,37 @@ Due to GitHub branch protection rules that require changes to be made through pu
    npm version major
    ```
 
+   This command will:
+   - Update `package.json` with the new version
+   - Create a git commit with the version bump
+   - Create a git tag (e.g., `v0.2.1`)
+
 2. **Update CHANGELOG.md** with changes for the new version
 
-3. **Commit the version bump**:
+3. **Push the changes** including the tag:
 
    ```bash
-   git add package.json package-lock.json CHANGELOG.md
-   git commit -m "chore: bump version to X.Y.Z"
+   git push origin main
+   git push origin --tags
    ```
 
-4. **Create a PR** with the version bump or push to a feature branch
+4. **The CI workflow will automatically build** the VSIX with the new version
 
-5. **After merge to main**, the CI will build and package the extension with the new version
+5. **Optional: Publish to Marketplace**:
+   ```bash
+   npx vsce publish
+   ```
 
-### Pull Requests
+### Pull Requests and Development Builds
 
-For pull requests, the workflow:
+For pull requests and development builds, the workflow:
 
 - Uses the existing version from `package.json` for packaging
 - Validates the version is Marketplace-compliant
-- Artifacts are named with build metadata: `vscode-extension-0.2.0-build-20251217183528.f7fc498`
+- Artifacts are named with build metadata for identification:
+  - Format: `vscode-extension-{version}-build-{timestamp}.{sha}`
+  - Example: `vscode-extension-0.2.0-build-20251217183528.f7fc498`
+  - The build metadata is used only for artifact naming, not in the VSIX package itself
 
 ### Version Update Guidelines
 
