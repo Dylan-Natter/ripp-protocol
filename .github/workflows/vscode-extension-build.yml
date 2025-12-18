@@ -14,8 +14,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-main
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -85,12 +85,24 @@ jobs:
           git config user.name "ripp-automation[bot]"
           git config user.email "ripp-automation[bot]@users.noreply.github.com"
           
+          # Fetch latest changes from origin to avoid non-fast-forward errors
+          git fetch origin main --tags
+          git checkout main
+          git pull --ff-only origin main
+          
           # Increment patch version (e.g., 0.2.0 → 0.2.1)
           npm version patch -m "chore: bump version to %s [skip ci]"
           
           # Get the new version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "New version: ${NEW_VERSION}"
+          
+          # Check if tag already exists (locally or on origin)
+          if git rev-parse "v${NEW_VERSION}" >/dev/null 2>&1 || git ls-remote --tags origin "v${NEW_VERSION}" | grep -q "v${NEW_VERSION}"; then
+            echo "Tag v${NEW_VERSION} already exists. Skipping release (idempotent behavior)."
+            echo "VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+            exit 0
+          fi
           
           # Update CHANGELOG.md
           CHANGELOG_DATE=$(date -u +%Y-%m-%d)
@@ -128,12 +140,14 @@ jobs:
           git add CHANGELOG.md
           git commit --amend --no-edit
           
-          # Update the tag to point to the amended commit
-          git tag -f "v${NEW_VERSION}"
+          # Create the tag (without force)
+          git tag "v${NEW_VERSION}"
           
-          # Push the commit and tags to main using the App token
-          # The App has bypass permissions, so this won't be blocked by branch protection
-          git push origin main --tags
+          # Push the commit to main first
+          git push origin main
+          
+          # Push only the new tag
+          git push origin "v${NEW_VERSION}"
           
           # Export version for later steps
           echo "VERSION=${NEW_VERSION}" >> $GITHUB_ENV
