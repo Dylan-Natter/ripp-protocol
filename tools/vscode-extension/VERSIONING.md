@@ -38,6 +38,26 @@ The VS Code extension uses **PR-based auto-versioning** powered by [release-plea
 - ✅ Creates immutable releases once published
 - ✅ Maintains a clear audit trail
 
+### Tag Formats
+
+The build workflow supports both simple and component-prefixed tag formats:
+
+#### Simple Version Tags (Current Default)
+
+- Format: `v{VERSION}` (e.g., `v0.2.0`, `v1.0.0`)
+- Created when: `"include-component-in-tag": false` in `release-please-config.json`
+- Example tags: `v0.2.0`, `v0.2.1`, `v1.0.0`
+
+#### Component-Prefixed Tags (Alternative)
+
+- Format: `{component}-v{VERSION}` (e.g., `vscode-extension-v0.2.0`)
+- Created when: `"include-component-in-tag": true` in `release-please-config.json`
+- Example tags: `vscode-extension-v0.2.0`, `tools-vscode-extension-v0.2.0`
+
+**Current Configuration:** Simple version tags (`v*`) are used by default.
+
+### Complete Release Flow
+
 **How It Works:**
 
 1. **Commit with Conventional Commits**: When you merge PRs to `main`, use [conventional commit](https://www.conventionalcommits.org/) messages:
@@ -60,8 +80,14 @@ The VS Code extension uses **PR-based auto-versioning** powered by [release-plea
 
 4. **Release Published Automatically**: When you merge the Release PR:
    - A GitHub Release is created with the tag (e.g., `v0.3.0`)
-   - The build workflow is triggered by the tag
-   - VSIX package is built and attached to the Release
+   - The tag triggers the VSIX build workflow automatically
+   - The workflow:
+     - Extracts the version from the tag (handling both `v0.3.0` and `vscode-extension-v0.3.0` formats)
+     - Validates that package.json version matches the tag version
+     - Compiles TypeScript, lints code, and packages the extension
+     - Creates a Marketplace-compliant VSIX file
+     - Uploads the VSIX as a build artifact
+     - Attaches the VSIX to the GitHub Release as an asset
 
 5. **Optional Marketplace Publish**: If enabled, the publish workflow automatically pushes the VSIX to the VS Code Marketplace
 
@@ -132,13 +158,18 @@ The versioning system consists of three workflows:
 
 1. **`.github/workflows/release-please.yml`**
    - Triggers on: Push to `main`
-   - Creates/updates Release PR
-   - Creates GitHub Release when Release PR is merged
+   - Creates/updates Release PR based on conventional commits
+   - Creates GitHub Release and tag when Release PR is merged
+   - Permissions: `contents: write`, `pull-requests: write`
 
 2. **`.github/workflows/vscode-extension-build.yml`**
-   - Triggers on: Tags matching `v*`
-   - Builds VSIX package
-   - Uploads VSIX to GitHub Release
+   - Triggers on: Tags matching `v*` or `**-v*`
+   - Supported tag formats:
+     - Simple tags: `v0.2.0`, `v1.0.0`
+     - Component-prefixed tags: `vscode-extension-v0.2.0`, `tools-vscode-extension-v0.2.0`
+   - Builds VSIX package with Marketplace-compliant version
+   - Validates version matches between tag and package.json
+   - Uploads VSIX to GitHub Release as an asset
 
 3. **`.github/workflows/vscode-extension-publish.yml`** (Optional)
    - Triggers on: GitHub Release published
@@ -151,6 +182,17 @@ The versioning system consists of three workflows:
 - **`.release-please-manifest.json`**: Tracks current version (managed by release-please)
 
 ## Troubleshooting
+
+### Build Workflow Not Triggered After Release PR Merge
+
+If the VSIX build workflow doesn't run after merging a Release PR:
+
+1. **Check the tag was created**: Look at the GitHub Release page or run `git tag -l`
+2. **Verify tag format**: The tag should match either:
+   - Simple format: `v0.2.0`, `v1.0.0`
+   - Component-prefixed: `vscode-extension-v0.2.0`, `tools-vscode-extension-v0.2.0`
+3. **Check workflow triggers**: The build workflow triggers on tags matching `v*` or `**-v*`
+4. **Review workflow runs**: Check the Actions tab to see if the workflow was triggered but failed
 
 ### Release PR Not Created
 
@@ -174,6 +216,16 @@ If you need to fix a version manually:
 1. Create a PR updating `package.json` and `.release-please-manifest.json`
 2. Merge it to `main`
 3. The next Release PR will use the corrected version as the baseline
+
+### Changing Tag Format
+
+To switch between simple and component-prefixed tag formats:
+
+1. Edit `release-please-config.json` in the repository root
+2. Set `"include-component-in-tag"` to `true` (for component-prefixed) or `false` (for simple)
+3. Commit and push the change
+4. Future releases will use the new tag format
+5. **Note**: The build workflow supports both formats, so this change is safe
 
 ## References
 
