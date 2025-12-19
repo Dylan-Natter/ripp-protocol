@@ -28,75 +28,157 @@ The Microsoft VS Code Marketplace validates extension packages and **rejects** a
 
 ## CI/CD Versioning Strategy
 
-### Manual Versioning
+### PR-Based Auto-Versioning with release-please
 
-The VS Code extension uses **manual versioning only**. The CI/CD workflow does not automatically increment versions.
+The VS Code extension uses **PR-based auto-versioning** powered by [release-please](https://github.com/googleapis/release-please). This is a production-grade approach that:
+
+- ✅ Respects branch protection rules (no direct pushes to main)
+- ✅ Makes version changes reviewable before release
+- ✅ Prevents version conflicts and race conditions
+- ✅ Creates immutable releases once published
+- ✅ Maintains a clear audit trail
 
 **How It Works:**
 
-- **Version Source**: The version in `package.json` is the single source of truth
-- **CI Behavior**: The workflow validates the version is Marketplace-compliant and builds the VSIX with that exact version
-- **All Events**: Both main branch builds and pull requests use the version from `package.json` without modification
-- **No Auto-Increment**: The workflow never modifies `package.json` or creates git tags
+1. **Commit with Conventional Commits**: When you merge PRs to `main`, use [conventional commit](https://www.conventionalcommits.org/) messages:
+   - `feat:` → Minor version bump (0.2.0 → 0.3.0)
+   - `fix:` → Patch version bump (0.2.0 → 0.2.1)
+   - `BREAKING CHANGE:` → Major version bump (0.2.0 → 1.0.0)
 
-### How to Release a New Version
+2. **Release PR Created Automatically**: The `release-please` workflow runs on every push to `main` and:
+   - Analyzes commits since the last release
+   - Determines the next version based on conventional commits
+   - Creates or updates a "Release PR" with:
+     - Version bump in `package.json` and `package-lock.json`
+     - Updated `CHANGELOG.md` with all changes
+     - Git tag for the new version
 
-To publish a new version of the extension:
+3. **Review and Merge**: Review the Release PR to verify:
+   - Version number is correct
+   - CHANGELOG accurately reflects changes
+   - No unintended changes are included
 
-1. **Update the version** in `package.json`:
+4. **Release Published Automatically**: When you merge the Release PR:
+   - A GitHub Release is created with the tag (e.g., `v0.3.0`)
+   - The build workflow is triggered by the tag
+   - VSIX package is built and attached to the Release
+
+5. **Optional Marketplace Publish**: If enabled, the publish workflow automatically pushes the VSIX to the VS Code Marketplace
+
+### Conventional Commit Examples
+
+```bash
+# Patch version (0.2.0 → 0.2.1)
+git commit -m "fix: resolve syntax highlighting bug"
+
+# Minor version (0.2.0 → 0.3.0)
+git commit -m "feat: add RIPP workflow visualization"
+
+# Major version (0.2.0 → 1.0.0)
+git commit -m "feat!: redesign extension API
+
+BREAKING CHANGE: Extension API has been completely redesigned"
+```
+
+### Manual Release (If Needed)
+
+If you need to create a release manually (bypassing automatic versioning):
+
+1. **Update version in package.json**:
 
    ```bash
    cd tools/vscode-extension
-   # For patch release (0.2.0 → 0.2.1)
-   npm version patch
-   # For minor release (0.2.0 → 0.3.0)
-   npm version minor
-   # For major release (0.2.0 → 1.0.0)
-   npm version major
+   npm version patch  # or minor, or major
    ```
 
-   This command will:
-   - Update `package.json` with the new version
-   - Create a git commit with the version bump
-   - Create a git tag (e.g., `v0.2.1`)
+2. **Update CHANGELOG.md** with your changes
 
-2. **Update CHANGELOG.md** with changes for the new version
+3. **Create a PR** with these changes
 
-3. **Push the changes** including the tag:
+4. **After merge**, manually create a GitHub Release with a tag (e.g., `v0.2.1`)
 
-   ```bash
-   git push origin main
-   git push origin --tags
-   ```
+5. **The build workflow** will automatically trigger and create the VSIX
 
-4. **The CI workflow will automatically build** the VSIX with the new version
+### Version Bump Rules
 
-5. **Optional: Publish to Marketplace**:
-   ```bash
-   npx vsce publish
-   ```
+Release-please follows these rules for version bumps:
 
-### Pull Requests and Development Builds
+| Commit Type       | Version Bump | Example           |
+| ----------------- | ------------ | ----------------- |
+| `fix:`            | Patch        | 0.2.0 → 0.2.1     |
+| `feat:`           | Minor        | 0.2.0 → 0.3.0     |
+| `BREAKING CHANGE` | Major        | 0.2.0 → 1.0.0     |
+| `docs:`           | None         | No version change |
+| `chore:`          | None         | No version change |
+| `refactor:`       | None         | No version change |
 
-For pull requests and development builds, the workflow:
+**Note**: Multiple commits can accumulate before a release. The highest-impact change determines the version bump (e.g., if there are both `fix:` and `feat:` commits, it will bump the minor version).
 
-- Uses the existing version from `package.json` for packaging
-- Validates the version is Marketplace-compliant
-- Artifacts are named with build metadata for identification:
-  - Format: `vscode-extension-{version}-build-{timestamp}.{sha}`
-  - Example: `vscode-extension-0.2.0-build-20251217183528.f7fc498`
-  - The build metadata is used only for artifact naming, not in the VSIX package itself
+### Preventing Accidental Releases
 
-### Version Update Guidelines
+If you're working on features that shouldn't trigger a release yet, use non-release commit types:
 
-Follow semantic versioning when updating versions:
+```bash
+git commit -m "chore: update dependencies"
+git commit -m "docs: improve README"
+git commit -m "refactor: reorganize code structure"
+```
 
-- **Patch** (`0.2.0` → `0.2.1`): Bug fixes, minor improvements
-- **Minor** (`0.2.0` → `0.3.0`): New features, backward-compatible changes
-- **Major** (`0.2.0` → `1.0.0`): Breaking changes, major rewrites
+These won't trigger a Release PR until you make a `feat:` or `fix:` commit.
+
+### Workflow Files
+
+The versioning system consists of three workflows:
+
+1. **`.github/workflows/release-please.yml`**
+   - Triggers on: Push to `main`
+   - Creates/updates Release PR
+   - Creates GitHub Release when Release PR is merged
+
+2. **`.github/workflows/vscode-extension-build.yml`**
+   - Triggers on: Tags matching `v*`
+   - Builds VSIX package
+   - Uploads VSIX to GitHub Release
+
+3. **`.github/workflows/vscode-extension-publish.yml`** (Optional)
+   - Triggers on: GitHub Release published
+   - Publishes VSIX to VS Code Marketplace
+   - Requires `VSCE_PAT` secret to be configured
+
+### Configuration Files
+
+- **`release-please-config.json`**: Configures release-please behavior
+- **`.release-please-manifest.json`**: Tracks current version (managed by release-please)
+
+## Troubleshooting
+
+### Release PR Not Created
+
+If a Release PR isn't created after pushing to `main`:
+
+1. Check that your commits use conventional commit format
+2. Verify the `release-please` workflow ran successfully
+3. Check if a Release PR already exists (it will be updated, not recreated)
+
+### Version Mismatch Error
+
+If the build fails with a version mismatch error:
+
+1. Ensure `package.json` version matches the git tag
+2. The Release PR should have updated both - check if it was modified manually
+
+### Manual Version Correction
+
+If you need to fix a version manually:
+
+1. Create a PR updating `package.json` and `.release-please-manifest.json`
+2. Merge it to `main`
+3. The next Release PR will use the corrected version as the baseline
 
 ## References
 
+- [Conventional Commits](https://www.conventionalcommits.org/)
+- [release-please Documentation](https://github.com/googleapis/release-please)
 - [VS Code Extension Manifest](https://code.visualstudio.com/api/references/extension-manifest)
 - [Publishing Extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
 - [Semantic Versioning](https://semver.org/)
