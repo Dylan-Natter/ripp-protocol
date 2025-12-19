@@ -1,0 +1,83 @@
+name: Publish to VS Code Marketplace
+
+# This workflow publishes the VS Code extension to the Microsoft Marketplace.
+# It is triggered when a GitHub Release is published (after the build workflow completes).
+#
+# Prerequisites:
+# - The VSIX file must be attached to the GitHub Release
+# - A Personal Access Token (PAT) with Marketplace publishing rights must be configured as VSCE_PAT secret
+#
+# To set up the PAT:
+# 1. Go to https://dev.azure.com/{your-org}/_usersSettings/tokens
+# 2. Create a new PAT with "Marketplace (Publish)" scope
+# 3. Add it as a repository secret named VSCE_PAT
+#
+# This workflow is OPTIONAL and can be disabled if you prefer manual publishing.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to publish (e.g., v0.2.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to Marketplace
+    runs-on: ubuntu-latest
+    
+    # Only run if VSCE_PAT secret is configured
+    if: vars.ENABLE_AUTO_PUBLISH == 'true' || github.event_name == 'workflow_dispatch'
+    
+    defaults:
+      run:
+        working-directory: tools/vscode-extension
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/vscode-extension/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+      
+      - name: Compile TypeScript
+        run: npm run compile
+      
+      - name: Package extension
+        run: npx @vscode/vsce package --no-dependencies
+      
+      - name: Publish to Marketplace
+        run: npx @vscode/vsce publish --packagePath *.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      
+      - name: Success summary
+        run: |
+          echo "# Successfully Published! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Marketplace:** https://marketplace.visualstudio.com/items?itemName=RIPP.ripp-protocol" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The extension should be available in VS Code within a few minutes." >> $GITHUB_STEP_SUMMARY

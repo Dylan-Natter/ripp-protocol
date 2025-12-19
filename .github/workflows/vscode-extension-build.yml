@@ -1,61 +1,44 @@
 name: Build VS Code Extension
 
+# This workflow builds the VSIX package when a release tag is created.
+# It does NOT push to main or create tags - that's handled by release-please.
+#
+# Triggers:
+# - When a tag matching v* is pushed (created by release-please on Release PR merge)
+# - Manual workflow dispatch for testing
+#
+# The workflow:
+# 1. Checks out the tagged commit
+# 2. Extracts version from package.json (must match tag)
+# 3. Builds and packages the VSIX
+# 4. Uploads the VSIX as a workflow artifact
+# 5. Attaches the VSIX to the GitHub Release
+
 on:
   push:
-    branches: [main, copilot/**]
-    paths:
-      - 'tools/vscode-extension/**'
-      - '.github/workflows/vscode-extension-build.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'tools/vscode-extension/**'
-      - '.github/workflows/vscode-extension-build.yml'
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 concurrency:
-  group: release-main
+  group: build-${{ github.ref }}
   cancel-in-progress: false
+
+permissions:
+  contents: write  # Required to upload assets to GitHub Release
 
 jobs:
   build:
     name: Build and Package Extension
     runs-on: ubuntu-latest
     
-    permissions:
-      contents: write  # Required for auto-versioning commits and tags
-    
     defaults:
       run:
         working-directory: tools/vscode-extension
     
     steps:
-      # ============================================================================
-      # GitHub App Authentication
-      # ============================================================================
-      # Generate an installation token from the GitHub App credentials.
-      # This token allows the workflow to bypass branch protection rules when
-      # pushing version bumps directly to main after a merge.
-      # 
-      # The token is only generated when pushing to main (not for PRs or other branches).
-      # It will be used for:
-      # - Checking out the repository with write access
-      # - Pushing version bump commits
-      # - Creating and pushing git tags
-      - name: Generate GitHub App Token
-        id: app-token
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.RIPP_APP_ID }}
-          private-key: ${{ secrets.RIPP_APP_PRIVATE_KEY }}
-      
-      # Checkout with the App token for main branch pushes/workflow_dispatch, regular token otherwise
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Fetch full history for version tagging
-          token: ${{ ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && steps.app-token.outputs.token) || github.token }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -67,97 +50,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      # ============================================================================
-      # Auto-Increment Version (Main Branch Only)
-      # ============================================================================
-      # Automatically increment the patch version when code is merged to main or manually triggered.
-      # This step:
-      # 1. Configures git with the GitHub App bot identity
-      # 2. Increments the patch version in package.json
-      # 3. Updates CHANGELOG.md with the new version entry
-      # 4. Commits the changes with [skip ci] to prevent infinite loops
-      # 5. Creates a git tag for the new version
-      # 6. Pushes both the commit and tag to main using the App token (bypasses branch protection)
-      - name: Auto-increment version (main branch only)
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-        run: |
-          # Configure git with GitHub App bot identity
-          git config user.name "ripp-automation[bot]"
-          git config user.email "ripp-automation[bot]@users.noreply.github.com"
-          
-          # Fetch latest changes from origin to avoid non-fast-forward errors
-          git fetch origin main --tags
-          git checkout main
-          git pull --ff-only origin main
-          
-          # Increment patch version (e.g., 0.2.0 → 0.2.1)
-          npm version patch -m "chore: bump version to %s [skip ci]"
-          
-          # Get the new version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "New version: ${NEW_VERSION}"
-          
-          # Check if tag already exists (locally or on origin)
-          if git rev-parse "v${NEW_VERSION}" >/dev/null 2>&1 || git ls-remote --tags origin "v${NEW_VERSION}" | grep -q "v${NEW_VERSION}"; then
-            echo "Tag v${NEW_VERSION} already exists. Skipping release (idempotent behavior)."
-            echo "VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-            exit 0
-          fi
-          
-          # Update CHANGELOG.md
-          CHANGELOG_DATE=$(date -u +%Y-%m-%d)
-          
-          # Get the previous tag to generate changelog notes
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
-          if [ -n "$PREV_TAG" ]; then
-            # Get commits since the previous tag (excluding the version bump commit we just made)
-            CHANGELOG_NOTES=$(git log --format="* %s" "${PREV_TAG}..HEAD^" 2>/dev/null || echo "* Version bump")
-          else
-            # No previous tag, this might be the first release
-            CHANGELOG_NOTES="* Initial release"
-          fi
-          
-          # Insert new changelog entry after the header
-          awk -v ver="${NEW_VERSION}" -v date="${CHANGELOG_DATE}" -v notes="${CHANGELOG_NOTES}" '
-            /All notable changes.*will be documented/ {
-              print;
-              print "";
-              print "## [" ver "] - " date;
-              print "";
-              print "### Changed";
-              print "";
-              n = split(notes, lines, "\n");
-              for (i = 1; i <= n; i++) {
-                if (length(lines[i]) > 0) print lines[i];
-              }
-              next;
-            }
-            { print }
-          ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
-          
-          # Amend the version bump commit to include CHANGELOG changes
-          git add CHANGELOG.md
-          git commit --amend --no-edit
-          
-          # Create the tag (without force)
-          git tag "v${NEW_VERSION}"
-          
-          # Push the commit to main first
-          git push origin main
-          
-          # Push only the new tag
-          git push origin "v${NEW_VERSION}"
-          
-          # Export version for later steps
-          echo "VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-      
-      # Get version from package.json for PR builds (no auto-increment)
-      - name: Get version from package.json (PR builds)
-        if: (github.event_name != 'push' && github.event_name != 'workflow_dispatch') || github.ref != 'refs/heads/main'
+      # Get version from package.json and verify it matches the tag
+      - name: Get version from package.json
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Building extension version: ${VERSION}"
+          
+          # If this is a tag build, verify version matches tag
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+            EXPECTED_VERSION="${TAG_NAME#v}"  # Remove 'v' prefix
+            if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+              echo "❌ Error: Version mismatch!"
+              echo "package.json version: $VERSION"
+              echo "Git tag version: $EXPECTED_VERSION"
+              exit 1
+            fi
+            echo "✅ Version matches tag: $VERSION"
+          fi
       
       # Set build metadata for artifact naming
       - name: Set build metadata
@@ -225,6 +136,17 @@ jobs:
           path: tools/vscode-extension/dist/*.vsix
           retention-days: 30
           if-no-files-found: error
+      
+      # Upload VSIX to GitHub Release (only when triggered by a tag)
+      - name: Upload VSIX to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: tools/vscode-extension/dist/*.vsix
+          tag_name: ${{ github.ref_name }}
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Generate summary
         if: always()

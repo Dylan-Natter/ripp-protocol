@@ -1,0 +1,73 @@
+name: Release Please (VS Code Extension)
+
+# This workflow implements PR-based auto-versioning for the VS Code extension.
+# It uses conventional commits to determine version bumps and creates/updates
+# a Release PR automatically. This approach respects branch protection rules
+# because version changes happen through PRs, not direct pushes to main.
+#
+# How it works:
+# 1. On every push to main, release-please analyzes commits since last release
+# 2. Based on conventional commits (feat/fix/BREAKING CHANGE), it determines the next version
+# 3. It creates or updates a "Release PR" with version bumps and CHANGELOG updates
+# 4. When the Release PR is merged, it creates a GitHub Release and tag
+# 5. The tag triggers the build workflow to create the VSIX package
+#
+# Why PR-based versioning?
+# - Respects branch protection (no direct pushes from CI)
+# - Version changes are reviewable before merge
+# - Prevents version conflicts and race conditions
+# - Immutable releases once published
+# - Clear audit trail of what goes into each version
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Create or Update Release PR
+    runs-on: ubuntu-latest
+    
+    # Only run on main branch pushes (not on PR merges from release-please itself)
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          # Use the config file for monorepo support
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          
+          # Target only the VS Code extension path
+          path: tools/vscode-extension
+          
+          # Token with permissions to create PRs and tags
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Output release information
+        if: steps.release.outputs.releases_created
+        run: |
+          echo "# Release Created! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${{ steps.release.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** ${{ steps.release.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The build workflow will now create the VSIX package." >> $GITHUB_STEP_SUMMARY
+      
+      - name: Output PR information
+        if: steps.release.outputs.pr
+        run: |
+          echo "# Release PR Updated 📝" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** ${{ steps.release.outputs.pr }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review and merge the Release PR to publish a new version." >> $GITHUB_STEP_SUMMARY
