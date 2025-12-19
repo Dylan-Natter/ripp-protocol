@@ -1,10 +1,9 @@
 name: Publish to VS Code Marketplace
 
 # This workflow publishes the VS Code extension to the Microsoft Marketplace.
-# It is triggered when a GitHub Release is published (after the build workflow completes).
+# It can be triggered manually or automatically when a GitHub Release is published.
 #
 # Prerequisites:
-# - The VSIX file must be attached to the GitHub Release
 # - A Personal Access Token (PAT) with Marketplace publishing rights must be configured as VSCE_PAT secret
 #
 # To set up the PAT:
@@ -12,7 +11,10 @@ name: Publish to VS Code Marketplace
 # 2. Create a new PAT with "Marketplace (Publish)" scope
 # 3. Add it as a repository secret named VSCE_PAT
 #
-# This workflow is OPTIONAL and can be disabled if you prefer manual publishing.
+# Manual Usage:
+# - Set publish=false to only build and upload VSIX artifact (safe testing)
+# - Set publish=true to actually publish to the Marketplace
+# - Set prerelease=true to mark the release as a pre-release version
 
 on:
   release:
@@ -20,19 +22,36 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag name to publish (e.g., v0.2.1)'
-        required: true
+        description: 'Tag name to publish (e.g., v0.2.1). Leave empty to use current HEAD.'
+        required: false
         type: string
+      publish:
+        description: 'Publish to Marketplace (false = build only, upload artifact)'
+        required: false
+        type: boolean
+        default: false
+      prerelease:
+        description: 'Mark as pre-release version'
+        required: false
+        type: boolean
+        default: false
+
+# Prevent concurrent publishes to the same ref
+concurrency:
+  group: publish-vscode-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
   publish:
-    name: Publish to Marketplace
+    name: Build and Publish Extension
     runs-on: ubuntu-latest
     
-    # Only run if VSCE_PAT secret is configured
+    # Only run if:
+    # - Auto-publish is enabled (for release events), OR
+    # - Manual workflow_dispatch
     if: vars.ENABLE_AUTO_PUBLISH == 'true' || github.event_name == 'workflow_dispatch'
     
     defaults:
@@ -43,7 +62,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
+          ref: ${{ github.event.inputs.tag_name || github.event.release.tag_name || github.ref }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,29 +74,96 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Get version
-        id: version
+      - name: Get extension metadata
+        id: metadata
         run: |
           VERSION=$(node -p "require('./package.json').version")
+          PUBLISHER=$(node -p "require('./package.json').publisher")
+          NAME=$(node -p "require('./package.json').name")
+          EXTENSION_ID="${PUBLISHER}.${NAME}"
+          
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Publishing version: $VERSION"
+          echo "publisher=$PUBLISHER" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "extension_id=$EXTENSION_ID" >> $GITHUB_OUTPUT
+          
+          echo "Extension: $EXTENSION_ID v$VERSION"
+      
+      - name: Run lint
+        run: npm run lint
+      
+      # Uncomment when tests are available:
+      # - name: Run tests
+      #   run: npm test
       
       - name: Compile TypeScript
         run: npm run compile
       
       - name: Package extension
-        run: npx @vscode/vsce package --no-dependencies
+        run: |
+          PRERELEASE_FLAG=""
+          if [ "${{ github.event.inputs.prerelease || 'false' }}" == "true" ]; then
+            PRERELEASE_FLAG="--pre-release"
+          fi
+          npx @vscode/vsce package --no-dependencies $PRERELEASE_FLAG
+      
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-${{ steps.metadata.outputs.version }}
+          path: tools/vscode-extension/*.vsix
+          retention-days: 30
+          if-no-files-found: error
       
       - name: Publish to Marketplace
-        run: npx @vscode/vsce publish --packagePath *.vsix
+        # Only publish if:
+        # - This is a release event (auto-publish), OR
+        # - Manual workflow with publish=true
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true')
+        run: |
+          if [ -z "${{ secrets.VSCE_PAT }}" ]; then
+            echo "::error::VSCE_PAT secret is not configured. Cannot publish."
+            exit 1
+          fi
+          
+          PRERELEASE_FLAG=""
+          if [ "${{ github.event.inputs.prerelease || 'false' }}" == "true" ]; then
+            PRERELEASE_FLAG="--pre-release"
+          fi
+          
+          npx @vscode/vsce publish --packagePath *.vsix $PRERELEASE_FLAG
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       
-      - name: Success summary
+      - name: Job summary
+        if: always()
         run: |
-          echo "# Successfully Published! 🎉" >> $GITHUB_STEP_SUMMARY
+          PUBLISH_STATUS="${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true') }}"
+          PRERELEASE="${{ github.event.inputs.prerelease || 'false' }}"
+          
+          if [ "$PUBLISH_STATUS" == "true" ]; then
+            echo "# ✅ Successfully Published to Marketplace! 🎉" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# 📦 Build Complete (Not Published)" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Marketplace:** https://marketplace.visualstudio.com/items?itemName=RIPP.ripp-protocol" >> $GITHUB_STEP_SUMMARY
+          echo "**Extension ID:** \`${{ steps.metadata.outputs.extension_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Publisher:** \`${{ steps.metadata.outputs.publisher }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.metadata.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$PRERELEASE" == "true" ]; then
+            echo "**Pre-release:** Yes" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The extension should be available in VS Code within a few minutes." >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$PUBLISH_STATUS" == "true" ]; then
+            echo "**Marketplace URL:** https://marketplace.visualstudio.com/items?itemName=${{ steps.metadata.outputs.extension_id }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The extension should be available in VS Code within a few minutes." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**VSIX Artifact:** Available for download in the workflow artifacts" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To publish this build, re-run the workflow with \`publish=true\`" >> $GITHUB_STEP_SUMMARY
+          fi
