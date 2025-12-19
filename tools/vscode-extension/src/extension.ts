@@ -8,6 +8,7 @@ import { RippReportViewProvider, ValidationReport, Finding } from './reportViewP
 import { CliRunner } from './services/cliRunner';
 import { ConfigService } from './services/configService';
 import { SecretService } from './services/secretService';
+import { WorkspaceMapService } from './services/workspaceMapService';
 
 const execFileAsync = promisify(execFile);
 
@@ -17,7 +18,7 @@ const execFileAsync = promisify(execFile);
  * World-class protocol UX with thin UI layer over deterministic CLI.
  * 
  * Architecture:
- * - Services: CLI runner, config manager, secrets manager
+ * - Services: CLI runner, config manager, secrets manager, workspace map
  * - Views: 5-step workflow sidebar, webviews for config/secrets/evidence/intent
  * - Providers: Diagnostics, validation reports
  * 
@@ -27,6 +28,7 @@ const execFileAsync = promisify(execFile);
  * - No secrets in repo files (use SecretStorage)
  * - Respect AI policy and precedence
  * - Transparent logging for all operations
+ * - Dynamic path discovery (never hardcode paths)
  */
 
 // Global services and providers
@@ -34,6 +36,7 @@ let outputChannel: vscode.OutputChannel;
 let cliRunner: CliRunner;
 let configService: ConfigService;
 let secretService: SecretService;
+let workspaceMapService: WorkspaceMapService;
 let workflowProvider: RippWorkflowProvider;
 let diagnosticsProvider: RippDiagnosticsProvider;
 let reportViewProvider: RippReportViewProvider;
@@ -49,6 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
 	cliRunner = CliRunner.getInstance(outputChannel);
 	configService = ConfigService.getInstance();
 	secretService = SecretService.getInstance(context.secrets);
+	workspaceMapService = WorkspaceMapService.getInstance();
 
 	// Initialize providers
 	workflowProvider = new RippWorkflowProvider();
@@ -87,6 +91,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
 	// Cleanup if needed
+}
+
+/**
+ * Get workspace map service instance (exported for testing and future use)
+ */
+export function getWorkspaceMapService(): WorkspaceMapService {
+	return workspaceMapService;
 }
 
 /**
