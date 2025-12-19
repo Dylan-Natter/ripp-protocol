@@ -522,7 +522,10 @@ async function handleMigrateCommand(args) {
       process.exit(0);
     }
   } catch (error) {
-    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    console.error(`${colors.red}Migration failed: ${error.message}${colors.reset}`);
+    if (error.stack) {
+      console.error(`${colors.gray}${error.stack}${colors.reset}`);
+    }
     process.exit(1);
   }
 }
