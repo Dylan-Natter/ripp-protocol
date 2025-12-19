@@ -14,8 +14,7 @@ const path = require('path');
  *   ripp/output/handoffs/        (finalized packets)
  *   ripp/output/packages/        (generated outputs)
  */
-function migrateDirectoryStructure(options = {}) {
-  const dryRun = options.dryRun || false;
+function migrateDirectoryStructure({ dryRun = false } = {}) {
   const cwd = process.cwd();
   const results = {
     moved: [],
@@ -45,6 +44,26 @@ function migrateDirectoryStructure(options = {}) {
 
   let hasLegacy = false;
 
+  /**
+   * Safely move directory with cross-device support
+   */
+  function safeMove(source, dest, description) {
+    try {
+      // Try rename first (faster, atomic)
+      fs.renameSync(source, dest);
+      results.moved.push(`Moved: ${description}`);
+    } catch (error) {
+      // If rename fails (cross-device), use copy+remove
+      if (error.code === 'EXDEV') {
+        fs.cpSync(source, dest, { recursive: true });
+        fs.rmSync(source, { recursive: true });
+        results.moved.push(`Moved: ${description}`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   // 1. Migrate features/ → intent/
   if (fs.existsSync(legacyFeatures)) {
     hasLegacy = true;
@@ -54,8 +73,7 @@ function migrateDirectoryStructure(options = {}) {
       if (dryRun) {
         results.moved.push('Would move: ripp/features/ → ripp/intent/');
       } else {
-        fs.renameSync(legacyFeatures, newIntent);
-        results.moved.push('Moved: ripp/features/ → ripp/intent/');
+        safeMove(legacyFeatures, newIntent, 'ripp/features/ → ripp/intent/');
       }
     }
   }
@@ -83,8 +101,7 @@ function migrateDirectoryStructure(options = {}) {
       if (dryRun) {
         results.moved.push('Would move: ripp/handoffs/ → ripp/output/handoffs/');
       } else {
-        fs.renameSync(legacyHandoffs, newHandoffs);
-        results.moved.push('Moved: ripp/handoffs/ → ripp/output/handoffs/');
+        safeMove(legacyHandoffs, newHandoffs, 'ripp/handoffs/ → ripp/output/handoffs/');
       }
     }
   }
@@ -99,7 +116,7 @@ function migrateDirectoryStructure(options = {}) {
       if (dryRun) {
         results.moved.push('Would move: ripp/packages/ → ripp/output/packages/');
       } else {
-        fs.renameSync(legacyPackages, newPackages);
+        safeMove(legacyPackages, newPackages, 'ripp/packages/ → ripp/output/packages/');
         results.moved.push('Moved: ripp/packages/ → ripp/output/packages/');
       }
     }
@@ -151,8 +168,11 @@ function detectLegacyStructure(cwd = process.cwd()) {
 function getSearchPaths(basePath, cwd = process.cwd()) {
   const paths = [];
 
-  // Normalize base path
-  const normalized = basePath.replace(/^ripp\//, '');
+  // Normalize base path - handle both with and without 'ripp/' prefix
+  let normalized = basePath;
+  if (normalized.startsWith('ripp/')) {
+    normalized = normalized.replace(/^ripp\//, '');
+  }
 
   // Map of legacy → new paths
   const pathMappings = {
