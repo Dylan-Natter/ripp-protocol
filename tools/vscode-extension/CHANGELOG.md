@@ -2,6 +2,12 @@
 
 All notable changes to the RIPP Protocol VS Code extension will be documented in this file.
 
+## [0.2.2] - 2025-12-19
+
+### Changed
+
+- Version bump to 0.2.2
+
 ## [0.1.1] - 2025-12-16
 
 ### Fixed
