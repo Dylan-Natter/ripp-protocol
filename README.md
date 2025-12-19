@@ -832,6 +832,13 @@ RIPP is an open standard. Contributions are welcome!
 - Check [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 - Open an issue or pull request
 
+### Publishing
+
+For maintainers: See [docs/PUBLISHING.md](docs/PUBLISHING.md) for instructions on publishing:
+
+- VS Code extension to the Marketplace
+- RIPP CLI package to npm
+
 ---
 
 ## License
@@ -846,6 +853,7 @@ MIT License. See [LICENSE](LICENSE).
 - **Schema**: [schema/ripp-1.0.schema.json](schema/ripp-1.0.schema.json)
 - **Examples**: [examples/](examples/)
 - **CLI Tool**: [tools/ripp-cli](tools/ripp-cli)
+- **Publishing Guide**: [docs/PUBLISHING.md](docs/PUBLISHING.md)
 
 ---
 

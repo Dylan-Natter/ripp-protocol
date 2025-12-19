@@ -45,6 +45,13 @@ Direct edits to the GitHub Wiki are overwritten. Always edit files in this direc
 - **Publishing**: Served via GitHub Pages at https://dylan-natter.github.io/ripp-protocol
 - **Audience**: End users, adopters, evaluators
 
+**Key documents:**
+
+- **[PUBLISHING.md](PUBLISHING.md)** — Guide for publishing VS Code extension and npm packages
+- **[EXTENSIONS.md](EXTENSIONS.md)** — Guidelines for extending RIPP tooling
+- **[INTENT-DISCOVERY-MODE.md](INTENT-DISCOVERY-MODE.md)** — AI-assisted intent discovery workflow
+- **[vscode-extension-pr-based-versioning.md](vscode-extension-pr-based-versioning.md)** — Release-please workflow documentation
+
 ## Authoritative Sources Hierarchy
 
 When documentation conflicts with other sources, this is the order of authority:
