@@ -51,8 +51,10 @@ ripp init
 This creates:
 
 - `ripp/` directory for your RIPP packets
-- `ripp/features/` for feature specifications
-- `ripp/intent-packages/` for packaged artifacts
+- `ripp/intent/` for feature specifications (human-authored)
+- `ripp/output/handoffs/` for validated packets (ready for delivery)
+- `ripp/output/packages/` for packaged outputs
+- `.ripp/` for configuration and workflow state
 - `.github/workflows/ripp-validate.yml` for automated validation
 
 **What you get:**
@@ -60,7 +62,9 @@ This creates:
 - ✅ Proper directory structure
 - ✅ GitHub Actions for CI/CD validation
 - ✅ Documentation and examples
-- ✅ Intent package management
+- ✅ Clear separation of source vs generated content
+
+**[📖 Learn more about directory structure →](directory-layout.md)**
 
 Now skip to **Step 4** to create your first RIPP packet.
 

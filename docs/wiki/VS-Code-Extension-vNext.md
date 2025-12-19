@@ -649,7 +649,7 @@ For detailed versioning rules, see `tools/vscode-extension/VERSIONING.md`.
 
 ### Breaking Changes
 
-- **Directory structure**: `ripp/features/` → `.ripp/` (legacy path still supported)
+- **Directory structure**: `ripp/intent/` → `.ripp/` (legacy path still supported)
 - **Analyze command**: Deprecated (use 5-step workflow instead)
 
 ### What's Preserved

@@ -56,7 +56,7 @@ Sets up the recommended directory structure and GitHub Actions workflow for RIPP
 Creates:
 
 - `ripp/` — Main directory for RIPP artifacts
-- `ripp/features/` — Directory for feature RIPP packets
+- `ripp/intent/` — Directory for feature RIPP packets
 - `ripp/intent-packages/` — Directory for packaged artifacts
 - `ripp/README.md` — Documentation about RIPP in your repo
 - `ripp/intent-packages/README.md` — Intent package documentation
@@ -67,7 +67,7 @@ Creates:
 | File                                  | Content                | Overwrite Behavior                       |
 | ------------------------------------- | ---------------------- | ---------------------------------------- |
 | `ripp/`                               | Empty directory        | Always created if missing                |
-| `ripp/features/`                      | Empty directory        | Always created if missing                |
+| `ripp/intent/`                        | Empty directory        | Always created if missing                |
 | `ripp/intent-packages/`               | Empty directory        | Always created if missing                |
 | `ripp/README.md`                      | Documentation template | **Skipped** if exists (unless `--force`) |
 | `ripp/intent-packages/README.md`      | Documentation template | **Skipped** if exists (unless `--force`) |
@@ -101,7 +101,7 @@ ripp init --force
 Initializing RIPP in your repository...
 
 ✓ Created ripp/
-✓ Created ripp/features/
+✓ Created ripp/intent/
 ✓ Created ripp/intent-packages/
 ✓ Created ripp/README.md
 ✓ Created ripp/intent-packages/README.md
@@ -110,8 +110,8 @@ Initializing RIPP in your repository...
 RIPP initialization complete!
 
 Next steps:
-1. Create your first RIPP packet in ripp/features/
-2. Run 'ripp validate ripp/features/' to validate
+1. Create your first RIPP packet in ripp/intent/
+2. Run 'ripp validate ripp/intent/' to validate
 3. Commit and push to enable CI/CD validation
 ```
 
@@ -152,7 +152,7 @@ Ensures RIPP packets conform to the specification and include all required secti
 ripp validate my-feature.ripp.yaml
 
 # Validate all files in a directory
-ripp validate ripp/features/
+ripp validate ripp/intent/
 
 # Validate current directory
 ripp validate .
@@ -239,13 +239,13 @@ Identifies issues that are syntactically valid but violate best practices.
 
 ```bash
 # Lint files in a directory
-ripp lint ripp/features/
+ripp lint ripp/intent/
 
 # Treat warnings as errors (fail on warnings)
-ripp lint ripp/features/ --strict
+ripp lint ripp/intent/ --strict
 
 # Custom output directory
-ripp lint ripp/features/ --output ./build/reports/
+ripp lint ripp/intent/ --output ./build/reports/
 ```
 
 ### Options
@@ -308,7 +308,7 @@ Linting RIPP packets...
 
 ```yaml
 - name: Lint RIPP Packets (strict)
-  run: ripp lint ripp/features/ --strict
+  run: ripp lint ripp/intent/ --strict
 ```
 
 ---

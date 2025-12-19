@@ -215,7 +215,7 @@ name: Validate RIPP Packets (Level 2+ for Production)
 on:
   pull_request:
     paths:
-      - 'ripp/features/**.ripp.yaml'
+      - 'ripp/intent/**.ripp.yaml'
 
 jobs:
   validate:
@@ -232,7 +232,7 @@ jobs:
         run: npm install -g ripp-cli
 
       - name: Validate Production Features (Level 2+)
-        run: ripp validate ripp/features/ --min-level 2
+        run: ripp validate ripp/intent/ --min-level 2
 ```
 
 **Use when:** Production features must be Level 2 or higher.
