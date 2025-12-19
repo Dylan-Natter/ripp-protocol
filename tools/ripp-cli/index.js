@@ -16,6 +16,7 @@ const { buildEvidencePack } = require('./lib/evidence');
 const { discoverIntent } = require('./lib/discovery');
 const { confirmIntent } = require('./lib/confirmation');
 const { buildCanonicalArtifacts } = require('./lib/build');
+const { migrateDirectoryStructure, detectLegacyStructure } = require('./lib/migrate');
 
 // ANSI color codes
 const colors = {
@@ -263,6 +264,7 @@ ${colors.blue}RIPP CLI v${pkg.version}${colors.reset}
 
 ${colors.green}Commands:${colors.reset}
   ripp init                         Initialize RIPP in your repository
+  ripp migrate                      Migrate legacy directory structure to new layout
   ripp validate <path>              Validate RIPP packets
   ripp lint <path>                  Lint RIPP packets for best practices
   ripp package --in <file> --out <file>
@@ -281,6 +283,9 @@ ${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
 
 ${colors.green}Init Options:${colors.reset}
   --force                           Overwrite existing files
+
+${colors.green}Migrate Options:${colors.reset}
+  --dry-run                         Preview changes without moving files
 
 ${colors.green}Evidence Build Options:${colors.reset}
   (Uses configuration from .ripp/config.yaml)
@@ -326,11 +331,13 @@ ${colors.green}Analyze Options:${colors.reset}
 ${colors.green}Examples:${colors.reset}
   ripp init
   ripp init --force
+  ripp migrate
+  ripp migrate --dry-run
   ripp validate my-feature.ripp.yaml
-  ripp validate features/
-  ripp validate api/ --min-level 2
-  ripp lint examples/
-  ripp lint examples/ --strict
+  ripp validate ripp/intent/
+  ripp validate ripp/intent/ --min-level 2
+  ripp lint ripp/intent/
+  ripp lint ripp/intent/ --strict
   ripp package --in feature.ripp.yaml --out handoff.md
   ripp package --in feature.ripp.yaml --out handoff.md --package-version 1.0.0
   ripp package --in feature.ripp.yaml --out handoff.md --force
@@ -345,6 +352,8 @@ ${colors.blue}Intent Discovery Examples:${colors.reset}
   RIPP_AI_ENABLED=true ripp discover --target-level 2
   ripp confirm --interactive
   ripp build --packet-id my-feature --title "My Feature"
+
+${colors.gray}Note: Legacy paths (features/, handoffs/, packages/) are supported for backward compatibility.${colors.reset}
 
 ${colors.green}Exit Codes:${colors.reset}
   0                                 All checks passed
@@ -427,6 +436,91 @@ function getGitInfo() {
   }
 }
 
+async function handleMigrateCommand(args) {
+  const dryRun = args.includes('--dry-run');
+
+  console.log(`${colors.blue}RIPP Directory Migration${colors.reset}\n`);
+  console.log('This will update your RIPP directory structure to the new layout:\n');
+  console.log(`  ${colors.gray}ripp/features/  ${colors.reset}→ ${colors.green}ripp/intent/${colors.reset}`);
+  console.log(`  ${colors.gray}ripp/handoffs/  ${colors.reset}→ ${colors.green}ripp/output/handoffs/${colors.reset}`);
+  console.log(`  ${colors.gray}ripp/packages/  ${colors.reset}→ ${colors.green}ripp/output/packages/${colors.reset}\n`);
+
+  if (dryRun) {
+    console.log(`${colors.yellow}ℹ DRY RUN MODE: No files will be moved${colors.reset}\n`);
+  }
+
+  try {
+    const results = migrateDirectoryStructure({ dryRun });
+
+    // Print moved directories
+    if (results.moved.length > 0) {
+      console.log(`${colors.green}✓ ${dryRun ? 'Would move' : 'Moved'}:${colors.reset}`);
+      results.moved.forEach(msg => {
+        console.log(`  ${colors.green}→${colors.reset} ${msg}`);
+      });
+      console.log('');
+    }
+
+    // Print created directories
+    if (results.created.length > 0) {
+      console.log(`${colors.green}✓ ${dryRun ? 'Would create' : 'Created'}:${colors.reset}`);
+      results.created.forEach(msg => {
+        console.log(`  ${colors.green}+${colors.reset} ${msg}`);
+      });
+      console.log('');
+    }
+
+    // Print skipped
+    if (results.skipped.length > 0) {
+      console.log(`${colors.blue}ℹ Info:${colors.reset}`);
+      results.skipped.forEach(msg => {
+        console.log(`  ${colors.blue}•${colors.reset} ${msg}`);
+      });
+      console.log('');
+    }
+
+    // Print warnings
+    if (results.warnings.length > 0) {
+      console.log(`${colors.yellow}⚠ Warnings:${colors.reset}`);
+      results.warnings.forEach(msg => {
+        console.log(`  ${colors.yellow}!${colors.reset} ${msg}`);
+      });
+      console.log('');
+    }
+
+    // Final summary
+    if (results.warnings.length > 0) {
+      log(
+        colors.yellow,
+        '⚠',
+        'Migration completed with warnings. Please review conflicts manually.'
+      );
+      console.log('');
+      process.exit(0);
+    } else if (results.moved.length > 0 || results.created.length > 0) {
+      if (dryRun) {
+        log(colors.blue, 'ℹ', 'Dry run complete. Run without --dry-run to apply changes.');
+      } else {
+        log(colors.green, '✓', 'Migration complete!');
+        console.log('');
+        console.log(`${colors.blue}Next steps:${colors.reset}`);
+        console.log('  1. Update your package.json scripts to use new paths');
+        console.log('  2. Update any documentation referencing old paths');
+        console.log('  3. Commit the changes to your repository');
+      }
+      console.log('');
+      process.exit(0);
+    } else {
+      log(colors.green, '✓', 'Already using new directory structure. No migration needed.');
+      console.log('');
+      process.exit(0);
+    }
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
 
@@ -444,6 +538,8 @@ async function main() {
 
   if (command === 'init') {
     await handleInitCommand(args);
+  } else if (command === 'migrate') {
+    await handleMigrateCommand(args);
   } else if (command === 'validate') {
     await handleValidateCommand(args);
   } else if (command === 'lint') {
@@ -515,10 +611,10 @@ async function handleInitCommand(args) {
       console.log('  1. Add this script to your package.json:');
       console.log('');
       console.log('     "scripts": {');
-      console.log('       "ripp:validate": "ripp validate ripp/features/"');
+      console.log('       "ripp:validate": "ripp validate ripp/intent/"');
       console.log('     }');
       console.log('');
-      console.log('  2. Create your first RIPP packet in ripp/features/');
+      console.log('  2. Create your first RIPP packet in ripp/intent/');
       console.log('  3. Validate it: npm run ripp:validate');
       console.log('  4. Commit the changes to your repository');
       console.log('');
