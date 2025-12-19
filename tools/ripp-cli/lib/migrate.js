@@ -3,12 +3,12 @@ const path = require('path');
 
 /**
  * Migrate RIPP directory structure from legacy to new layout
- * 
+ *
  * Legacy structure:
  *   ripp/features/     → ripp/intent/
  *   ripp/handoffs/     → ripp/output/handoffs/
  *   ripp/packages/     → ripp/output/packages/
- * 
+ *
  * New structure:
  *   ripp/intent/                 (human-authored intent)
  *   ripp/output/handoffs/        (finalized packets)
@@ -49,9 +49,7 @@ function migrateDirectoryStructure(options = {}) {
   if (fs.existsSync(legacyFeatures)) {
     hasLegacy = true;
     if (fs.existsSync(newIntent)) {
-      results.warnings.push(
-        'Both ripp/features/ and ripp/intent/ exist. Manual merge required.'
-      );
+      results.warnings.push('Both ripp/features/ and ripp/intent/ exist. Manual merge required.');
     } else {
       if (dryRun) {
         results.moved.push('Would move: ripp/features/ → ripp/intent/');
@@ -119,17 +117,17 @@ function migrateDirectoryStructure(options = {}) {
  */
 function detectLegacyStructure(cwd = process.cwd()) {
   const rippDir = path.join(cwd, 'ripp');
-  
+
   if (!fs.existsSync(rippDir)) {
     return { hasLegacy: false, directories: [] };
   }
 
   const legacyDirs = [];
-  
+
   const legacyFeatures = path.join(rippDir, 'features');
   const legacyHandoffs = path.join(rippDir, 'handoffs');
   const legacyPackages = path.join(rippDir, 'packages');
-  
+
   if (fs.existsSync(legacyFeatures)) {
     legacyDirs.push('ripp/features/');
   }
@@ -152,22 +150,22 @@ function detectLegacyStructure(cwd = process.cwd()) {
  */
 function getSearchPaths(basePath, cwd = process.cwd()) {
   const paths = [];
-  
+
   // Normalize base path
   const normalized = basePath.replace(/^ripp\//, '');
-  
+
   // Map of legacy → new paths
   const pathMappings = {
-    'features': ['intent', 'features'],
-    'intent': ['intent', 'features'],
-    'handoffs': ['output/handoffs', 'handoffs'],
+    features: ['intent', 'features'],
+    intent: ['intent', 'features'],
+    handoffs: ['output/handoffs', 'handoffs'],
     'output/handoffs': ['output/handoffs', 'handoffs'],
-    'packages': ['output/packages', 'packages'],
+    packages: ['output/packages', 'packages'],
     'output/packages': ['output/packages', 'packages']
   };
 
   const mappings = pathMappings[normalized] || [normalized];
-  
+
   for (const mapping of mappings) {
     const fullPath = path.join(cwd, 'ripp', mapping);
     if (fs.existsSync(fullPath)) {

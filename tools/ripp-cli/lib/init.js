@@ -47,10 +47,12 @@ function initRepository(options = {}) {
     const rippDir = path.join(process.cwd(), 'ripp');
     const intentDir = path.join(rippDir, 'intent');
     const legacyFeaturesDir = path.join(rippDir, 'features');
-    
+
     // Check for legacy features/ directory
     if (fs.existsSync(legacyFeaturesDir) && !fs.existsSync(intentDir)) {
-      results.skipped.push('ripp/features/ (legacy directory exists - use "ripp migrate" to update)');
+      results.skipped.push(
+        'ripp/features/ (legacy directory exists - use "ripp migrate" to update)'
+      );
     } else if (!fs.existsSync(intentDir)) {
       fs.mkdirSync(intentDir, { recursive: true });
       results.created.push('ripp/intent/');
@@ -95,10 +97,12 @@ function initRepository(options = {}) {
     const rippDir = path.join(process.cwd(), 'ripp');
     const handoffsDir = path.join(rippDir, 'output', 'handoffs');
     const legacyHandoffsDir = path.join(rippDir, 'handoffs');
-    
+
     // Check for legacy handoffs/ directory
     if (fs.existsSync(legacyHandoffsDir) && !fs.existsSync(handoffsDir)) {
-      results.skipped.push('ripp/handoffs/ (legacy directory exists - use "ripp migrate" to update)');
+      results.skipped.push(
+        'ripp/handoffs/ (legacy directory exists - use "ripp migrate" to update)'
+      );
     } else if (!fs.existsSync(handoffsDir)) {
       fs.mkdirSync(handoffsDir, { recursive: true });
       results.created.push('ripp/output/handoffs/');
@@ -118,7 +122,9 @@ function initRepository(options = {}) {
       fs.writeFileSync(gitkeepPath, '');
       results.created.push('ripp/output/handoffs/.gitkeep');
     } else if (fs.existsSync(gitkeepPath)) {
-      results.skipped.push('ripp/output/handoffs/.gitkeep (already exists, use --force to overwrite)');
+      results.skipped.push(
+        'ripp/output/handoffs/.gitkeep (already exists, use --force to overwrite)'
+      );
     }
   } catch (error) {
     results.errors.push(`Failed to create ripp/output/handoffs/.gitkeep: ${error.message}`);
@@ -129,10 +135,12 @@ function initRepository(options = {}) {
     const rippDir = path.join(process.cwd(), 'ripp');
     const packagesDir = path.join(rippDir, 'output', 'packages');
     const legacyPackagesDir = path.join(rippDir, 'packages');
-    
+
     // Check for legacy packages/ directory
     if (fs.existsSync(legacyPackagesDir) && !fs.existsSync(packagesDir)) {
-      results.skipped.push('ripp/packages/ (legacy directory exists - use "ripp migrate" to update)');
+      results.skipped.push(
+        'ripp/packages/ (legacy directory exists - use "ripp migrate" to update)'
+      );
     } else if (!fs.existsSync(packagesDir)) {
       fs.mkdirSync(packagesDir, { recursive: true });
       results.created.push('ripp/output/packages/');
@@ -152,7 +160,9 @@ function initRepository(options = {}) {
       fs.writeFileSync(gitkeepPath, '');
       results.created.push('ripp/output/packages/.gitkeep');
     } else if (fs.existsSync(gitkeepPath)) {
-      results.skipped.push('ripp/output/packages/.gitkeep (already exists, use --force to overwrite)');
+      results.skipped.push(
+        'ripp/output/packages/.gitkeep (already exists, use --force to overwrite)'
+      );
     }
   } catch (error) {
     results.errors.push(`Failed to create ripp/output/packages/.gitkeep: ${error.message}`);

@@ -16,7 +16,7 @@ const { buildEvidencePack } = require('./lib/evidence');
 const { discoverIntent } = require('./lib/discovery');
 const { confirmIntent } = require('./lib/confirmation');
 const { buildCanonicalArtifacts } = require('./lib/build');
-const { migrateDirectoryStructure, detectLegacyStructure } = require('./lib/migrate');
+const { migrateDirectoryStructure } = require('./lib/migrate');
 
 // ANSI color codes
 const colors = {
@@ -441,9 +441,15 @@ async function handleMigrateCommand(args) {
 
   console.log(`${colors.blue}RIPP Directory Migration${colors.reset}\n`);
   console.log('This will update your RIPP directory structure to the new layout:\n');
-  console.log(`  ${colors.gray}ripp/features/  ${colors.reset}→ ${colors.green}ripp/intent/${colors.reset}`);
-  console.log(`  ${colors.gray}ripp/handoffs/  ${colors.reset}→ ${colors.green}ripp/output/handoffs/${colors.reset}`);
-  console.log(`  ${colors.gray}ripp/packages/  ${colors.reset}→ ${colors.green}ripp/output/packages/${colors.reset}\n`);
+  console.log(
+    `  ${colors.gray}ripp/features/  ${colors.reset}→ ${colors.green}ripp/intent/${colors.reset}`
+  );
+  console.log(
+    `  ${colors.gray}ripp/handoffs/  ${colors.reset}→ ${colors.green}ripp/output/handoffs/${colors.reset}`
+  );
+  console.log(
+    `  ${colors.gray}ripp/packages/  ${colors.reset}→ ${colors.green}ripp/output/packages/${colors.reset}\n`
+  );
 
   if (dryRun) {
     console.log(`${colors.yellow}ℹ DRY RUN MODE: No files will be moved${colors.reset}\n`);
