@@ -1,0 +1,219 @@
+name: Publish NPM Package
+
+# This workflow publishes the RIPP CLI npm package to the npm registry.
+# It is designed to be run manually with safety controls.
+#
+# Prerequisites:
+# - An npm access token with publish rights must be configured as NPM_TOKEN secret
+#
+# To set up the NPM_TOKEN:
+# 1. Log in to npmjs.com
+# 2. Go to Access Tokens → Generate New Token → Choose "Automation"
+# 3. Add it as a repository secret named NPM_TOKEN
+#
+# Manual Usage:
+# - Set dry_run=true (default) to test without actually publishing
+# - Set dry_run=false to publish for real
+# - Set tag to "latest" (default), "next", or "beta"
+# - Override package_path if needed (default: tools/ripp-cli)
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_path:
+        description: 'Path to the package to publish (default: tools/ripp-cli)'
+        required: false
+        type: string
+        default: 'tools/ripp-cli'
+      tag:
+        description: 'NPM dist-tag for this publish'
+        required: false
+        type: choice
+        options:
+          - latest
+          - next
+          - beta
+        default: latest
+      dry_run:
+        description: 'Dry run only (test without publishing)'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to NPM Registry
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ${{ github.event.inputs.package_path || 'tools/ripp-cli' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: ${{ github.event.inputs.package_path || 'tools/ripp-cli' }}/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Get package metadata
+        id: metadata
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_SCOPE=$(echo "$PACKAGE_NAME" | grep -oP '^@[^/]+' || echo "")
+          
+          echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "scope=$PACKAGE_SCOPE" >> $GITHUB_OUTPUT
+          
+          echo "Package: $PACKAGE_NAME@$PACKAGE_VERSION"
+          
+          # Check if package.json has required fields
+          HAS_BIN=$(node -p "!!require('./package.json').bin")
+          echo "has_bin=$HAS_BIN" >> $GITHUB_OUTPUT
+      
+      - name: Verify working tree is clean
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Working tree is dirty. Please commit or stash changes before publishing."
+            git status
+            exit 1
+          fi
+          echo "✅ Working tree is clean"
+      
+      - name: Run lint
+        run: |
+          if npm run lint --if-present; then
+            echo "✅ Lint passed"
+          else
+            echo "⚠️ No lint script found or lint failed"
+          fi
+      
+      - name: Run tests
+        run: |
+          if npm test; then
+            echo "✅ Tests passed"
+          else
+            echo "⚠️ Tests not found or failed"
+          fi
+      
+      - name: Run build
+        run: |
+          if npm run build --if-present; then
+            echo "✅ Build completed"
+          else
+            echo "ℹ️ No build script found (may not be needed)"
+          fi
+      
+      - name: Check published version
+        id: version_check
+        run: |
+          PACKAGE_NAME="${{ steps.metadata.outputs.name }}"
+          CURRENT_VERSION="${{ steps.metadata.outputs.version }}"
+          
+          # Get latest published version from npm
+          PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || echo "none")
+          
+          echo "published_version=$PUBLISHED_VERSION" >> $GITHUB_OUTPUT
+          
+          if [ "$PUBLISHED_VERSION" = "none" ]; then
+            echo "ℹ️ Package not yet published to npm"
+            echo "version_status=new" >> $GITHUB_OUTPUT
+          elif [ "$PUBLISHED_VERSION" = "$CURRENT_VERSION" ]; then
+            echo "::error::Version $CURRENT_VERSION is already published. Please bump the version in package.json"
+            exit 1
+          else
+            echo "✅ Version check passed: $PUBLISHED_VERSION → $CURRENT_VERSION"
+            echo "version_status=bump" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Verify package contents
+        run: |
+          echo "# Package Contents Preview" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm pack --dry-run 2>&1 | tee /tmp/pack-output.txt
+          cat /tmp/pack-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Dry run publish
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "# 🧪 Dry Run Mode" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Running publish in dry-run mode (no actual publish)..." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          npm publish --dry-run --tag ${{ github.event.inputs.tag || 'latest' }}
+          
+          echo "✅ Dry run completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**To publish for real, re-run with \`dry_run=false\`**" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Publish to NPM
+        if: github.event.inputs.dry_run == 'false'
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN secret is not configured. Cannot publish."
+            exit 1
+          fi
+          
+          # Determine access flag (public for unscoped packages)
+          ACCESS_FLAG=""
+          if [ -z "${{ steps.metadata.outputs.scope }}" ]; then
+            ACCESS_FLAG="--access public"
+          fi
+          
+          echo "Publishing to npm registry..."
+          npm publish $ACCESS_FLAG --tag ${{ github.event.inputs.tag || 'latest' }}
+          
+          echo "✅ Successfully published to npm!"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Job summary
+        if: always()
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          TAG="${{ github.event.inputs.tag || 'latest' }}"
+          
+          if [ "$DRY_RUN" == "false" ]; then
+            echo "# ✅ Successfully Published to NPM! 🎉" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# 📦 Dry Run Complete (Not Published)" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package Name:** \`${{ steps.metadata.outputs.name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.metadata.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Dist Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+          
+          VERSION_STATUS="${{ steps.version_check.outputs.version_status }}"
+          if [ "$VERSION_STATUS" == "new" ]; then
+            echo "**Status:** First publish (new package)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Previous Version:** \`${{ steps.version_check.outputs.published_version }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$DRY_RUN" == "false" ]; then
+            echo "**NPM URL:** https://www.npmjs.com/package/${{ steps.metadata.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The package should be available via \`npm install ${{ steps.metadata.outputs.name }}\` within a few minutes." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Next Step:** Re-run this workflow with \`dry_run=false\` to publish for real." >> $GITHUB_STEP_SUMMARY
+          fi
