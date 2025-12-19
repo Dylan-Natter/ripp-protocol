@@ -42,6 +42,7 @@ jobs:
             "jest.config.js"
             "jest.config.ts"
             ".gitignore"
+            "package.json"
             "package-lock.json"
             "yarn.lock"
             "pnpm-lock.yaml"
