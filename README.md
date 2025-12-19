@@ -333,13 +333,17 @@ ripp init
 This creates:
 
 - `ripp/` directory for your RIPP packets
-- `ripp/features/` for feature specifications
+- `ripp/intent/` for feature specifications (human-authored)
+- `ripp/output/handoffs/` for validated packets (ready for delivery)
+- `ripp/output/packages/` for packaged outputs (generated)
+- `.ripp/` for configuration and workflow state
 - GitHub Actions workflow for automated validation
-- Intent package management structure
+
+**[📖 Learn more about directory structure →](docs/directory-layout.md)**
 
 ### 2. Create Your First RIPP File
 
-Create `ripp/features/my-feature.ripp.yaml`:
+Create `ripp/intent/my-feature.ripp.yaml`:
 
 ```yaml
 ripp_version: '1.0'
@@ -395,14 +399,15 @@ data_contracts:
 Validate your packet:
 
 ```bash
-ripp validate ripp/features/my-feature.ripp.yaml
+ripp validate ripp/intent/my-feature.ripp.yaml
 
-# Or validate all features
-ripp validate ripp/features/
+# Or validate all intent packets
+ripp validate ripp/intent/
 ```
 
 ### 4. Learn More
 
+- **Directory Layout**: [docs/directory-layout.md](docs/directory-layout.md)
 - **Full Specification**: [SPEC.md](SPEC.md)
 - **Examples**: [examples/](examples/)
 - **Documentation**: [https://dylan-natter.github.io/ripp-protocol](https://dylan-natter.github.io/ripp-protocol)
@@ -606,26 +611,45 @@ workflows:
 
 ### Directory Structure Recommendations
 
-Organize your RIPP packets for clarity:
+Organize your RIPP packets for clarity. RIPP provides a standard structure:
 
 ```
 your-project/
-├── specs/                      # All RIPP packets
-│   ├── features/              # Feature specifications
+├── .ripp/                      # Hidden config/workflow state
+│   └── config.yaml             # RIPP configuration
+├── ripp/                       # RIPP workspace
+│   ├── intent/                 # Human-authored intent (source)
 │   │   ├── user-auth.ripp.yaml
-│   │   └── profile-mgmt.ripp.yaml
-│   ├── apis/                  # API specifications (Level 2+)
-│   │   ├── auth-api.ripp.yaml
-│   │   └── user-api.ripp.yaml
-│   └── critical/              # Critical features (Level 3)
-│       └── payment-flow.ripp.yaml
-├── vendor/                    # Git submodules (if applicable)
-│   └── ripp-protocol/
+│   │   ├── profile-mgmt.ripp.yaml
+│   │   └── payment-flow.ripp.yaml
+│   └── output/                 # Generated artifacts (derived)
+│       ├── handoffs/           # Finalized packets ready for delivery
+│       │   └── approved-feature.ripp.yaml
+│       └── packages/           # Packaged outputs (gitignored)
+│           ├── handoff.md
+│           └── handoff.json
 ├── package.json
 └── .github/
     └── workflows/
         └── validate-ripp.yml
 ```
+
+You can also organize by category within `intent/`:
+
+```
+ripp/
+└── intent/
+    ├── api/                    # API specifications (Level 2+)
+    │   ├── auth-api.ripp.yaml
+    │   └── user-api.ripp.yaml
+    ├── ui/                     # UI feature specifications
+    │   ├── login-form.ripp.yaml
+    │   └── dashboard.ripp.yaml
+    └── critical/               # Critical features (Level 3)
+        └── payment-flow.ripp.yaml
+```
+
+**[📖 Learn more about directory structure →](docs/directory-layout.md)**
 
 ### Troubleshooting
 
