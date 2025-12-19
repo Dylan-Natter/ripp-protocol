@@ -178,14 +178,14 @@ Monorepos can have RIPP packets in multiple locations:
 ```
 packages/
 ├── auth/
-│   └── ripp/features/
+│   └── ripp/intent/
 │       ├── login.ripp.yaml
 │       └── oauth.ripp.yaml
 ├── billing/
-│   └── ripp/features/
+│   └── ripp/intent/
 │       └── subscriptions.ripp.yaml
 └── core/
-    └── ripp/features/
+    └── ripp/intent/
         └── api.ripp.yaml
 ```
 
@@ -490,7 +490,7 @@ Keep package-specific RIPP packets close to their implementation:
 
 ```
 packages/auth/
-├── ripp/features/
+├── ripp/intent/
 │   └── password-reset.ripp.yaml
 └── src/
 ```
@@ -543,13 +543,13 @@ build/reports/
 
 1. Create centralized `ripp/` directory
 2. Run `ripp init` from repository root
-3. Create first RIPP packets in `ripp/features/`
+3. Create first RIPP packets in `ripp/intent/`
 4. Set up GitHub Action to validate all
 
 ### Phase 2: Package-Specific Adoption
 
 1. Identify high-risk packages (auth, billing, payments)
-2. Create `ripp/features/` in those packages
+2. Create `ripp/intent/` in those packages
 3. Move relevant specs from centralized directory
 4. Update GitHub Action to enforce Level 3 for those packages
 
