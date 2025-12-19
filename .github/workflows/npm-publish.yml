@@ -8,8 +8,13 @@ name: Publish NPM Package
 #
 # To set up the NPM_TOKEN:
 # 1. Log in to npmjs.com
-# 2. Go to Access Tokens → Generate New Token → Choose "Automation"
-# 3. Add it as a repository secret named NPM_TOKEN
+# 2. Go to Access Tokens → Generate New Token → Choose "Granular Access Token"
+# 3. Set permissions: "Read and write" for packages
+# 4. Enable "Bypass 2FA requirement" (required for CI/CD automation)
+# 5. Add it as a repository secret named NPM_TOKEN
+#
+# IMPORTANT: The token MUST have "Bypass 2FA" enabled for automated publishing to work.
+# Standard Automation tokens may fail with E403 if 2FA is enabled on your npm account.
 #
 # Manual Usage:
 # - Set dry_run=true (default) to test without actually publishing
@@ -117,6 +122,23 @@ jobs:
             echo "ℹ️ No build script found (may not be needed)"
           fi
       
+      - name: Verify npm authentication
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN secret is not configured. Cannot proceed."
+            exit 1
+          fi
+          
+          echo "Verifying npm authentication..."
+          if npm whoami; then
+            echo "✅ Successfully authenticated with npm registry"
+          else
+            echo "::error::npm authentication failed. Check that NPM_TOKEN is valid and has required permissions."
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
       - name: Check published version
         id: version_check
         run: |
@@ -131,6 +153,13 @@ jobs:
           if [ "$PUBLISHED_VERSION" = "none" ]; then
             echo "ℹ️ Package not yet published to npm"
             echo "version_status=new" >> $GITHUB_OUTPUT
+            
+            # For new packages, check if the name exists at all (might be owned by someone else)
+            if npm view "$PACKAGE_NAME" 2>/dev/null; then
+              echo "::warning::Package name '$PACKAGE_NAME' exists in registry but has no versions."
+              echo "This might indicate the package is reserved or owned by another account."
+              echo "If publish fails with E403, you may need to choose a different package name."
+            fi
           elif [ "$PUBLISHED_VERSION" = "$CURRENT_VERSION" ]; then
             echo "::error::Version $CURRENT_VERSION is already published. Please bump the version in package.json"
             exit 1
@@ -166,11 +195,6 @@ jobs:
       - name: Publish to NPM
         if: github.event.inputs.dry_run == 'false'
         run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "::error::NPM_TOKEN secret is not configured. Cannot publish."
-            exit 1
-          fi
-          
           # Determine access flag (public for unscoped packages)
           ACCESS_FLAG=""
           if [ -z "${{ steps.metadata.outputs.scope }}" ]; then

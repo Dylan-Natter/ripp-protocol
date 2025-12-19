@@ -274,6 +274,63 @@ npm link
 ripp validate ../../examples/
 ```
 
+## Publishing
+
+### Prerequisites
+
+To publish `ripp-cli` to npm, you need:
+
+1. **npm Account**: A verified npm account with appropriate permissions
+2. **NPM_TOKEN Secret**: Configured in GitHub repository secrets
+
+### Setting Up NPM_TOKEN
+
+The publishing workflow requires an npm **Granular Access Token** with specific permissions:
+
+1. Log in to [npmjs.com](https://www.npmjs.com)
+2. Go to **Access Tokens** → **Generate New Token** → **Granular Access Token**
+3. Configure the token:
+   - **Permissions**: Select "Read and write" for packages
+   - **Packages and scopes**: Select "All packages" or specific packages
+   - **Organizations**: (if applicable) Select relevant organizations
+   - **Expiration**: Set appropriate expiration date
+   - **Bypass 2FA**: ✅ **MUST be enabled** for CI/CD automation
+4. Copy the generated token
+5. Add it to GitHub repository secrets:
+   - Go to repository **Settings** → **Secrets and variables** → **Actions**
+   - Click **New repository secret**
+   - Name: `NPM_TOKEN`
+   - Value: (paste your token)
+
+**Important**: The token MUST have "Bypass 2FA requirement" enabled. Standard automation tokens may fail with E403 errors if 2FA is enabled on your npm account.
+
+### Publishing Process
+
+The package is published via the GitHub Actions workflow:
+
+1. Go to **Actions** → **Publish NPM Package**
+2. Click **Run workflow**
+3. Configure options:
+   - **dry_run**: `true` (test) or `false` (publish)
+   - **tag**: `latest`, `next`, or `beta`
+   - **package_path**: (default: `tools/ripp-cli`)
+4. Click **Run workflow**
+
+**Workflow Features**:
+
+- ✅ Validates package before publishing
+- ✅ Checks version isn't already published
+- ✅ Verifies npm authentication
+- ✅ Runs tests and linting
+- ✅ Dry-run mode for safe testing
+- ✅ Detailed job summaries
+
+**Version Management**:
+
+- Bump version in `package.json` before publishing
+- Follow [Semantic Versioning](https://semver.org/)
+- Workflow will reject if version already exists
+
 ## Dependencies
 
 - **ajv**: JSON Schema validator
