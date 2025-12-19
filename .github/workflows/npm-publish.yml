@@ -103,10 +103,10 @@ jobs:
       
       - name: Run tests
         run: |
-          if npm test; then
+          if npm test --if-present; then
             echo "✅ Tests passed"
           else
-            echo "⚠️ Tests not found or failed"
+            echo "⚠️ No test script found or tests failed"
           fi
       
       - name: Run build
