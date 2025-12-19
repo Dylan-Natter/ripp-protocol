@@ -8,19 +8,19 @@ import * as path from 'path';
 export type StepStatus = 'not-started' | 'ready' | 'in-progress' | 'done' | 'error';
 
 export interface WorkflowStep {
-	id: string;
-	label: string;
-	description: string;
-	status: StepStatus;
-	lastRun?: number;
-	outputFiles?: string[];
-	command?: string;
-	prerequisite?: string; // ID of prerequisite step
+  id: string;
+  label: string;
+  description: string;
+  status: StepStatus;
+  lastRun?: number;
+  outputFiles?: string[];
+  command?: string;
+  prerequisite?: string; // ID of prerequisite step
 }
 
 /**
  * Enhanced RIPP Status Provider with 5-Step Workflow
- * 
+ *
  * Steps:
  * 1. Initialize - ripp init
  * 2. Build Evidence Pack - ripp evidence build
@@ -29,444 +29,449 @@ export interface WorkflowStep {
  * 5. Build + Validate + Package - ripp build, validate, package
  */
 export class RippWorkflowProvider implements vscode.TreeDataProvider<WorkflowTreeItem> {
-	private _onDidChangeTreeData: vscode.EventEmitter<WorkflowTreeItem | undefined | null | void> = 
-		new vscode.EventEmitter<WorkflowTreeItem | undefined | null | void>();
-	readonly onDidChangeTreeData: vscode.Event<WorkflowTreeItem | undefined | null | void> = 
-		this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<WorkflowTreeItem | undefined | null | void> =
+    new vscode.EventEmitter<WorkflowTreeItem | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<WorkflowTreeItem | undefined | null | void> =
+    this._onDidChangeTreeData.event;
 
-	private workspaceRoot: string | undefined;
-	private steps: Map<string, WorkflowStep> = new Map();
+  private workspaceRoot: string | undefined;
+  private steps: Map<string, WorkflowStep> = new Map();
 
-	constructor() {
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		this.workspaceRoot = workspaceFolders && workspaceFolders.length > 0 
-			? workspaceFolders[0].uri.fsPath 
-			: undefined;
+  constructor() {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    this.workspaceRoot =
+      workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].uri.fsPath : undefined;
 
-		this.initializeSteps();
-	}
+    this.initializeSteps();
+  }
 
-	private initializeSteps(): void {
-		this.steps.set('init', {
-			id: 'init',
-			label: '1. Initialize',
-			description: 'Set up RIPP in repository',
-			status: 'not-started',
-			command: 'ripp.init'
-		});
+  private initializeSteps(): void {
+    this.steps.set('init', {
+      id: 'init',
+      label: '1. Initialize',
+      description: 'Set up RIPP in repository',
+      status: 'not-started',
+      command: 'ripp.init'
+    });
 
-		this.steps.set('evidence', {
-			id: 'evidence',
-			label: '2. Build Evidence Pack',
-			description: 'Extract repository signals',
-			status: 'not-started',
-			command: 'ripp.evidence.build',
-			prerequisite: 'init'
-		});
+    this.steps.set('evidence', {
+      id: 'evidence',
+      label: '2. Build Evidence Pack',
+      description: 'Extract repository signals',
+      status: 'not-started',
+      command: 'ripp.evidence.build',
+      prerequisite: 'init'
+    });
 
-		this.steps.set('discover', {
-			id: 'discover',
-			label: '3. Discover Intent (AI)',
-			description: 'Infer candidate intent',
-			status: 'not-started',
-			command: 'ripp.discover',
-			prerequisite: 'evidence'
-		});
+    this.steps.set('discover', {
+      id: 'discover',
+      label: '3. Discover Intent (AI)',
+      description: 'Infer candidate intent',
+      status: 'not-started',
+      command: 'ripp.discover',
+      prerequisite: 'evidence'
+    });
 
-		this.steps.set('confirm', {
-			id: 'confirm',
-			label: '4. Confirm Intent',
-			description: 'Review and confirm intent',
-			status: 'not-started',
-			command: 'ripp.confirm',
-			prerequisite: 'discover'
-		});
+    this.steps.set('confirm', {
+      id: 'confirm',
+      label: '4. Confirm Intent',
+      description: 'Review and confirm intent',
+      status: 'not-started',
+      command: 'ripp.confirm',
+      prerequisite: 'discover'
+    });
 
-		this.steps.set('finalize', {
-			id: 'finalize',
-			label: '5. Build + Validate + Package',
-			description: 'Generate final artifacts',
-			status: 'not-started',
-			prerequisite: 'confirm'
-		});
+    this.steps.set('finalize', {
+      id: 'finalize',
+      label: '5. Build + Validate + Package',
+      description: 'Generate final artifacts',
+      status: 'not-started',
+      prerequisite: 'confirm'
+    });
 
-		// Check initial statuses
-		this.updateAllStatuses();
-	}
+    // Check initial statuses
+    this.updateAllStatuses();
+  }
 
-	refresh(): void {
-		this.updateAllStatuses();
-		this._onDidChangeTreeData.fire();
-	}
+  refresh(): void {
+    this.updateAllStatuses();
+    this._onDidChangeTreeData.fire();
+  }
 
-	getTreeItem(element: WorkflowTreeItem): vscode.TreeItem {
-		return element;
-	}
+  getTreeItem(element: WorkflowTreeItem): vscode.TreeItem {
+    return element;
+  }
 
-	getChildren(element?: WorkflowTreeItem): Thenable<WorkflowTreeItem[]> {
-		if (!this.workspaceRoot) {
-			return Promise.resolve([
-				new WorkflowTreeItem(
-					'No Workspace',
-					'Open a folder to use RIPP',
-					vscode.TreeItemCollapsibleState.None
-				)
-			]);
-		}
+  getChildren(element?: WorkflowTreeItem): Thenable<WorkflowTreeItem[]> {
+    if (!this.workspaceRoot) {
+      return Promise.resolve([
+        new WorkflowTreeItem(
+          'No Workspace',
+          'Open a folder to use RIPP',
+          vscode.TreeItemCollapsibleState.None
+        )
+      ]);
+    }
 
-		if (element) {
-			// Return children for expandable items
-			return Promise.resolve(element.children || []);
-		} else {
-			// Root level - return workflow steps
-			return Promise.resolve(this.getRootItems());
-		}
-	}
+    if (element) {
+      // Return children for expandable items
+      return Promise.resolve(element.children || []);
+    } else {
+      // Root level - return workflow steps
+      return Promise.resolve(this.getRootItems());
+    }
+  }
 
-	private getRootItems(): WorkflowTreeItem[] {
-		const items: WorkflowTreeItem[] = [];
+  private getRootItems(): WorkflowTreeItem[] {
+    const items: WorkflowTreeItem[] = [];
 
-		// Add workflow steps
-		const stepOrder = ['init', 'evidence', 'discover', 'confirm', 'finalize'];
-		
-		for (const stepId of stepOrder) {
-			const step = this.steps.get(stepId);
-			if (step) {
-				items.push(this.createStepItem(step));
-			}
-		}
+    // Add workflow steps
+    const stepOrder = ['init', 'evidence', 'discover', 'confirm', 'finalize'];
 
-		// Add divider
-		items.push(new WorkflowTreeItem(
-			'',
-			'',
-			vscode.TreeItemCollapsibleState.None,
-			'divider'
-		));
+    for (const stepId of stepOrder) {
+      const step = this.steps.get(stepId);
+      if (step) {
+        items.push(this.createStepItem(step));
+      }
+    }
 
-		// Add utility actions
-		items.push(this.createUtilityActionsSection());
+    // Add divider
+    items.push(new WorkflowTreeItem('', '', vscode.TreeItemCollapsibleState.None, 'divider'));
 
-		return items;
-	}
+    // Add utility actions
+    items.push(this.createUtilityActionsSection());
 
-	private createStepItem(step: WorkflowStep): WorkflowTreeItem {
-		const statusIcon = this.getStatusIcon(step.status);
-		const label = `${statusIcon} ${step.label}`;
-		
-		// Check if step can be run
-		const canRun = this.canRunStep(step);
-		const description = canRun ? step.description : '(prerequisites not met)';
+    return items;
+  }
 
-		const item = new WorkflowTreeItem(
-			label,
-			description,
-			vscode.TreeItemCollapsibleState.Collapsed,
-			'step'
-		);
+  private createStepItem(step: WorkflowStep): WorkflowTreeItem {
+    const statusIcon = this.getStatusIcon(step.status);
+    const label = `${statusIcon} ${step.label}`;
 
-		// Add children for step details
-		const children: WorkflowTreeItem[] = [];
+    // Check if step can be run
+    const canRun = this.canRunStep(step);
+    const description = canRun ? step.description : '(prerequisites not met)';
 
-		// Status
-		children.push(new WorkflowTreeItem(
-			`Status: ${step.status}`,
-			'',
-			vscode.TreeItemCollapsibleState.None,
-			'status'
-		));
+    const item = new WorkflowTreeItem(
+      label,
+      description,
+      vscode.TreeItemCollapsibleState.Collapsed,
+      'step'
+    );
 
-		// Last run
-		if (step.lastRun) {
-			const timeStr = new Date(step.lastRun).toLocaleString();
-			children.push(new WorkflowTreeItem(
-				`Last run: ${timeStr}`,
-				'',
-				vscode.TreeItemCollapsibleState.None,
-				'info'
-			));
-		}
+    // Add children for step details
+    const children: WorkflowTreeItem[] = [];
 
-		// Output files
-		if (step.outputFiles && step.outputFiles.length > 0 && this.workspaceRoot) {
-			const outputsItem = new WorkflowTreeItem(
-				`Outputs (${step.outputFiles.length})`,
-				'',
-				vscode.TreeItemCollapsibleState.Collapsed,
-				'outputs'
-			);
-			outputsItem.children = step.outputFiles.map(file => {
-				const fileItem = new WorkflowTreeItem(
-					path.basename(file),
-					file,
-					vscode.TreeItemCollapsibleState.None,
-					'file'
-				);
-				fileItem.command = {
-					command: 'vscode.open',
-					title: 'Open File',
-					arguments: [vscode.Uri.file(path.join(this.workspaceRoot!, file))]
-				};
-				return fileItem;
-			});
-			children.push(outputsItem);
-		}
+    // Status
+    children.push(
+      new WorkflowTreeItem(
+        `Status: ${step.status}`,
+        '',
+        vscode.TreeItemCollapsibleState.None,
+        'status'
+      )
+    );
 
-		// Action button
-		if (step.command && canRun) {
-			const actionItem = new WorkflowTreeItem(
-				`▶ Run ${step.label}`,
-				'',
-				vscode.TreeItemCollapsibleState.None,
-				'action'
-			);
-			actionItem.command = {
-				command: step.command,
-				title: `Run ${step.label}`,
-				arguments: []
-			};
-			children.push(actionItem);
-		}
+    // Last run
+    if (step.lastRun) {
+      const timeStr = new Date(step.lastRun).toLocaleString();
+      children.push(
+        new WorkflowTreeItem(
+          `Last run: ${timeStr}`,
+          '',
+          vscode.TreeItemCollapsibleState.None,
+          'info'
+        )
+      );
+    }
 
-		item.children = children;
-		return item;
-	}
+    // Output files
+    if (step.outputFiles && step.outputFiles.length > 0 && this.workspaceRoot) {
+      const outputsItem = new WorkflowTreeItem(
+        `Outputs (${step.outputFiles.length})`,
+        '',
+        vscode.TreeItemCollapsibleState.Collapsed,
+        'outputs'
+      );
+      outputsItem.children = step.outputFiles.map(file => {
+        const fileItem = new WorkflowTreeItem(
+          path.basename(file),
+          file,
+          vscode.TreeItemCollapsibleState.None,
+          'file'
+        );
+        fileItem.command = {
+          command: 'vscode.open',
+          title: 'Open File',
+          arguments: [vscode.Uri.file(path.join(this.workspaceRoot!, file))]
+        };
+        return fileItem;
+      });
+      children.push(outputsItem);
+    }
 
-	private createUtilityActionsSection(): WorkflowTreeItem {
-		const section = new WorkflowTreeItem(
-			'Utilities',
-			'',
-			vscode.TreeItemCollapsibleState.Expanded,
-			'section'
-		);
+    // Action button
+    if (step.command && canRun) {
+      const actionItem = new WorkflowTreeItem(
+        `▶ Run ${step.label}`,
+        '',
+        vscode.TreeItemCollapsibleState.None,
+        'action'
+      );
+      actionItem.command = {
+        command: step.command,
+        title: `Run ${step.label}`,
+        arguments: []
+      };
+      children.push(actionItem);
+    }
 
-		section.children = [
-			this.createActionItem('Configuration', 'Edit RIPP config', 'ripp.config.edit'),
-			this.createActionItem('Connections', 'Manage AI connections', 'ripp.connections.edit'),
-			this.createActionItem('Refresh', 'Refresh workflow status', 'ripp.refreshStatus'),
-			this.createActionItem('Documentation', 'Open RIPP docs', 'ripp.openDocs')
-		];
+    item.children = children;
+    return item;
+  }
 
-		return section;
-	}
+  private createUtilityActionsSection(): WorkflowTreeItem {
+    const section = new WorkflowTreeItem(
+      'Utilities',
+      '',
+      vscode.TreeItemCollapsibleState.Expanded,
+      'section'
+    );
 
-	private createActionItem(label: string, description: string, commandId: string): WorkflowTreeItem {
-		const item = new WorkflowTreeItem(
-			label,
-			description,
-			vscode.TreeItemCollapsibleState.None,
-			'action'
-		);
-		item.command = {
-			command: commandId,
-			title: label,
-			arguments: []
-		};
-		return item;
-	}
+    section.children = [
+      this.createActionItem('Configuration', 'Edit RIPP config', 'ripp.config.edit'),
+      this.createActionItem('Connections', 'Manage AI connections', 'ripp.connections.edit'),
+      this.createActionItem('Refresh', 'Refresh workflow status', 'ripp.refreshStatus'),
+      this.createActionItem('Documentation', 'Open RIPP docs', 'ripp.openDocs')
+    ];
 
-	private getStatusIcon(status: StepStatus): string {
-		switch (status) {
-			case 'not-started':
-				return '○';
-			case 'ready':
-				return '◌';
-			case 'in-progress':
-				return '◐';
-			case 'done':
-				return '●';
-			case 'error':
-				return '✗';
-			default:
-				return '○';
-		}
-	}
+    return section;
+  }
 
-	private canRunStep(step: WorkflowStep): boolean {
-		if (!step.prerequisite) {
-			return true;
-		}
+  private createActionItem(
+    label: string,
+    description: string,
+    commandId: string
+  ): WorkflowTreeItem {
+    const item = new WorkflowTreeItem(
+      label,
+      description,
+      vscode.TreeItemCollapsibleState.None,
+      'action'
+    );
+    item.command = {
+      command: commandId,
+      title: label,
+      arguments: []
+    };
+    return item;
+  }
 
-		const prerequisite = this.steps.get(step.prerequisite);
-		if (!prerequisite) {
-			return true;
-		}
+  private getStatusIcon(status: StepStatus): string {
+    switch (status) {
+      case 'not-started':
+        return '○';
+      case 'ready':
+        return '◌';
+      case 'in-progress':
+        return '◐';
+      case 'done':
+        return '●';
+      case 'error':
+        return '✗';
+      default:
+        return '○';
+    }
+  }
 
-		return prerequisite.status === 'done';
-	}
+  private canRunStep(step: WorkflowStep): boolean {
+    if (!step.prerequisite) {
+      return true;
+    }
 
-	private updateAllStatuses(): void {
-		if (!this.workspaceRoot) {
-			return;
-		}
+    const prerequisite = this.steps.get(step.prerequisite);
+    if (!prerequisite) {
+      return true;
+    }
 
-		// Step 1: Initialize - check if .ripp directory exists
-		const rippDir = path.join(this.workspaceRoot, '.ripp');
-		const initStep = this.steps.get('init');
-		if (initStep) {
-			initStep.status = fs.existsSync(rippDir) ? 'done' : 'ready';
-		}
+    return prerequisite.status === 'done';
+  }
 
-		// Step 2: Evidence - check if evidence pack exists
-		const evidenceIndex = path.join(this.workspaceRoot, '.ripp', 'evidence', 'evidence.index.json');
-		const evidenceStep = this.steps.get('evidence');
-		if (evidenceStep) {
-			if (fs.existsSync(evidenceIndex)) {
-				evidenceStep.status = 'done';
-				evidenceStep.outputFiles = [
-					'.ripp/evidence/evidence.index.json',
-					'.ripp/evidence/routes.json',
-					'.ripp/evidence/schemas.json'
-				].filter(file => fs.existsSync(path.join(this.workspaceRoot!, file)));
-			} else {
-				evidenceStep.status = this.canRunStep(evidenceStep) ? 'ready' : 'not-started';
-			}
-		}
+  private updateAllStatuses(): void {
+    if (!this.workspaceRoot) {
+      return;
+    }
 
-		// Step 3: Discover - check if candidates exist
-		const candidatesFiles = this.getCandidatesFiles();
-		const discoverStep = this.steps.get('discover');
-		if (discoverStep) {
-			if (candidatesFiles.length > 0) {
-				discoverStep.status = 'done';
-				discoverStep.outputFiles = candidatesFiles;
-			} else {
-				discoverStep.status = this.canRunStep(discoverStep) ? 'ready' : 'not-started';
-			}
-		}
+    // Step 1: Initialize - check if .ripp directory exists
+    const rippDir = path.join(this.workspaceRoot, '.ripp');
+    const initStep = this.steps.get('init');
+    if (initStep) {
+      initStep.status = fs.existsSync(rippDir) ? 'done' : 'ready';
+    }
 
-		// Step 4: Confirm - check if confirmed intent exists
-		const confirmedFiles = this.getConfirmedFiles();
-		const confirmStep = this.steps.get('confirm');
-		if (confirmStep) {
-			if (confirmedFiles.length > 0) {
-				confirmStep.status = 'done';
-				confirmStep.outputFiles = confirmedFiles;
-			} else {
-				confirmStep.status = this.canRunStep(confirmStep) ? 'ready' : 'not-started';
-			}
-		}
+    // Step 2: Evidence - check if evidence pack exists
+    const evidenceIndex = path.join(this.workspaceRoot, '.ripp', 'evidence', 'evidence.index.json');
+    const evidenceStep = this.steps.get('evidence');
+    if (evidenceStep) {
+      if (fs.existsSync(evidenceIndex)) {
+        evidenceStep.status = 'done';
+        evidenceStep.outputFiles = [
+          '.ripp/evidence/evidence.index.json',
+          '.ripp/evidence/routes.json',
+          '.ripp/evidence/schemas.json'
+        ].filter(file => fs.existsSync(path.join(this.workspaceRoot!, file)));
+      } else {
+        evidenceStep.status = this.canRunStep(evidenceStep) ? 'ready' : 'not-started';
+      }
+    }
 
-		// Step 5: Finalize - check if RIPP packets exist
-		const rippPackets = this.getRippPackets();
-		const finalizeStep = this.steps.get('finalize');
-		if (finalizeStep) {
-			if (rippPackets.length > 0) {
-				finalizeStep.status = 'done';
-				finalizeStep.outputFiles = rippPackets;
-			} else {
-				finalizeStep.status = this.canRunStep(finalizeStep) ? 'ready' : 'not-started';
-			}
-		}
-	}
+    // Step 3: Discover - check if candidates exist
+    const candidatesFiles = this.getCandidatesFiles();
+    const discoverStep = this.steps.get('discover');
+    if (discoverStep) {
+      if (candidatesFiles.length > 0) {
+        discoverStep.status = 'done';
+        discoverStep.outputFiles = candidatesFiles;
+      } else {
+        discoverStep.status = this.canRunStep(discoverStep) ? 'ready' : 'not-started';
+      }
+    }
 
-	private getCandidatesFiles(): string[] {
-		if (!this.workspaceRoot) {
-			return [];
-		}
+    // Step 4: Confirm - check if confirmed intent exists
+    const confirmedFiles = this.getConfirmedFiles();
+    const confirmStep = this.steps.get('confirm');
+    if (confirmStep) {
+      if (confirmedFiles.length > 0) {
+        confirmStep.status = 'done';
+        confirmStep.outputFiles = confirmedFiles;
+      } else {
+        confirmStep.status = this.canRunStep(confirmStep) ? 'ready' : 'not-started';
+      }
+    }
 
-		const candidatesDir = path.join(this.workspaceRoot, '.ripp', 'candidates');
-		if (!fs.existsSync(candidatesDir)) {
-			return [];
-		}
+    // Step 5: Finalize - check if RIPP packets exist
+    const rippPackets = this.getRippPackets();
+    const finalizeStep = this.steps.get('finalize');
+    if (finalizeStep) {
+      if (rippPackets.length > 0) {
+        finalizeStep.status = 'done';
+        finalizeStep.outputFiles = rippPackets;
+      } else {
+        finalizeStep.status = this.canRunStep(finalizeStep) ? 'ready' : 'not-started';
+      }
+    }
+  }
 
-		try {
-			return fs.readdirSync(candidatesDir)
-				.filter(file => file.startsWith('intent.candidates.'))
-				.map(file => `.ripp/candidates/${file}`);
-		} catch {
-			return [];
-		}
-	}
+  private getCandidatesFiles(): string[] {
+    if (!this.workspaceRoot) {
+      return [];
+    }
 
-	private getConfirmedFiles(): string[] {
-		if (!this.workspaceRoot) {
-			return [];
-		}
+    const candidatesDir = path.join(this.workspaceRoot, '.ripp', 'candidates');
+    if (!fs.existsSync(candidatesDir)) {
+      return [];
+    }
 
-		const confirmedDir = path.join(this.workspaceRoot, '.ripp', 'confirmed');
-		if (!fs.existsSync(confirmedDir)) {
-			return [];
-		}
+    try {
+      return fs
+        .readdirSync(candidatesDir)
+        .filter(file => file.startsWith('intent.candidates.'))
+        .map(file => `.ripp/candidates/${file}`);
+    } catch {
+      return [];
+    }
+  }
 
-		try {
-			return fs.readdirSync(confirmedDir)
-				.filter(file => file.startsWith('intent.confirmed.'))
-				.map(file => `.ripp/confirmed/${file}`);
-		} catch {
-			return [];
-		}
-	}
+  private getConfirmedFiles(): string[] {
+    if (!this.workspaceRoot) {
+      return [];
+    }
 
-	private getRippPackets(): string[] {
-		if (!this.workspaceRoot) {
-			return [];
-		}
+    const confirmedDir = path.join(this.workspaceRoot, '.ripp', 'confirmed');
+    if (!fs.existsSync(confirmedDir)) {
+      return [];
+    }
 
-		const rippDir = path.join(this.workspaceRoot, '.ripp');
-		if (!fs.existsSync(rippDir)) {
-			return [];
-		}
+    try {
+      return fs
+        .readdirSync(confirmedDir)
+        .filter(file => file.startsWith('intent.confirmed.'))
+        .map(file => `.ripp/confirmed/${file}`);
+    } catch {
+      return [];
+    }
+  }
 
-		try {
-			return fs.readdirSync(rippDir)
-				.filter(file => file.endsWith('.ripp.yaml') || file.endsWith('.ripp.json'))
-				.map(file => `.ripp/${file}`);
-		} catch {
-			return [];
-		}
-	}
+  private getRippPackets(): string[] {
+    if (!this.workspaceRoot) {
+      return [];
+    }
 
-	/**
-	 * Update step status
-	 */
-	public updateStepStatus(stepId: string, status: StepStatus, lastRun?: number): void {
-		const step = this.steps.get(stepId);
-		if (step) {
-			step.status = status;
-			if (lastRun) {
-				step.lastRun = lastRun;
-			}
-			this.refresh();
-		}
-	}
+    const rippDir = path.join(this.workspaceRoot, '.ripp');
+    if (!fs.existsSync(rippDir)) {
+      return [];
+    }
 
-	/**
-	 * Update step outputs
-	 */
-	public updateStepOutputs(stepId: string, outputFiles: string[]): void {
-		const step = this.steps.get(stepId);
-		if (step) {
-			step.outputFiles = outputFiles;
-			this.refresh();
-		}
-	}
+    try {
+      return fs
+        .readdirSync(rippDir)
+        .filter(file => file.endsWith('.ripp.yaml') || file.endsWith('.ripp.json'))
+        .map(file => `.ripp/${file}`);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Update step status
+   */
+  public updateStepStatus(stepId: string, status: StepStatus, lastRun?: number): void {
+    const step = this.steps.get(stepId);
+    if (step) {
+      step.status = status;
+      if (lastRun) {
+        step.lastRun = lastRun;
+      }
+      this.refresh();
+    }
+  }
+
+  /**
+   * Update step outputs
+   */
+  public updateStepOutputs(stepId: string, outputFiles: string[]): void {
+    const step = this.steps.get(stepId);
+    if (step) {
+      step.outputFiles = outputFiles;
+      this.refresh();
+    }
+  }
 }
 
 export class WorkflowTreeItem extends vscode.TreeItem {
-	children: WorkflowTreeItem[] | undefined;
-	itemType: string;
+  children: WorkflowTreeItem[] | undefined;
+  itemType: string;
 
-	constructor(
-		public readonly label: string,
-		public readonly description: string,
-		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-		itemType: string = 'default',
-		children?: WorkflowTreeItem[]
-	) {
-		super(label, collapsibleState);
-		this.description = description;
-		this.children = children;
-		this.itemType = itemType;
-		this.contextValue = itemType;
+  constructor(
+    public readonly label: string,
+    public readonly description: string,
+    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    itemType: string = 'default',
+    children?: WorkflowTreeItem[]
+  ) {
+    super(label, collapsibleState);
+    this.description = description;
+    this.children = children;
+    this.itemType = itemType;
+    this.contextValue = itemType;
 
-		// Set icons based on type
-		if (itemType === 'action') {
-			this.iconPath = new vscode.ThemeIcon('play');
-		} else if (itemType === 'file') {
-			this.iconPath = new vscode.ThemeIcon('file');
-		} else if (itemType === 'outputs') {
-			this.iconPath = new vscode.ThemeIcon('folder-opened');
-		}
-	}
+    // Set icons based on type
+    if (itemType === 'action') {
+      this.iconPath = new vscode.ThemeIcon('play');
+    } else if (itemType === 'file') {
+      this.iconPath = new vscode.ThemeIcon('file');
+    } else if (itemType === 'outputs') {
+      this.iconPath = new vscode.ThemeIcon('folder-opened');
+    }
+  }
 }

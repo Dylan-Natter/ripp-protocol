@@ -6,3 +6,4 @@
 export * from './cliRunner';
 export * from './configService';
 export * from './secretService';
+export * from './workspaceMapService';
