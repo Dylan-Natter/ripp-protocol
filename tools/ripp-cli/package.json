@@ -4,7 +4,7 @@
   "description": "Official CLI validator for Regenerative Intent Prompting Protocol (RIPP)",
   "main": "index.js",
   "bin": {
-    "ripp": "./index.js"
+    "ripp": "index.js"
   },
   "scripts": {
     "test": "echo \"Warning: No tests specified\" && exit 0"
@@ -21,7 +21,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Dylan-Natter/ripp-protocol.git",
+    "url": "git+https://github.com/Dylan-Natter/ripp-protocol.git",
     "directory": "tools/ripp-cli"
   },
   "bugs": {
