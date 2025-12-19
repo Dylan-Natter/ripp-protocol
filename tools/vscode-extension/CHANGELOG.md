@@ -2,6 +2,13 @@
 
 All notable changes to the RIPP Protocol VS Code extension will be documented in this file.
 
+## [0.3.0](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.2.2...v0.3.0) (2025-12-19)
+
+
+### Features
+
+* Add workspace map service and enhance CLI runner ([bd60a6f](https://github.com/Dylan-Natter/ripp-protocol/commit/bd60a6f5416c41fbd35ff4b7f99f3545ff8ed059))
+
 ## [0.2.2] - 2025-12-19
 
 ### Changed
