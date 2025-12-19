@@ -318,14 +318,28 @@ RIPP is often misunderstood as an IaC tool, policy engine, or code generator. It
 
 ## Quickstart
 
-### 1. Initialize RIPP in Your Repository
+### 1. Install RIPP CLI
 
-Install the RIPP CLI and set up your repository:
+Choose your preferred installation method:
+
+#### Homebrew (macOS)
 
 ```bash
-# Install RIPP CLI
-npm install -g ripp-cli
+brew tap Dylan-Natter/ripp
+brew install ripp
+```
 
+#### npm (All platforms)
+
+```bash
+npm install -g ripp-cli
+```
+
+### 2. Initialize RIPP in Your Repository
+
+Set up your repository:
+
+```bash
 # Initialize RIPP scaffolding
 ripp init
 ```
@@ -341,7 +355,7 @@ This creates:
 
 **[📖 Learn more about directory structure →](docs/directory-layout.md)**
 
-### 2. Create Your First RIPP File
+### 3. Create Your First RIPP File
 
 Create `ripp/intent/my-feature.ripp.yaml`:
 
@@ -394,7 +408,7 @@ data_contracts:
           description: 'Registration status (pending_verification)'
 ```
 
-### 3. Validate It
+### 4. Validate It
 
 Validate your packet:
 
@@ -405,7 +419,7 @@ ripp validate ripp/intent/my-feature.ripp.yaml
 ripp validate ripp/intent/
 ```
 
-### 4. Learn More
+### 5. Learn More
 
 - **Directory Layout**: [docs/directory-layout.md](docs/directory-layout.md)
 - **Full Specification**: [SPEC.md](SPEC.md)

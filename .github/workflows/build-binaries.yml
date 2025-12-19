@@ -1,0 +1,176 @@
+name: Build and Release Binaries
+
+# This workflow builds standalone binaries for ripp-cli and uploads them to GitHub Releases.
+# It is triggered on tag pushes (vX.Y.Z format) to support Homebrew distribution.
+#
+# Binaries produced:
+# - ripp-darwin-arm64.tar.gz (macOS ARM64/Apple Silicon)
+# - ripp-darwin-amd64.tar.gz (macOS AMD64/Intel)
+#
+# Each archive contains:
+# - A standalone 'ripp' binary (Node.js bundled with pkg)
+# - SHA256 checksums for verification
+#
+# These binaries are consumed by the Homebrew formula in the homebrew-ripp tap.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-binaries:
+    name: Build macOS Binaries
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/ripp-cli/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: tools/ripp-cli
+        run: npm ci
+      
+      - name: Install pkg (binary builder)
+        run: npm install -g pkg
+      
+      - name: Create build directory
+        run: mkdir -p build/binaries
+      
+      - name: Build macOS ARM64 binary
+        working-directory: tools/ripp-cli
+        run: |
+          pkg . \
+            --targets node20-macos-arm64 \
+            --output ../../build/binaries/ripp-darwin-arm64
+          
+          echo "✅ Built ARM64 binary"
+          ls -lh ../../build/binaries/ripp-darwin-arm64
+      
+      - name: Build macOS AMD64 binary
+        working-directory: tools/ripp-cli
+        run: |
+          pkg . \
+            --targets node20-macos-x64 \
+            --output ../../build/binaries/ripp-darwin-amd64
+          
+          echo "✅ Built AMD64 binary"
+          ls -lh ../../build/binaries/ripp-darwin-amd64
+      
+      - name: Package binaries
+        working-directory: build/binaries
+        run: |
+          # Package ARM64
+          tar -czf ripp-darwin-arm64.tar.gz ripp-darwin-arm64
+          sha256sum ripp-darwin-arm64.tar.gz > ripp-darwin-arm64.tar.gz.sha256
+          
+          # Package AMD64
+          tar -czf ripp-darwin-amd64.tar.gz ripp-darwin-amd64
+          sha256sum ripp-darwin-amd64.tar.gz > ripp-darwin-amd64.tar.gz.sha256
+          
+          echo "✅ Packaged binaries"
+          ls -lh *.tar.gz *.sha256
+      
+      - name: Display checksums
+        working-directory: build/binaries
+        run: |
+          echo "# SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat *.sha256 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          # Also output to console
+          cat *.sha256
+      
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.ref_name }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            build/binaries/ripp-darwin-arm64.tar.gz
+            build/binaries/ripp-darwin-arm64.tar.gz.sha256
+            build/binaries/ripp-darwin-amd64.tar.gz
+            build/binaries/ripp-darwin-amd64.tar.gz.sha256
+          body: |
+            ## Homebrew Installation
+            
+            ```bash
+            brew tap Dylan-Natter/ripp
+            brew install ripp
+            ```
+            
+            ## Manual Installation (macOS)
+            
+            ### ARM64 (Apple Silicon)
+            ```bash
+            curl -L https://github.com/Dylan-Natter/ripp-protocol/releases/download/${{ steps.version.outputs.version }}/ripp-darwin-arm64.tar.gz | tar xz
+            sudo mv ripp-darwin-arm64 /usr/local/bin/ripp
+            sudo chmod +x /usr/local/bin/ripp
+            ```
+            
+            ### AMD64 (Intel)
+            ```bash
+            curl -L https://github.com/Dylan-Natter/ripp-protocol/releases/download/${{ steps.version.outputs.version }}/ripp-darwin-amd64.tar.gz | tar xz
+            sudo mv ripp-darwin-amd64 /usr/local/bin/ripp
+            sudo chmod +x /usr/local/bin/ripp
+            ```
+            
+            ## npm Installation
+            
+            ```bash
+            npm install -g ripp-cli
+            ```
+            
+            ## Checksums
+            
+            Verify your download:
+            ```bash
+            sha256sum ripp-darwin-*.tar.gz
+            ```
+      
+      - name: Summary
+        run: |
+          echo "# ✅ Binaries Built and Released! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifacts:**" >> $GITHUB_STEP_SUMMARY
+          echo "- ripp-darwin-arm64.tar.gz (macOS ARM64)" >> $GITHUB_STEP_SUMMARY
+          echo "- ripp-darwin-amd64.tar.gz (macOS AMD64)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** https://github.com/Dylan-Natter/ripp-protocol/releases/tag/${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Update the Homebrew formula with new version and checksums" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test installation: \`brew install Dylan-Natter/ripp/ripp\`" >> $GITHUB_STEP_SUMMARY
