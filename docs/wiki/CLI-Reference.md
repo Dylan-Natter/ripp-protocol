@@ -32,6 +32,7 @@ npm link
 | Command         | Purpose                                    | Read-Only?                |
 | --------------- | ------------------------------------------ | ------------------------- |
 | `ripp init`     | Initialize RIPP in your repository         | ❌ Creates files          |
+| `ripp migrate`  | Migrate legacy directory structure         | ❌ Moves directories      |
 | `ripp validate` | Validate RIPP packets against schema       | ✅ Yes                    |
 | `ripp lint`     | Check best practices                       | ✅ Yes                    |
 | `ripp package`  | Package RIPP packet into handoff artifact  | ✅ Yes (creates new file) |
@@ -119,6 +120,167 @@ Next steps:
 
 - `0` — Initialization successful
 - `1` — Error occurred (e.g., file write failure)
+
+---
+
+## `ripp migrate`
+
+Migrate legacy RIPP directory structure to the new recommended layout.
+
+### Purpose
+
+Automatically reorganizes RIPP directories from the legacy structure to the new structure introduced in RIPP v1.0.
+
+### Legacy vs. New Structure
+
+**Legacy structure (pre-v1.0):**
+
+```
+ripp/
+├── features/           # Intent packets
+├── handoffs/           # Finalized packets
+└── packages/           # Generated outputs
+```
+
+**New structure (v1.0+):**
+
+```
+ripp/
+├── intent/             # Intent packets (was features/)
+└── output/
+    ├── handoffs/       # Finalized packets (was handoffs/)
+    └── packages/       # Generated outputs (was packages/)
+```
+
+### What It Does
+
+- ✅ Detects legacy directory structure
+- ✅ Moves `ripp/features/` → `ripp/intent/`
+- ✅ Creates `ripp/output/` directory
+- ✅ Moves `ripp/handoffs/` → `ripp/output/handoffs/`
+- ✅ Moves `ripp/packages/` → `ripp/output/packages/`
+- ✅ Supports dry-run mode to preview changes
+- ✅ Handles cross-device moves safely
+- ✅ Detects conflicts (if both old and new directories exist)
+
+### What It Never Does
+
+- ❌ Deletes files
+- ❌ Modifies file contents
+- ❌ Overwrites existing directories
+- ❌ Runs automatically (requires explicit user action)
+
+### When to Run It
+
+- ✅ When upgrading from RIPP pre-v1.0 to v1.0+
+- ✅ When repository uses legacy directory names
+- ✅ After cloning a repository with legacy structure
+- ❌ Not needed if already using new structure
+
+### Usage
+
+```bash
+# Preview changes (dry-run)
+ripp migrate --dry-run
+
+# Execute migration
+ripp migrate
+```
+
+### Options
+
+| Option      | Description                       | Default |
+| ----------- | --------------------------------- | ------- |
+| `--dry-run` | Preview changes without executing | `false` |
+
+### Example Output (Dry Run)
+
+```
+🔍 Scanning for legacy RIPP directories...
+
+Would move: ripp/features/ → ripp/intent/
+Would create: ripp/output/
+Would move: ripp/handoffs/ → ripp/output/handoffs/
+Would move: ripp/packages/ → ripp/output/packages/
+
+Run without --dry-run to apply changes.
+```
+
+### Example Output (Actual Migration)
+
+```
+🔍 Scanning for legacy RIPP directories...
+
+✓ Moved: ripp/features/ → ripp/intent/
+✓ Created: ripp/output/
+✓ Moved: ripp/handoffs/ → ripp/output/handoffs/
+✓ Moved: ripp/packages/ → ripp/output/packages/
+
+Migration complete!
+
+Next steps:
+1. Review migrated files in new locations
+2. Update any scripts or CI configs that reference old paths
+3. Commit changes to version control
+```
+
+### Example Output (No Legacy Directories)
+
+```
+🔍 Scanning for legacy RIPP directories...
+
+No legacy directories found. Already using new structure!
+```
+
+### Example Output (Conflict Detected)
+
+```
+🔍 Scanning for legacy RIPP directories...
+
+⚠️  Warning: Both ripp/features/ and ripp/intent/ exist. Manual merge required.
+
+Migration cannot proceed automatically.
+Please manually merge directories and remove duplicates.
+```
+
+### Exit Codes
+
+- `0` — Migration successful or no action needed
+- `1` — Migration failed (e.g., file system error)
+
+### Relationship to vNext Workflows
+
+The new directory structure (`ripp/intent/`, `ripp/output/`) is designed to work seamlessly with the vNext intent discovery workflow:
+
+- **`ripp/intent/`** — Stores human-authored or AI-confirmed intent packets
+- **`ripp/output/handoffs/`** — Stores finalized, packaged handoff artifacts
+- **`ripp/output/packages/`** — Stores generated outputs from build process
+
+After migrating, the VS Code extension and CLI tools will automatically detect and use the new structure.
+
+### Backward Compatibility
+
+The RIPP CLI maintains backward compatibility with legacy paths:
+
+- Commands like `ripp validate` and `ripp lint` will search both legacy and new paths
+- You can continue using legacy paths until you're ready to migrate
+- The migration is **opt-in** — nothing breaks if you don't migrate immediately
+
+### CI/CD Considerations
+
+After migrating, update your CI/CD workflows to reference new paths:
+
+```yaml
+# Before (legacy)
+- name: Validate RIPP Packets
+  run: ripp validate ripp/features/
+
+# After (new)
+- name: Validate RIPP Packets
+  run: ripp validate ripp/intent/
+```
+
+However, `ripp validate .` works for both structures.
 
 ---
 
