@@ -2,6 +2,14 @@
 
 All notable changes to the RIPP Protocol VS Code extension will be documented in this file.
 
+## [0.4.0](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.3.0...v0.4.0) (2025-12-19)
+
+
+### Features
+
+* Add Copilot-backed intent discovery and VS Code integration
+
+
 ## [0.3.0](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.2.2...v0.3.0) (2025-12-19)
 
 
