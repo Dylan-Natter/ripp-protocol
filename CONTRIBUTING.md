@@ -19,6 +19,30 @@ RIPP documentation lives in the main repository under `/docs/`:
 - **`/docs/architecture/`** → Architecture decisions and design docs
 - **`/docs/*.md`** → GitHub Pages content (user guides)
 
+### GitHub Pages vs GitHub Wiki
+
+The repository uses two complementary documentation systems:
+
+**GitHub Pages (`/docs/*.md`)** - User-facing guides:
+
+- **Purpose:** Accessible learning and onboarding
+- **Audience:** New users, decision-makers, learners
+- **Style:** Tutorial-style, conceptual, approachable
+- **Examples:** Getting started, use cases, philosophy, adoption stories
+
+**GitHub Wiki (`/docs/wiki/`)** - Technical reference:
+
+- **Purpose:** Authoritative technical documentation
+- **Audience:** Developers, integrators, power users
+- **Style:** Precise, comprehensive, reference-oriented
+- **Examples:** CLI reference, schema docs, validation rules, advanced usage
+
+**Guidelines:**
+
+- **Avoid exact duplication** - Link from Pages to Wiki when content overlaps
+- **Pages → Wiki for details** - Use Pages for overview, Wiki for specifics
+- **Keep both updated** - Changes to spec/tooling should update both if relevant
+
 **Important**: The GitHub Wiki is automatically synced from `/docs/wiki/`. Do not edit the Wiki directly—all changes must go through the main repository PR process.
 
 ## Before You Contribute
