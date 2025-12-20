@@ -51,6 +51,7 @@ jobs:
           # Define directories that don't require docs (tool internal files)
           INTERNAL_DIRS=(
             ".ripp/"
+            ".github/workflows/"
           )
           
           # Define documentation files that don't require additional docs
