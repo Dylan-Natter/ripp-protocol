@@ -1,8 +1,0 @@
-node_modules/
-dist/
-build/
-*.log
-.git/
-_site/
-.sass-cache/
-.jekyll-cache/
