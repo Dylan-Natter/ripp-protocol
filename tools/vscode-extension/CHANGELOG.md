@@ -9,6 +9,18 @@ All notable changes to the RIPP Protocol VS Code extension will be documented in
 
 * move marketplace compliance fix to architecture directory ([674a019](https://github.com/Dylan-Natter/ripp-protocol/commit/674a019d90f39abdee811ca33cae73b077cab369))
 
+### Infrastructure
+
+* Migrate to ESLint 9 flat config format (eslint.config.mjs)
+* Update dev dependencies:
+  * @types/node: 18.19.130 → 25.0.3
+  * @typescript-eslint/eslint-plugin: 6.21.0 → 8.50.0
+  * @typescript-eslint/parser: 6.21.0 → 8.50.0
+  * eslint: 8.57.1 → 9.39.2
+  * Added globals: 16.5.0 for ESLint configuration
+* Remove legacy .eslintrc.json file
+* Fix npm dependency tree errors
+
 ## [0.4.0](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.3.0...v0.4.0) (2025-12-19)
 
 
