@@ -385,26 +385,39 @@ function detectProjectType(files) {
     const path = file.path.toLowerCase();
 
     // CLI tool indicators
-    if (path.includes('/bin/') || path.includes('cli') || path.includes('command')) indicators.cli += 3;
-    if (content.includes('commander') || content.includes('yargs') || content.includes('process.argv')) indicators.cli += 2;
+    if (path.includes('/bin/') || path.includes('cli') || path.includes('command'))
+      indicators.cli += 3;
+    if (
+      content.includes('commander') ||
+      content.includes('yargs') ||
+      content.includes('process.argv')
+    )
+      indicators.cli += 2;
     if (path === 'package.json' && content.includes('"bin"')) indicators.cli += 4;
 
-    // Web app indicators  
-    if (path.includes('app/') || path.includes('pages/') || path.includes('components/')) indicators.webApp += 3;
-    if (content.includes('react') || content.includes('vue') || content.includes('angular')) indicators.webApp += 2;
+    // Web app indicators
+    if (path.includes('app/') || path.includes('pages/') || path.includes('components/'))
+      indicators.webApp += 3;
+    if (content.includes('react') || content.includes('vue') || content.includes('angular'))
+      indicators.webApp += 2;
     if (path.includes('index.html') || path.includes('app.tsx')) indicators.webApp += 3;
 
     // API indicators
-    if (path.includes('api/') || path.includes('routes/') || path.includes('controllers/')) indicators.api += 3;
-    if (content.includes('express') || content.includes('fastify') || content.includes('koa')) indicators.api += 2;
-    if (content.includes('@app.route') || content.includes('@route') || content.includes('router.')) indicators.api += 2;
+    if (path.includes('api/') || path.includes('routes/') || path.includes('controllers/'))
+      indicators.api += 3;
+    if (content.includes('express') || content.includes('fastify') || content.includes('koa'))
+      indicators.api += 2;
+    if (content.includes('@app.route') || content.includes('@route') || content.includes('router.'))
+      indicators.api += 2;
 
     // Library indicators
-    if (path === 'package.json' && !content.includes('"bin"') && !content.includes('"scripts"')) indicators.library += 2;
+    if (path === 'package.json' && !content.includes('"bin"') && !content.includes('"scripts"'))
+      indicators.library += 2;
     if (path.includes('lib/') || path.includes('src/index')) indicators.library += 1;
 
     // Protocol/spec indicators
-    if (path.includes('spec.md') || path.includes('protocol') || path.includes('rfc')) indicators.protocol += 4;
+    if (path.includes('spec.md') || path.includes('protocol') || path.includes('rfc'))
+      indicators.protocol += 4;
     if (path.includes('schema/') && path.includes('.json')) indicators.protocol += 2;
   }
 
@@ -447,7 +460,9 @@ function extractKeyInsights(files, cwd) {
       if (desc) insights.description = desc.slice(0, 300);
 
       // Extract features (look for bullet points or numbered lists)
-      const featureMatch = content.match(/(?:features|capabilities|includes)[\s\S]{0,50}?\n((?:[-*]\s.+\n)+)/i);
+      const featureMatch = content.match(
+        /(?:features|capabilities|includes)[\s\S]{0,50}?\n((?:[-*]\s.+\n)+)/i
+      );
       if (featureMatch) {
         insights.mainFeatures = featureMatch[1]
           .split('\n')
@@ -500,7 +515,9 @@ function extractKeyCodeSnippets(files) {
     const path = file.path;
 
     // Extract function definitions (JavaScript/TypeScript)
-    const funcMatches = content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\([^)]*\)\s*{([^}]{0,200})/g);
+    const funcMatches = content.matchAll(
+      /(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\([^)]*\)\s*{([^}]{0,200})/g
+    );
     for (const match of funcMatches) {
       if (count >= maxSnippets) break;
       snippets.push({
@@ -513,7 +530,9 @@ function extractKeyCodeSnippets(files) {
     }
 
     // Extract class definitions
-    const classMatches = content.matchAll(/(?:export\s+)?class\s+(\w+)(?:\s+extends\s+\w+)?\s*{([^}]{0,150})/g);
+    const classMatches = content.matchAll(
+      /(?:export\s+)?class\s+(\w+)(?:\s+extends\s+\w+)?\s*{([^}]{0,150})/g
+    );
     for (const match of classMatches) {
       if (count >= maxSnippets) break;
       snippets.push({
@@ -529,7 +548,10 @@ function extractKeyCodeSnippets(files) {
     const commentMatches = content.matchAll(/\/\*\*\s*\n\s*\*\s*([^\n]{30,200})/g);
     for (const match of commentMatches) {
       if (count >= maxSnippets) break;
-      if (match[1].toLowerCase().includes('purpose') || match[1].toLowerCase().includes('description')) {
+      if (
+        match[1].toLowerCase().includes('purpose') ||
+        match[1].toLowerCase().includes('description')
+      ) {
         snippets.push({
           file: path,
           type: 'comment',
