@@ -60,7 +60,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.tag_name || github.event.release.tag_name || github.ref }}
       
@@ -108,7 +108,7 @@ jobs:
           npx @vscode/vsce package --no-dependencies $PRERELEASE_FLAG
       
       - name: Upload VSIX artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: vscode-extension-${{ steps.metadata.outputs.version }}
           path: tools/vscode-extension/*.vsix
