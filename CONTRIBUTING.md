@@ -47,9 +47,60 @@ The repository uses two complementary documentation systems:
 
 ## Before You Contribute
 
+### Prerequisites
+
+**Node.js Version:**
+
+This repository requires **Node.js 20 LTS** or higher. We recommend using `nvm` (Node Version Manager) for managing Node versions:
+
+```bash
+# Install nvm if you don't have it: https://github.com/nvm-sh/nvm
+
+# Use the project's Node version (reads .nvmrc)
+nvm use
+
+# Or install Node 20 explicitly
+nvm install 20
+nvm use 20
+```
+
+The repository includes a `.nvmrc` file that specifies Node 20, so `nvm use` will automatically switch to the correct version.
+
+### Setup
+
+### Setup
+
 1. Read the [SPEC.md](SPEC.md) to understand RIPP's design principles
 2. Check existing issues and pull requests to avoid duplication
 3. For major changes, open an issue first to discuss your proposal
+
+## Repository Structure (Monorepo)
+
+This repository is organized as a **monorepo** with multiple packages:
+
+```
+ripp-protocol/
+├── package.json           # Root package (dev tools: ESLint, Prettier)
+├── tools/
+│   ├── ripp-cli/          # Published npm package: ripp-cli
+│   └── vscode-extension/  # VS Code extension (published to Marketplace)
+├── schema/                # JSON Schema definitions
+├── examples/              # Example RIPP packets
+└── docs/                  # Documentation
+```
+
+**Important monorepo patterns:**
+
+- **Root `package.json`**: Contains shared development tools (ESLint, Prettier) and workspace scripts. The `"ripp-cli": "file:tools/ripp-cli"` dependency enables local linking for testing.
+- **Publishing**: The `ripp-cli` package is published from `tools/ripp-cli`, **not** from the repository root.
+- **Local development**: Use `npm run setup` at the root to install dependencies and link packages locally.
+- **Testing**: Scripts in root `package.json` (like `npm test`) delegate to the appropriate tool directories.
+
+This structure allows us to:
+
+- Maintain formatting/linting consistency across all packages
+- Test CLI changes locally before publishing
+- Keep published package metadata clean and minimal
 
 ## Governance
 

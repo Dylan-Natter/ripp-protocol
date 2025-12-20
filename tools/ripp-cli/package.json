@@ -35,15 +35,15 @@
     "js-yaml": "^4.1.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "pkg": {
     "assets": [
       "../../schema/**/*"
     ],
     "targets": [
-      "node18-macos-arm64",
-      "node18-macos-x64"
+      "node20-macos-arm64",
+      "node20-macos-x64"
     ],
     "outputPath": "dist"
   }
