@@ -78,7 +78,7 @@ jobs:
             # Check if file is in an internal directory
             IS_INTERNAL=""
             for dir in "${INTERNAL_DIRS[@]}"; do
-              if [[ "$file" == $dir* ]]; then
+              if [[ "$file" == $dir* || "$file" == */$dir* ]]; then
                 IS_INTERNAL="true"
                 echo "Internal directory file detected (docs not required): $file"
                 break
