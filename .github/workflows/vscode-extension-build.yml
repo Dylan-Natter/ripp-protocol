@@ -164,7 +164,7 @@ jobs:
       # Upload VSIX to GitHub Release (only when triggered by a tag)
       - name: Upload VSIX to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: tools/vscode-extension/dist/*.vsix
           tag_name: ${{ github.ref_name }}
