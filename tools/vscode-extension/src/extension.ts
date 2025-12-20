@@ -329,7 +329,7 @@ async function checkCliVersion(): Promise<void> {
 				versionCheck.requiredVersion
 			);
 		}
-	} catch (error) {
+	} catch {
 		// Silently fail - CLI might not be installed yet
 	}
 }
@@ -1000,7 +1000,7 @@ async function openCI(): Promise<void> {
 		} else {
 			vscode.window.showWarningMessage('Could not detect GitHub repository from git remote');
 		}
-	} catch (error) {
+	} catch {
 		vscode.window.showWarningMessage('Could not detect GitHub repository. Is this a git repository with a GitHub remote?');
 	}
 }
