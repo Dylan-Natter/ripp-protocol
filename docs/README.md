@@ -51,6 +51,9 @@ Direct edits to the GitHub Wiki are overwritten. Always edit files in this direc
 - **[EXTENSIONS.md](EXTENSIONS.md)** — Guidelines for extending RIPP tooling
 - **[INTENT-DISCOVERY-MODE.md](INTENT-DISCOVERY-MODE.md)** — AI-assisted intent discovery workflow
 - **[vscode-extension-pr-based-versioning.md](vscode-extension-pr-based-versioning.md)** — Release-please workflow documentation
+- **[HOMEBREW.md](HOMEBREW.md)** — Homebrew distribution overview and user instructions
+- **[HOMEBREW-TAP-SETUP.md](HOMEBREW-TAP-SETUP.md)** — Complete setup guide for the homebrew-ripp tap repository
+- **[HOMEBREW-RELEASE-CHECKLIST.md](HOMEBREW-RELEASE-CHECKLIST.md)** — Step-by-step checklist for Homebrew releases
 
 ## Authoritative Sources Hierarchy
 
