@@ -98,13 +98,13 @@ ripp-protocol/
 
 ### Deliverables Inventory
 
-| Deliverable        | Location                  | Status         | Published          |
-| ------------------ | ------------------------- | -------------- | ------------------ |
-| **Protocol Spec**  | `SPEC.md`, `schema/`      | ✅ Complete    | N/A                |
-| **RIPP CLI**       | `tools/ripp-cli/`         | ✅ Production  | npm: `ripp-cli`    |
-| **VS Code Ext**    | `tools/vscode-extension/` | ✅ Production  | VS Marketplace     |
-| **Documentation**  | `docs/`, `README.md`      | ✅ Comprehensive | GitHub Pages      |
-| **GitHub Wiki**    | `docs/wiki/` (source)     | ✅ Active      | GitHub Wiki        |
+| Deliverable       | Location                  | Status           | Published       |
+| ----------------- | ------------------------- | ---------------- | --------------- |
+| **Protocol Spec** | `SPEC.md`, `schema/`      | ✅ Complete      | N/A             |
+| **RIPP CLI**      | `tools/ripp-cli/`         | ✅ Production    | npm: `ripp-cli` |
+| **VS Code Ext**   | `tools/vscode-extension/` | ✅ Production    | VS Marketplace  |
+| **Documentation** | `docs/`, `README.md`      | ✅ Comprehensive | GitHub Pages    |
+| **GitHub Wiki**   | `docs/wiki/` (source)     | ✅ Active        | GitHub Wiki     |
 
 ---
 
@@ -556,22 +556,22 @@ Example:
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "npm"
-    directory: "/tools/ripp-cli"
+      interval: 'weekly'
+  - package-ecosystem: 'npm'
+    directory: '/tools/ripp-cli'
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "npm"
-    directory: "/tools/vscode-extension"
+      interval: 'weekly'
+  - package-ecosystem: 'npm'
+    directory: '/tools/vscode-extension'
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+      interval: 'weekly'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
 ```
 
 ---
@@ -739,18 +739,18 @@ ripp-protocol/
 
 ### Current State
 
-| Workflow                       | Purpose            | Status       |
-| ------------------------------ | ------------------ | ------------ |
-| `code-quality.yml`             | Lint + format      | ✅ Working   |
-| `ripp-validate.yml`            | Validate packets   | ✅ Working   |
-| `docs-enforcement.yml`         | Require docs       | ✅ Working   |
-| `drift-prevention.yml`         | Config drift       | ✅ Working   |
-| `vscode-extension-build.yml`   | Build VSIX         | ✅ Working   |
-| `vscode-extension-publish.yml` | Publish extension  | ✅ Working   |
-| `npm-publish.yml`              | Publish CLI        | ✅ Working   |
-| `build-binaries.yml`           | Build CLI binaries | ✅ Working   |
+| Workflow                       | Purpose            | Status            |
+| ------------------------------ | ------------------ | ----------------- |
+| `code-quality.yml`             | Lint + format      | ✅ Working        |
+| `ripp-validate.yml`            | Validate packets   | ✅ Working        |
+| `docs-enforcement.yml`         | Require docs       | ✅ Working        |
+| `drift-prevention.yml`         | Config drift       | ✅ Working        |
+| `vscode-extension-build.yml`   | Build VSIX         | ✅ Working        |
+| `vscode-extension-publish.yml` | Publish extension  | ✅ Working        |
+| `npm-publish.yml`              | Publish CLI        | ✅ Working        |
+| `build-binaries.yml`           | Build CLI binaries | ✅ Working        |
 | `release-please.yml`           | Automated releases | ⚠️ Extension only |
-| `publish-wiki.yml`             | Sync wiki          | ✅ Working   |
+| `publish-wiki.yml`             | Sync wiki          | ✅ Working        |
 
 ### Publishing Strategy
 
@@ -769,15 +769,15 @@ ripp-protocol/
 
 ### Current State
 
-| Category                  | Status        | Notes                              |
-| ------------------------- | ------------- | ---------------------------------- |
-| **Secrets in Git**        | ✅ Clean      | No secrets detected                |
-| **`.gitignore`**          | ✅ Good       | Covers node_modules, dist, .env    |
-| **Workflow Permissions**  | ✅ Good       | Least privilege                    |
-| **Dependabot**            | ⚠️ Not configured | Add `.github/dependabot.yml`   |
-| **Secret Scanning**       | ❓ Unknown    | Check GitHub settings              |
-| **License**               | ✅ Compliant  | MIT license properly applied       |
-| **Supply Chain**          | ✅ Good       | Lockfiles, no suspicious deps      |
+| Category                 | Status            | Notes                           |
+| ------------------------ | ----------------- | ------------------------------- |
+| **Secrets in Git**       | ✅ Clean          | No secrets detected             |
+| **`.gitignore`**         | ✅ Good           | Covers node_modules, dist, .env |
+| **Workflow Permissions** | ✅ Good           | Least privilege                 |
+| **Dependabot**           | ⚠️ Not configured | Add `.github/dependabot.yml`    |
+| **Secret Scanning**      | ❓ Unknown        | Check GitHub settings           |
+| **License**              | ✅ Compliant      | MIT license properly applied    |
+| **Supply Chain**         | ✅ Good           | Lockfiles, no suspicious deps   |
 
 ### Recommendations
 

@@ -289,37 +289,37 @@ ripp-protocol/
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
 
-  - package-ecosystem: "npm"
-    directory: "/tools/ripp-cli"
+  - package-ecosystem: 'npm'
+    directory: '/tools/ripp-cli'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
 
-  - package-ecosystem: "npm"
-    directory: "/tools/vscode-extension"
+  - package-ecosystem: 'npm'
+    directory: '/tools/vscode-extension'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
 ```
 
 **Verification:**
@@ -470,58 +470,47 @@ RIPP uses two complementary documentation systems:
 ### Commit Sequence
 
 1. **chore: create audit directory and reports**
-
    - Add `docs/audit/REPO_AUDIT_REPORT.md`
    - Add `docs/audit/CLEANUP_PLAN.md`
    - Add `docs/audit/DOD_CHECKLIST.md`
 
 2. **docs: archive vscode extension internal docs**
-
    - Create `docs/archive/vscode-extension-internal-docs/`
    - Move 10 files from extension to archive
    - Add archive README
 
 3. **docs: consolidate versioning documentation**
-
    - Create `/docs/VERSIONING.md`
    - Remove `/tools/vscode-extension/VERSIONING.md`
    - Update references
 
 4. **docs: move marketplace compliance fix to architecture**
-
    - Move `MARKETPLACE-COMPLIANCE-FIX.md` → `docs/architecture/`
 
 5. **docs: remove duplicate /wiki/ directory**
-
    - Verify `/docs/wiki/` and `/wiki/` are identical
    - Remove `/wiki/`
    - Update any references
 
 6. **chore: clarify /ripp/ directory purpose or remove**
-
    - Based on decision in Step 1.5
 
 7. **chore: add .nvmrc for Node version management**
-
    - Add `.nvmrc` with `18`
 
 8. **chore: add Dependabot configuration**
-
    - Add `.github/dependabot.yml`
 
 9. **chore: standardize root package.json scripts**
-
    - Update scripts in `/package.json`
    - Update `README.md` with `setup` script
    - Update `CONTRIBUTING.md`
 
 10. **docs: enhance documentation index and structure**
-
     - Update `/docs/README.md`
     - Clarify docs/ vs docs/wiki/ in `CONTRIBUTING.md`
 
 11. **docs: document CLI release process**
-
     - Update `/docs/PUBLISHING.md` with CLI process
     - Or add CLI to release-please config
 
@@ -546,13 +535,11 @@ All changes in this plan are **non-breaking**:
 ### Potential Concerns
 
 1. **Removing /wiki/**
-
    - **Risk:** CI workflow might reference it
    - **Mitigation:** Check `publish-wiki.yml` workflow source path
    - **Rollback:** Easy to restore from git
 
 2. **Removing extension docs**
-
    - **Risk:** Might be referenced in issues or PRs
    - **Mitigation:** Archive instead of delete
    - **Rollback:** Move back from archive
