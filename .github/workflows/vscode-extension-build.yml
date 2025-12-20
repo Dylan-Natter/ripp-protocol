@@ -44,10 +44,10 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -154,7 +154,7 @@ jobs:
           fi
       
       - name: Upload .vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: vscode-extension-${{ env.VERSION }}-build-${{ env.BUILD_ID }}
           path: tools/vscode-extension/dist/*.vsix
@@ -164,7 +164,7 @@ jobs:
       # Upload VSIX to GitHub Release (only when triggered by a tag)
       - name: Upload VSIX to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: tools/vscode-extension/dist/*.vsix
           tag_name: ${{ github.ref_name }}
