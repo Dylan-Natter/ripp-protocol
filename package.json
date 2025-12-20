@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "description": "Regenerative Intent Prompting Protocol (RIPP) — an open standard for turning AI-generated ideas and prototypes into secure, scalable, production-ready systems without losing their original intent.",
   "scripts": {
-    "test": "cd tools/ripp-cli && npm ci && npm link && cd ../.. && ripp validate examples/",
+    "test": "npm run test:validate-examples",
+    "test:validate-examples": "cd tools/ripp-cli && npm ci && npm link && cd ../.. && ripp validate examples/",
     "lint": "eslint tools/ripp-cli/index.js",
     "lint:fix": "eslint --fix tools/ripp-cli/index.js",
     "format": "prettier --write \"**/*.{js,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{js,json,md,yaml,yml}\"",
+    "setup": "npm install && cd tools/ripp-cli && npm install && npm link && cd ../..",
+    "clean": "rm -rf tools/ripp-cli/node_modules tools/vscode-extension/node_modules tools/vscode-extension/out",
     "ripp:lint": "ripp lint examples/",
     "ripp:lint:strict": "ripp lint examples/ --strict",
     "ripp:package:example": "ripp package --in examples/item-creation.ripp.yaml --out /tmp/handoff.md"

@@ -1,10 +1,18 @@
-# VSIX Workflow - PR-Based Auto-Versioning Implementation
+# VS Code Extension Versioning - Historical Implementation Notes
+
+> **Note:** This document contains historical implementation details. For current versioning information, see **[/docs/VERSIONING.md](/docs/VERSIONING.md)**.
+
+---
 
 ## Overview
 
 This document describes the implementation of PR-based auto-versioning for the VS Code extension using release-please. This approach provides production-grade release automation while respecting branch protection rules.
 
-## Problem Statement
+**Current Documentation:** See [/docs/VERSIONING.md](/docs/VERSIONING.md) for the complete versioning strategy.
+
+---
+
+## Historical Context: Problem Statement
 
 The previous approach had two issues:
 
@@ -20,66 +28,44 @@ The previous approach had two issues:
    - No automated CHANGELOG generation
    - Time-consuming for frequent releases
 
-## Solution: PR-Based Auto-Versioning
+## Solution Implemented: PR-Based Auto-Versioning
 
-The new approach uses [release-please](https://github.com/googleapis/release-please) to automate versioning through Pull Requests:
+The approach uses [release-please](https://github.com/googleapis/release-please) to automate versioning through Pull Requests.
 
-### Architecture
-
-```
-┌─────────────────┐
-│ Developer       │
-│ Commits Code    │
-│ (Conventional)  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Merge to main   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────┐
-│ release-please Workflow │
-│ - Analyzes commits      │
-│ - Determines version    │
-│ - Creates Release PR    │
-└────────┬────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│ Release PR          │
-│ - Version bump      │
-│ - CHANGELOG update  │
-│ - Ready for review  │
+For complete details, see [/docs/VERSIONING.md](/docs/VERSIONING.md).
+│ Release PR │
+│ - Version bump │
+│ - CHANGELOG update │
+│ - Ready for review │
 └────────┬────────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────┐
 │ Merge Release PR│
 └────────┬────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────────┐
-│ GitHub Release      │
-│ - Tag created       │
-│ - Release notes     │
+│ GitHub Release │
+│ - Tag created │
+│ - Release notes │
 └────────┬────────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────┐
-│ Build Workflow  │
-│ - Build VSIX    │
-│ - Upload asset  │
+│ Build Workflow │
+│ - Build VSIX │
+│ - Upload asset │
 └────────┬────────┘
-         │
-         ▼
+│
+▼
 ┌──────────────────────┐
-│ (Optional)           │
-│ Publish to           │
-│ Marketplace          │
+│ (Optional) │
+│ Publish to │
+│ Marketplace │
 └──────────────────────┘
-```
+
+````
 
 ### Key Components
 
@@ -165,7 +151,7 @@ Configures release-please behavior for the monorepo:
     }
   }
 }
-```
+````
 
 #### `.release-please-manifest.json`
 

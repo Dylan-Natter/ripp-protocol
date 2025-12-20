@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # Root npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "automated"
+    open-pull-requests-limit: 10
+
+  # RIPP CLI dependencies
+  - package-ecosystem: "npm"
+    directory: "/tools/ripp-cli"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "ripp-cli"
+    open-pull-requests-limit: 10
+
+  # VS Code extension dependencies
+  - package-ecosystem: "npm"
+    directory: "/tools/vscode-extension"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "vscode-extension"
+    open-pull-requests-limit: 10
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "github-actions"
+    open-pull-requests-limit: 5
