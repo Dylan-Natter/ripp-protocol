@@ -42,8 +42,8 @@
       "../../schema/**/*"
     ],
     "targets": [
-      "node20-macos-arm64",
-      "node20-macos-x64"
+      "node18-macos-arm64",
+      "node18-macos-x64"
     ],
     "outputPath": "dist"
   }
