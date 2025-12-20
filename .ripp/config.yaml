@@ -1,0 +1,46 @@
+# RIPP Configuration
+# Version: 1.0
+# Documentation: https://dylan-natter.github.io/ripp-protocol
+
+rippVersion: "1.0"
+
+# AI Configuration (vNext Intent Discovery Mode)
+# AI is DISABLED BY DEFAULT for security and trust
+ai:
+  enabled: true  # Set to true AND set RIPP_AI_ENABLED=true to enable AI features
+  provider: openai  # openai | azure-openai | ollama | custom
+  model: gpt-4o-mini  # Model identifier
+
+# Evidence Pack Configuration
+evidencePack:
+  includeGlobs:
+    # Application patterns (for when adding examples/apps)
+    - "src/**"
+    - "app/**"
+    - "api/**"
+    - "db/**"
+    # RIPP tooling repository patterns
+    - "tools/**/*.js"
+    - "tools/**/*.ts"
+    - "tools/**/*.json"
+    - "schema/**/*.json"
+    - "examples/**"
+    - "templates/**"
+    - ".github/workflows/**"
+    - "package.json"
+    - "SPEC.md"
+  excludeGlobs:
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/*.lock"
+    - "**/.git/**"
+    - "**/vendor/**"
+    - "**/.ripp/**"
+    - "**/out/**"
+  maxFileSize: 1048576  # 1MB
+
+# Discovery Configuration
+discovery:
+  minConfidence: 0.5  # Minimum confidence for AI-inferred intent (0.0-1.0)
+  includeEvidence: true  # Include evidence references in candidates

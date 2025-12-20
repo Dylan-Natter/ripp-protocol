@@ -1,0 +1,6 @@
+# Generated packages (deliverables)
+# These are built artifacts that should not be committed
+packages/
+
+# Keep directory structure
+!.gitkeep

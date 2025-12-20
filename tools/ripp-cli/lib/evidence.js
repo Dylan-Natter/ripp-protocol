@@ -74,6 +74,7 @@ async function buildEvidencePack(cwd, config) {
  */
 async function scanFiles(cwd, evidenceConfig) {
   const files = [];
+  let excludedCount = 0;
   const { includeGlobs, excludeGlobs, maxFileSize } = evidenceConfig;
 
   // Build combined pattern
@@ -92,6 +93,7 @@ async function scanFiles(cwd, evidenceConfig) {
 
         // Skip files that are too large
         if (stats.size > maxFileSize) {
+          excludedCount++;
           continue;
         }
 
@@ -109,12 +111,13 @@ async function scanFiles(cwd, evidenceConfig) {
         });
       } catch (error) {
         // Skip files we can't read
+        excludedCount++;
         continue;
       }
     }
   }
 
-  return files;
+  return { files, excludedCount };
 }
 
 /**
