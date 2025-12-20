@@ -35,8 +35,21 @@ if command -v gh &> /dev/null; then
   echo "Fetching checksums from GitHub Release..."
   echo ""
   
-  ARM64_CHECKSUM=$(gh release view "${VERSION}" -R "${REPO}" --json assets -q '.assets[] | select(.name == "ripp-darwin-arm64.tar.gz.sha256") | .url' | xargs curl -sL | cut -d' ' -f1 || echo "")
-  AMD64_CHECKSUM=$(gh release view "${VERSION}" -R "${REPO}" --json assets -q '.assets[] | select(.name == "ripp-darwin-amd64.tar.gz.sha256") | .url' | xargs curl -sL | cut -d' ' -f1 || echo "")
+  # Fetch ARM64 checksum
+  ARM64_URL=$(gh release view "${VERSION}" -R "${REPO}" --json assets -q '.assets[] | select(.name == "ripp-darwin-arm64.tar.gz.sha256") | .url' 2>/dev/null || echo "")
+  if [ -n "$ARM64_URL" ]; then
+    ARM64_CHECKSUM=$(curl -sL "$ARM64_URL" | cut -d' ' -f1 || echo "")
+  else
+    ARM64_CHECKSUM=""
+  fi
+  
+  # Fetch AMD64 checksum
+  AMD64_URL=$(gh release view "${VERSION}" -R "${REPO}" --json assets -q '.assets[] | select(.name == "ripp-darwin-amd64.tar.gz.sha256") | .url' 2>/dev/null || echo "")
+  if [ -n "$AMD64_URL" ]; then
+    AMD64_CHECKSUM=$(curl -sL "$AMD64_URL" | cut -d' ' -f1 || echo "")
+  else
+    AMD64_CHECKSUM=""
+  fi
   
   if [ -n "$ARM64_CHECKSUM" ] && [ -n "$AMD64_CHECKSUM" ]; then
     echo "✓ Successfully fetched checksums"
@@ -89,7 +102,7 @@ echo ""
 echo "2. Edit Formula/ripp.rb with the values above"
 echo ""
 echo "3. Test the formula locally:"
-echo "   brew install --build-from-source Formula/ripp.rb"
+echo "   brew install Formula/ripp.rb"
 echo "   brew test ripp"
 echo ""
 echo "4. Commit and push:"
