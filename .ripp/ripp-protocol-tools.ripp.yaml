@@ -11,7 +11,7 @@ purpose:
     AI-generated prototypes and ideas lose critical context during handoffs between developers 
     or from prototype to production. Requirements get misinterpreted, edge cases missed, and 
     the original intent behind design decisions is lost.
-    
+
   solution: |
     RIPP provides a structured protocol for capturing and preserving intent through standardized 
     YAML/JSON packets validated by schema and tooling. The protocol includes:
@@ -19,19 +19,19 @@ purpose:
     - VS Code extension for IDE-integrated workflow
     - Evidence-based AI discovery to infer intent from code
     - Three maturity levels (L1: Purpose only, L2: +Contracts, L3: +Failure Modes)
-    
+
   value: |
     Enables seamless handoffs without losing context. Teams can confidently move from AI 
     prototypes to production implementation with full visibility into original intent, 
     requirements, and design decisions.
-    
+
   out_of_scope: 'Runtime code generation, automated implementation, project scaffolding'
-  
+
   assumptions:
     - 'Developers have Node.js 18+ installed for CLI tools'
     - 'VS Code users have GitHub Copilot for AI-powered discovery'
     - 'Projects follow standard repository layouts for evidence scanning'
-    
+
   references:
     - title: 'RIPP Specification'
       url: 'https://dylan-natter.github.io/ripp-protocol/spec.html'
@@ -44,37 +44,37 @@ ux_flow:
     action: 'Initializes RIPP in repository'
     trigger: 'Runs `ripp init` or uses VS Code command'
     result: 'Creates .ripp/config.yaml and directory structure'
-  
+
   - step: 2
     actor: 'Developer'
     action: 'Builds evidence pack from codebase'
     trigger: 'Runs `ripp evidence build`'
     result: 'Scans repository and creates .ripp/evidence/evidence.index.json'
-  
+
   - step: 3
     actor: 'Developer'
     action: 'Discovers candidate intent using AI'
     trigger: 'Runs `ripp discover` with configured AI provider (OpenAI/Azure/Copilot)'
     result: 'AI generates .ripp/intent.candidates.yaml with inferred intent'
-  
+
   - step: 4
     actor: 'Developer'
     action: 'Reviews and confirms candidates'
     trigger: 'Runs `ripp confirm --checklist`'
     result: 'Generates .ripp/intent.checklist.md for manual review'
-  
+
   - step: 5
     actor: 'Developer'
     action: 'Marks accepted candidates and saves checklist'
     trigger: 'Edits checklist file, marks items with [x]'
     result: 'Checklist saved with confirmed selections'
-  
+
   - step: 6
     actor: 'Developer'
     action: 'Builds canonical RIPP artifacts'
     trigger: 'Runs `ripp build`'
     result: 'Creates .ripp/handoff.ripp.yaml and .ripp/handoff.ripp.md'
-  
+
   - step: 7
     actor: 'Developer'
     action: 'Validates packet before commit'
@@ -116,7 +116,7 @@ data_contracts:
           type: 'array'
           required: true
           description: 'Input/output data structures'
-  
+
   outputs:
     - name: 'Validation Report'
       description: 'JSON report from ripp validate command'
@@ -133,4 +133,3 @@ data_contracts:
           type: 'array'
           required: false
           description: 'Style and best-practice warnings'
-
