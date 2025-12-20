@@ -33,38 +33,39 @@ The previous approach had two issues:
 The approach uses [release-please](https://github.com/googleapis/release-please) to automate versioning through Pull Requests.
 
 For complete details, see [/docs/VERSIONING.md](/docs/VERSIONING.md).
-│ Release PR          │
-│ - Version bump      │
-│ - CHANGELOG update  │
-│ - Ready for review  │
+│ Release PR │
+│ - Version bump │
+│ - CHANGELOG update │
+│ - Ready for review │
 └────────┬────────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────┐
 │ Merge Release PR│
 └────────┬────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────────┐
-│ GitHub Release      │
-│ - Tag created       │
-│ - Release notes     │
+│ GitHub Release │
+│ - Tag created │
+│ - Release notes │
 └────────┬────────────┘
-         │
-         ▼
+│
+▼
 ┌─────────────────┐
-│ Build Workflow  │
-│ - Build VSIX    │
-│ - Upload asset  │
+│ Build Workflow │
+│ - Build VSIX │
+│ - Upload asset │
 └────────┬────────┘
-         │
-         ▼
+│
+▼
 ┌──────────────────────┐
-│ (Optional)           │
-│ Publish to           │
-│ Marketplace          │
+│ (Optional) │
+│ Publish to │
+│ Marketplace │
 └──────────────────────┘
-```
+
+````
 
 ### Key Components
 
@@ -150,7 +151,7 @@ Configures release-please behavior for the monorepo:
     }
   }
 }
-```
+````
 
 #### `.release-please-manifest.json`
 

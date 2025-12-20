@@ -16,11 +16,11 @@ All RIPP Protocol packages follow [Semantic Versioning 2.0.0](https://semver.org
 
 The RIPP Protocol repository contains multiple deliverables that version independently:
 
-| Package                | Location                  | Current Version | Automation      |
-| ---------------------- | ------------------------- | --------------- | --------------- |
-| **VS Code Extension**  | `tools/vscode-extension/` | 0.4.0           | release-please  |
-| **RIPP CLI**           | `tools/ripp-cli/`         | 1.0.0           | Manual          |
-| **Protocol Spec**      | `SPEC.md`, `schema/`      | 1.0             | Manual          |
+| Package               | Location                  | Current Version | Automation     |
+| --------------------- | ------------------------- | --------------- | -------------- |
+| **VS Code Extension** | `tools/vscode-extension/` | 0.4.0           | release-please |
+| **RIPP CLI**          | `tools/ripp-cli/`         | 1.0.0           | Manual         |
+| **Protocol Spec**     | `SPEC.md`, `schema/`      | 1.0             | Manual         |
 
 ---
 
@@ -70,7 +70,6 @@ The VS Code extension uses **automated PR-based versioning** via [release-please
    ```
 
 2. **Release PR Created Automatically**: The `release-please` workflow:
-
    - Analyzes commits since last release
    - Determines next version based on conventional commits
    - Creates/updates a "Release PR" with:
@@ -79,7 +78,6 @@ The VS Code extension uses **automated PR-based versioning** via [release-please
      - Git tag
 
 3. **Review and Merge Release PR**: Verify:
-
    - Version number is correct
    - CHANGELOG accurately reflects changes
    - No unintended changes
@@ -102,14 +100,14 @@ The extension supports both simple and component-prefixed tags:
 
 ### Conventional Commit Types
 
-| Type       | Version Bump | Example                              |
-| ---------- | ------------ | ------------------------------------ |
-| `feat:`    | Minor        | `feat: add command palette support`  |
-| `fix:`     | Patch        | `fix: resolve validation error`      |
-| `feat!:`   | Major        | `feat!: change CLI interface`        |
-| `docs:`    | None         | `docs: update README`                |
-| `chore:`   | None         | `chore: update dependencies`         |
-| `refactor:`| None         | `refactor: simplify parser logic`    |
+| Type        | Version Bump | Example                             |
+| ----------- | ------------ | ----------------------------------- |
+| `feat:`     | Minor        | `feat: add command palette support` |
+| `fix:`      | Patch        | `fix: resolve validation error`     |
+| `feat!:`    | Major        | `feat!: change CLI interface`       |
+| `docs:`     | None         | `docs: update README`               |
+| `chore:`    | None         | `chore: update dependencies`        |
+| `refactor:` | None         | `refactor: simplify parser logic`   |
 
 **Note:** Use `BREAKING CHANGE:` in commit body for major version bumps.
 
