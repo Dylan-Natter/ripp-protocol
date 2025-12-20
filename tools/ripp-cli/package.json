@@ -36,5 +36,15 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "pkg": {
+    "assets": [
+      "../../schema/**/*"
+    ],
+    "targets": [
+      "node20-macos-arm64",
+      "node20-macos-x64"
+    ],
+    "outputPath": "dist"
   }
 }
