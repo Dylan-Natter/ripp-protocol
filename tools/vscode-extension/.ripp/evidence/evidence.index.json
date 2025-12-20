@@ -7,13 +7,7 @@
     "includedFiles": 0,
     "excludedFiles": 0
   },
-  "includePatterns": [
-    "src/**",
-    "app/**",
-    "api/**",
-    "db/**",
-    ".github/workflows/**"
-  ],
+  "includePatterns": ["src/**", "app/**", "api/**", "db/**", ".github/workflows/**"],
   "excludePatterns": [
     "**/node_modules/**",
     "**/dist/**",
