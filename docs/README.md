@@ -20,6 +20,7 @@ This is not aspirational—it's enforced through CI checks, CODEOWNERS, and GitH
 /docs/
 ├── wiki/              # GitHub Wiki source of truth (auto-published)
 ├── architecture/      # Architecture decision records and design docs
+├── audit/             # Repository audit reports (public-safe)
 ├── *.md               # GitHub Pages documentation (user-facing guides)
 └── README.md          # This file
 ```
@@ -38,6 +39,13 @@ Direct edits to the GitHub Wiki are overwritten. Always edit files in this direc
 - **Purpose**: Design decisions, architectural patterns, governance records
 - **Audience**: Contributors, maintainers, architects
 - **Format**: Markdown files, optionally using ADR (Architecture Decision Record) format
+
+### `/docs/audit/` — Repository Audit Reports
+
+- **Purpose**: Read-only repository health audits, compliance baseline, historical tracking
+- **Audience**: Maintainers, auditors, governance reviewers
+- **Format**: Standardized audit reports (see [audit/README.md](audit/README.md))
+- **Important**: All audit reports are **public-safe** (no secrets, credentials, or internal information)
 
 ### `/docs/*.md` — GitHub Pages Documentation
 

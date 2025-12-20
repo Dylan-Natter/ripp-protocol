@@ -1,8 +1,14 @@
 # RIPP Protocol Repository Cleanup & Modernization Plan
 
+**⚠️ PUBLIC-SAFE DOCUMENT**
+
+This is a historical planning document created before audit standardization. All information is public and no sensitive data is included.
+
+---
+
 **Date:** 2025-12-20  
 **Related:** [REPO_AUDIT_REPORT.md](./REPO_AUDIT_REPORT.md)  
-**Status:** Ready for Execution
+**Status:** Historical - Superseded by standardized audit process (see [README.md](./README.md))
 
 ---
 
@@ -632,3 +638,13 @@ The execution will proceed commit-by-commit with validation at each step.
 
 **Plan Status:** ✅ Ready for Execution  
 **Next Step:** Begin Phase 1, Step 1.1
+
+---
+
+## Standardized Audit Process
+
+This historical planning document has been superseded by a standardized audit process. For current audit procedures, see:
+
+- **[README.md](./README.md)** - Audit folder documentation and how to run audits
+- **[TEMPLATE.md](./TEMPLATE.md)** - Standard template for audit reports
+- **[2025-12-20_REPO_AUDIT.md](./2025-12-20_REPO_AUDIT.md)** - Current audit in standardized format
