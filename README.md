@@ -318,6 +318,24 @@ RIPP is often misunderstood as an IaC tool, policy engine, or code generator. It
 
 ## Quickstart
 
+### Prerequisites
+
+**Node.js 20 LTS or higher is required** for development and running the CLI locally:
+
+```bash
+# Check your Node version
+node --version  # Should be v20.x.x or higher
+
+# Using nvm (recommended)
+nvm install 20
+nvm use 20
+
+# Or if the repository includes .nvmrc:
+nvm use
+```
+
+**Note**: If you install the CLI via Homebrew (macOS binaries), Node.js is not required as binaries are standalone.
+
 ### 1. Install RIPP CLI
 
 Choose your preferred installation method:
