@@ -7,7 +7,9 @@ All notable changes to the RIPP Protocol VS Code extension will be documented in
 
 ### Features
 
-* Add Copilot-backed intent discovery and VS Code integration
+* Add Copilot-backed intent discovery and VS Code integration:
+  * Copilot-assisted suggestions to help infer RIPP packet intent from existing project files and packets, including candidate values for fields like `purpose`, `data_contracts`, and `ux_flow`
+  * Surface intent discovery inside VS Code through new RIPP extension commands and editor-level actions so authors can review and apply suggestions without leaving their workflow
 
 
 ## [0.3.0](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.2.2...v0.3.0) (2025-12-19)
