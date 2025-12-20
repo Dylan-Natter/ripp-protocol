@@ -7,6 +7,7 @@ This directory contains RIPP (Regenerative Intent Prompting Protocol) packets fo
 RIPP is a **structured specification format** for capturing feature requirements, design decisions, and implementation contracts in a machine-readable, human-reviewable format.
 
 A RIPP packet is a YAML or JSON document that describes:
+
 - **What** a feature does and **why** it exists
 - **How** users interact with it
 - **What data** it produces and consumes
@@ -15,6 +16,7 @@ A RIPP packet is a YAML or JSON document that describes:
 - **How to verify** correctness (acceptance tests)
 
 **Key Benefits:**
+
 - Preserve original intent during implementation
 - Create reviewable, versioned contracts
 - Enable automated validation
@@ -24,16 +26,19 @@ A RIPP packet is a YAML or JSON document that describes:
 ## What RIPP is NOT
 
 **RIPP is not a code migration tool:**
+
 - Does not transform prototype code into production code
 - Does not provide refactoring or modernization capabilities
 - Does not attempt lift-and-shift operations
 
 **RIPP is not a code generator:**
+
 - RIPP is a specification format, not a code generation framework
 - While tools MAY generate code from RIPP packets, this is optional
 - RIPP does not prescribe implementation details
 
 **RIPP is not a production hardening helper:**
+
 - Does not scan code for vulnerabilities
 - Does not inject security controls into existing code
 - Does not automatically make prototype code production-ready
@@ -72,7 +77,7 @@ Example: `auth-login.ripp.yaml`
 ### 2. Minimum required structure (Level 1)
 
 ```yaml
-ripp_version: "1.0"
+ripp_version: '1.0'
 packet_id: auth-login
 title: User Authentication and Login
 created: 2024-01-15
@@ -81,15 +86,15 @@ status: draft
 level: 1
 
 purpose:
-  problem: "Users need a secure way to authenticate and access their accounts"
-  solution: "Implement JWT-based authentication with email/password login"
-  value: "Enables secure user access and personalized experiences"
+  problem: 'Users need a secure way to authenticate and access their accounts'
+  solution: 'Implement JWT-based authentication with email/password login'
+  value: 'Enables secure user access and personalized experiences'
 
 ux_flow:
-  - step: "User navigates to login page"
-  - step: "User enters email and password"
-  - step: "System validates credentials"
-  - step: "User is redirected to dashboard"
+  - step: 'User navigates to login page'
+  - step: 'User enters email and password'
+  - step: 'System validates credentials'
+  - step: 'User is redirected to dashboard'
 
 data_contracts:
   inputs:
@@ -103,7 +108,7 @@ data_contracts:
   outputs:
     - name: auth_token
       type: string
-      description: "JWT access token"
+      description: 'JWT access token'
 ```
 
 ### 3. Validate your packets
