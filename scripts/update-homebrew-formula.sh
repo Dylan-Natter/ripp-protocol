@@ -36,16 +36,20 @@ if command -v gh &> /dev/null; then
   echo ""
   
   # Fetch ARM64 checksum
+  # First, get the download URL for the .sha256 file from the release
   ARM64_URL=$(gh release view "${VERSION}" -R "${REPO}" --json assets -q '.assets[] | select(.name == "ripp-darwin-arm64.tar.gz.sha256") | .url' 2>/dev/null || echo "")
   if [ -n "$ARM64_URL" ]; then
+    # Download the .sha256 file and extract just the checksum (first field)
     ARM64_CHECKSUM=$(curl -sL "$ARM64_URL" | cut -d' ' -f1 || echo "")
   else
     ARM64_CHECKSUM=""
   fi
   
   # Fetch AMD64 checksum
+  # First, get the download URL for the .sha256 file from the release
   AMD64_URL=$(gh release view "${VERSION}" -R "${REPO}" --json assets -q '.assets[] | select(.name == "ripp-darwin-amd64.tar.gz.sha256") | .url' 2>/dev/null || echo "")
   if [ -n "$AMD64_URL" ]; then
+    # Download the .sha256 file and extract just the checksum (first field)
     AMD64_CHECKSUM=$(curl -sL "$AMD64_URL" | cut -d' ' -f1 || echo "")
   else
     AMD64_CHECKSUM=""

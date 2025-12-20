@@ -288,6 +288,6 @@ end
 
 ```bash
 brew audit --strict Formula/ripp.rb
-brew install --build-from-source Formula/ripp.rb
+brew install Formula/ripp.rb
 brew test ripp
 ```
