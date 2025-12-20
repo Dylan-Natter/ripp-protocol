@@ -48,6 +48,11 @@ jobs:
             "pnpm-lock.yaml"
           )
           
+          # Define directories that don't require docs (tool internal files)
+          INTERNAL_DIRS=(
+            ".ripp/"
+          )
+          
           # Define documentation files that don't require additional docs
           # These are already documentation themselves
           DOC_FILE_PATTERNS=(
@@ -70,19 +75,31 @@ jobs:
             # Skip empty lines
             [[ -z "$file" ]] && continue
             
-            # Check if file matches any config pattern
-            IS_CONFIG=""
-            for pattern in "${CONFIG_FILE_PATTERNS[@]}"; do
-              if [[ "$(basename "$file")" == $pattern ]]; then
-                IS_CONFIG="true"
-                echo "Config file detected (docs not required): $file"
+            # Check if file is in an internal directory
+            IS_INTERNAL=""
+            for dir in "${INTERNAL_DIRS[@]}"; do
+              if [[ "$file" == $dir* ]]; then
+                IS_INTERNAL="true"
+                echo "Internal directory file detected (docs not required): $file"
                 break
               fi
             done
             
+            # Check if file matches any config pattern
+            IS_CONFIG=""
+            if [[ "$IS_INTERNAL" != "true" ]]; then
+              for pattern in "${CONFIG_FILE_PATTERNS[@]}"; do
+                if [[ "$(basename "$file")" == $pattern ]]; then
+                  IS_CONFIG="true"
+                  echo "Config file detected (docs not required): $file"
+                  break
+                fi
+              done
+            fi
+            
             # Check if file matches any doc pattern
             IS_DOC=""
-            if [[ "$IS_CONFIG" != "true" ]]; then
+            if [[ "$IS_INTERNAL" != "true" && "$IS_CONFIG" != "true" ]]; then
               for pattern in "${DOC_FILE_PATTERNS[@]}"; do
                 # Use case statement for pattern matching
                 case "$(basename "$file")" in
@@ -95,8 +112,8 @@ jobs:
               done
             fi
             
-            # Only check high-impact paths if not a config file or doc file
-            if [[ "$IS_CONFIG" != "true" && "$IS_DOC" != "true" ]]; then
+            # Only check high-impact paths if not internal, config, or doc file
+            if [[ "$IS_INTERNAL" != "true" && "$IS_CONFIG" != "true" && "$IS_DOC" != "true" ]]; then
               for path in "${HIGH_IMPACT_PATHS[@]}"; do
                 if [[ "$file" == $path* ]]; then
                   HIGH_IMPACT="true"
