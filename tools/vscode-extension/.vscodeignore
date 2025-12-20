@@ -8,6 +8,8 @@ tsconfig.json
 **/*.ts
 **/*.map
 node_modules/**
+!node_modules/js-yaml/**
+!node_modules/@types/js-yaml/**
 .npmrc
 docs/**
 EXTENSION-DRIFT-REPORT.md

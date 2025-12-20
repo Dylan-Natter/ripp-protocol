@@ -28,12 +28,14 @@
     "url": "https://github.com/Dylan-Natter/ripp-protocol/issues"
   },
   "homepage": "https://dylan-natter.github.io/ripp-protocol",
-  "dependencies": {},
   "devDependencies": {
     "eslint": "^8.56.0",
     "prettier": "^3.1.1"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ripp-cli": "file:tools/ripp-cli"
   }
 }

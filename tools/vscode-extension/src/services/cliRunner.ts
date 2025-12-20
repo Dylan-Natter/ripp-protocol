@@ -119,7 +119,7 @@ export class CliRunner {
       const spawnOptions: SpawnOptions = {
         cwd,
         env: safeEnv,
-        shell: false
+        shell: true // Required for npx on Windows
       };
 
       const child = spawn(command, commandArgs, spawnOptions);

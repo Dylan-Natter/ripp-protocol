@@ -65,10 +65,10 @@ export class RippWorkflowProvider implements vscode.TreeDataProvider<WorkflowTre
 
     this.steps.set('discover', {
       id: 'discover',
-      label: '3. Discover Intent (AI)',
-      description: 'Infer candidate intent',
+      label: '3. Discover Intent',
+      description: 'Infer candidate intent with AI',
       status: 'not-started',
-      command: 'ripp.discover',
+      command: 'ripp.discover.smart',
       prerequisite: 'evidence'
     });
 
@@ -210,8 +210,54 @@ export class RippWorkflowProvider implements vscode.TreeDataProvider<WorkflowTre
       children.push(outputsItem);
     }
 
-    // Action button
-    if (step.command && canRun) {
+    // Action buttons - special handling for discover step
+    if (step.id === 'discover' && canRun) {
+      // Get active AI mode from config
+      const aiMode = this.getActiveAiMode();
+      
+      // Add primary action with active mode indicator
+      const primaryAction = new WorkflowTreeItem(
+        aiMode === 'copilot' ? '▶ Discover with Copilot' : '▶ Discover with External AI',
+        aiMode === 'copilot' ? 'Using GitHub Copilot (active)' : 'Using external endpoint (active)',
+        vscode.TreeItemCollapsibleState.None,
+        'action'
+      );
+      primaryAction.command = {
+        command: aiMode === 'copilot' ? 'ripp.discover.copilot' : 'ripp.discover',
+        title: 'Discover Intent',
+        arguments: []
+      };
+      children.push(primaryAction);
+
+      // Add alternative action
+      const altAction = new WorkflowTreeItem(
+        aiMode === 'copilot' ? '  Use External AI instead' : '  Use Copilot instead',
+        'Click to switch and discover',
+        vscode.TreeItemCollapsibleState.None,
+        'action'
+      );
+      altAction.command = {
+        command: aiMode === 'copilot' ? 'ripp.discover' : 'ripp.discover.copilot',
+        title: 'Discover with alternative',
+        arguments: []
+      };
+      children.push(altAction);
+
+      // Add config link
+      const configAction = new WorkflowTreeItem(
+        '  ⚙ Configure AI Mode',
+        'Choose between Copilot and external endpoint',
+        vscode.TreeItemCollapsibleState.None,
+        'action'
+      );
+      configAction.command = {
+        command: 'ripp.ai.configureMode',
+        title: 'Configure AI Mode',
+        arguments: []
+      };
+      children.push(configAction);
+    } else if (step.command && canRun) {
+      // Default action button for other steps
       const actionItem = new WorkflowTreeItem(
         `▶ Run ${step.label}`,
         '',
@@ -367,19 +413,14 @@ export class RippWorkflowProvider implements vscode.TreeDataProvider<WorkflowTre
       return [];
     }
 
-    const candidatesDir = path.join(this.workspaceRoot, '.ripp', 'candidates');
-    if (!fs.existsSync(candidatesDir)) {
-      return [];
+    const rippDir = path.join(this.workspaceRoot, '.ripp');
+    const candidatesPath = path.join(rippDir, 'intent.candidates.yaml');
+    
+    if (fs.existsSync(candidatesPath)) {
+      return ['.ripp/intent.candidates.yaml'];
     }
-
-    try {
-      return fs
-        .readdirSync(candidatesDir)
-        .filter(file => file.startsWith('intent.candidates.'))
-        .map(file => `.ripp/candidates/${file}`);
-    } catch {
-      return [];
-    }
+    
+    return [];
   }
 
   private getConfirmedFiles(): string[] {
@@ -420,6 +461,32 @@ export class RippWorkflowProvider implements vscode.TreeDataProvider<WorkflowTre
     } catch {
       return [];
     }
+  }
+
+  /**
+   * Get active AI mode from config
+   */
+  private getActiveAiMode(): 'copilot' | 'endpoint' {
+    if (!this.workspaceRoot) {
+      return 'endpoint';
+    }
+
+    const configPath = path.join(this.workspaceRoot, '.ripp', 'config.yaml');
+    if (!fs.existsSync(configPath)) {
+      return 'endpoint';
+    }
+
+    try {
+      const content = fs.readFileSync(configPath, 'utf8');
+      // Simple check for copilot mode marker
+      if (content.includes('# AI Mode: copilot')) {
+        return 'copilot';
+      }
+    } catch {
+      // Ignore read errors
+    }
+
+    return 'endpoint';
   }
 
   /**

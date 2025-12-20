@@ -9,6 +9,9 @@ import { CliRunner } from './services/cliRunner';
 import { ConfigService } from './services/configService';
 import { SecretService } from './services/secretService';
 import { WorkspaceMapService } from './services/workspaceMapService';
+import { CopilotLmProvider, CopilotNotAvailableError, CopilotPermissionError } from './ai/copilotLmProvider';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 
 const execFileAsync = promisify(execFile);
 
@@ -82,6 +85,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register diagnostics provider
 	context.subscriptions.push(diagnosticsProvider);
+
+	// TEST: Simple command to verify registration works
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.test', () => {
+			vscode.window.showInformationMessage('RIPP Test Command Works!');
+		})
+	);
 
 	// Check CLI version on activation
 	checkCliVersion();
@@ -212,6 +222,39 @@ function registerUtilityCommands(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('ripp.analyze', async () => {
 			await analyzeProject();
+		})
+	);
+
+	// Copilot-powered commands
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.discover.copilot', async () => {
+			await discoverIntentWithCopilot();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.analyze.copilot', async () => {
+			await analyzeProjectWithCopilot();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.ai.configureMode', async () => {
+			console.log('[RIPP] Configure AI Mode command invoked');
+			outputChannel.appendLine('[RIPP] Configure AI Mode command invoked');
+			await configureAiMode();
+		})
+	);
+
+	// Smart discovery command that routes to appropriate method based on config
+	context.subscriptions.push(
+		vscode.commands.registerCommand('ripp.discover.smart', async () => {
+			const mode = getActiveAiMode();
+			if (mode === 'copilot') {
+				await discoverIntentWithCopilot();
+			} else {
+				await discoverIntent();
+			}
 		})
 	);
 }
@@ -603,7 +646,7 @@ async function confirmIntent(): Promise<void> {
 		async () => {
 			try {
 				const result = await cliRunner.execute({
-					args: ['confirm', '--interactive'],
+					args: ['confirm', '--checklist'],
 					cwd: workspaceRoot
 				});
 
@@ -1062,4 +1105,231 @@ function parseValidationOutput(output: string): ValidationReport {
 		timestamp: Date.now(),
 		findings
 	};
+}
+
+// ============================================================================
+// Copilot-Powered AI Commands
+// ============================================================================
+
+/**
+ * Discover intent using Copilot (VS Code Language Model API)
+ */
+async function discoverIntentWithCopilot(): Promise<void> {
+	const workspaceRoot = getWorkspaceRoot();
+	if (!workspaceRoot || !checkWorkspaceTrust()) {
+		return;
+	}
+
+	// Check if evidence pack exists
+	const evidencePath = path.join(workspaceRoot, '.ripp', 'evidence', 'evidence.index.json');
+	if (!fs.existsSync(evidencePath)) {
+		const choice = await vscode.window.showErrorMessage(
+			'No evidence pack found. Build evidence pack first.',
+			'Build Evidence'
+		);
+		if (choice === 'Build Evidence') {
+			await vscode.commands.executeCommand('ripp.evidence.build');
+		}
+		return;
+	}
+
+	// Confirm Copilot usage
+	const choice = await vscode.window.showInformationMessage(
+		'Discover intent using GitHub Copilot?\n\nThis will analyze your code evidence using Copilot language models.',
+		{ modal: true },
+		'Use Copilot',
+		'Cancel'
+	);
+
+	if (choice !== 'Use Copilot') {
+		return;
+	}
+
+	await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title: 'RIPP: Discovering intent with Copilot...',
+			cancellable: true
+		},
+		async (progress, token) => {
+			try {
+				// Load evidence pack
+				const evidenceContent = fs.readFileSync(evidencePath, 'utf8');
+				const evidencePack = JSON.parse(evidenceContent);
+
+				// Get config
+				const config = vscode.workspace.getConfiguration('ripp.ai.copilot');
+				const family = config.get<string>('family') || 'gpt-4o';
+				const justification = config.get<string>('justification') || 'Analyzing code evidence to discover RIPP intent';
+
+				// Create Copilot provider
+				const copilotProvider = new CopilotLmProvider(
+					{ family, justification, maxRetries: 3 },
+					outputChannel
+				);
+
+				// Check if configured
+				if (!copilotProvider.isConfigured()) {
+					throw new Error('VS Code Language Model API is not available. Please update VS Code.');
+				}
+
+				progress.report({ message: 'Analyzing evidence with Copilot...' });
+
+				// Infer intent
+				const targetLevel = 2; // Default to Level 2
+				const candidates = await copilotProvider.inferIntent(
+					evidencePack,
+					{ targetLevel },
+					token
+				);
+
+				// Save candidates
+				const rippDir = path.join(workspaceRoot, '.ripp');
+				if (!fs.existsSync(rippDir)) {
+					fs.mkdirSync(rippDir, { recursive: true });
+				}
+
+				const candidatesPath = path.join(rippDir, 'intent.candidates.yaml');
+				const yamlContent = yaml.dump(candidates, { indent: 2, lineWidth: -1 });
+				fs.writeFileSync(candidatesPath, yamlContent, 'utf8');
+
+				vscode.window.showInformationMessage(
+					'Intent discovery complete!',
+					'View Candidates',
+					'Next: Confirm'
+				).then(async selection => {
+					if (selection === 'View Candidates') {
+						const doc = await vscode.workspace.openTextDocument(candidatesPath);
+						await vscode.window.showTextDocument(doc);
+					} else if (selection === 'Next: Confirm') {
+						await vscode.commands.executeCommand('ripp.confirm');
+					}
+				});
+
+				workflowProvider.refresh();
+
+			} catch (error: any) {
+				if (token.isCancellationRequested) {
+					vscode.window.showInformationMessage('Intent discovery was cancelled');
+					return;
+				}
+
+				if (error instanceof CopilotNotAvailableError) {
+					vscode.window.showErrorMessage(
+						error.message,
+						'Install Copilot'
+					).then(selection => {
+						if (selection === 'Install Copilot') {
+							vscode.env.openExternal(vscode.Uri.parse('https://marketplace.visualstudio.com/items?itemName=GitHub.copilot'));
+						}
+					});
+				} else if (error instanceof CopilotPermissionError) {
+					vscode.window.showErrorMessage(error.message);
+				} else {
+					vscode.window.showErrorMessage(`Intent discovery failed: ${error.message}`);
+					outputChannel.appendLine(`Error: ${error.stack || error.message}`);
+				}
+			}
+		}
+	);
+}
+
+/**
+ * Analyze project using Copilot (placeholder for future implementation)
+ */
+async function analyzeProjectWithCopilot(): Promise<void> {
+	vscode.window.showInformationMessage(
+		'Analyze with Copilot is coming soon! Use "RIPP: Discover Intent (Copilot)" for now.',
+		'Open Discover'
+	).then(selection => {
+		if (selection === 'Open Discover') {
+			vscode.commands.executeCommand('ripp.discover.copilot');
+		}
+	});
+}
+
+/**
+ * Configure AI mode (endpoint vs copilot)
+ */
+async function configureAiMode(): Promise<void> {
+	console.log('[RIPP] configureAiMode function started');
+	outputChannel.appendLine('[RIPP] configureAiMode function started');
+	
+	const current = vscode.workspace.getConfiguration('ripp.ai').get<string>('mode') || 'endpoint';
+	
+	const items: vscode.QuickPickItem[] = [
+		{
+			label: 'Copilot Mode',
+			description: 'Use GitHub Copilot (no API key needed)',
+			detail: current === 'copilot' ? '$(check) Currently active' : 'Recommended for VS Code users',
+			picked: current === 'copilot'
+		},
+		{
+			label: 'Endpoint Mode',
+			description: 'Use external AI endpoint (OpenAI, Azure, etc.)',
+			detail: current === 'endpoint' ? '$(check) Currently active' : 'Requires API key configuration',
+			picked: current === 'endpoint'
+		}
+	];
+
+	const selection = await vscode.window.showQuickPick(items, {
+		title: 'Configure AI Mode for RIPP',
+		placeHolder: 'Select AI mode...'
+	});
+
+	if (!selection) {
+		return;
+	}
+
+	const newMode = selection.label === 'Copilot Mode' ? 'copilot' : 'endpoint';
+	
+	if (newMode === current) {
+		vscode.window.showInformationMessage(`AI mode is already set to ${newMode}`);
+		return;
+	}
+
+	await vscode.workspace.getConfiguration('ripp.ai').update(
+		'mode',
+		newMode,
+		vscode.ConfigurationTarget.Workspace
+	);
+
+	const nextSteps = newMode === 'copilot' 
+		? 'You can now use "RIPP: Discover Intent (Copilot)" without API keys.'
+		: 'Remember to configure your API keys using "RIPP: Manage AI Connections".';
+
+	vscode.window.showInformationMessage(
+		`AI mode changed to ${newMode}. ${nextSteps}`,
+		'Got it'
+	);
+
+	// Refresh the workflow view to update UI
+	workflowProvider.refresh();
+}
+
+/**
+ * Get active AI mode from workspace config
+ */
+function getActiveAiMode(): 'copilot' | 'endpoint' {
+	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	if (!workspaceRoot) {
+		return 'endpoint';
+	}
+
+	const configPath = path.join(workspaceRoot, '.ripp', 'config.yaml');
+	if (!fs.existsSync(configPath)) {
+		return 'endpoint';
+	}
+
+	try {
+		const content = fs.readFileSync(configPath, 'utf8');
+		// Simple check for copilot mode marker
+		if (content.includes('# AI Mode: copilot')) {
+			return 'copilot';
+		}
+	} catch {
+		// Ignore read errors
+	}
+
+	return 'endpoint';
 }

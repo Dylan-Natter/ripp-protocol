@@ -77,12 +77,12 @@ async function scanFiles(cwd, evidenceConfig) {
   let excludedCount = 0;
   const { includeGlobs, excludeGlobs, maxFileSize } = evidenceConfig;
 
-  // Build combined pattern
-  const patterns = includeGlobs.map(pattern => path.join(cwd, pattern));
-
-  for (const pattern of patterns) {
+  // Use glob with cwd option instead of joining paths
+  // This ensures patterns work correctly on all platforms
+  for (const pattern of includeGlobs) {
     const matches = await glob(pattern, {
-      ignore: excludeGlobs.map(ex => path.join(cwd, ex)),
+      cwd: cwd,
+      ignore: excludeGlobs,
       nodir: true,
       absolute: true
     });
@@ -154,7 +154,10 @@ async function extractEvidence(files, cwd) {
     routes: [],
     schemas: [],
     auth: [],
-    workflows: []
+    workflows: [],
+    projectType: detectProjectType(files),
+    keyInsights: extractKeyInsights(files, cwd),
+    codeSnippets: extractKeyCodeSnippets(files)
   };
 
   for (const file of files) {
@@ -363,6 +366,181 @@ function redactSecrets(text) {
   }
 
   return redacted;
+}
+
+/**
+ * Detect project type from evidence
+ */
+function detectProjectType(files) {
+  const indicators = {
+    cli: 0,
+    webApp: 0,
+    api: 0,
+    library: 0,
+    protocol: 0
+  };
+
+  for (const file of files) {
+    const content = file.content ? file.content.toLowerCase() : '';
+    const path = file.path.toLowerCase();
+
+    // CLI tool indicators
+    if (path.includes('/bin/') || path.includes('cli') || path.includes('command')) indicators.cli += 3;
+    if (content.includes('commander') || content.includes('yargs') || content.includes('process.argv')) indicators.cli += 2;
+    if (path === 'package.json' && content.includes('"bin"')) indicators.cli += 4;
+
+    // Web app indicators  
+    if (path.includes('app/') || path.includes('pages/') || path.includes('components/')) indicators.webApp += 3;
+    if (content.includes('react') || content.includes('vue') || content.includes('angular')) indicators.webApp += 2;
+    if (path.includes('index.html') || path.includes('app.tsx')) indicators.webApp += 3;
+
+    // API indicators
+    if (path.includes('api/') || path.includes('routes/') || path.includes('controllers/')) indicators.api += 3;
+    if (content.includes('express') || content.includes('fastify') || content.includes('koa')) indicators.api += 2;
+    if (content.includes('@app.route') || content.includes('@route') || content.includes('router.')) indicators.api += 2;
+
+    // Library indicators
+    if (path === 'package.json' && !content.includes('"bin"') && !content.includes('"scripts"')) indicators.library += 2;
+    if (path.includes('lib/') || path.includes('src/index')) indicators.library += 1;
+
+    // Protocol/spec indicators
+    if (path.includes('spec.md') || path.includes('protocol') || path.includes('rfc')) indicators.protocol += 4;
+    if (path.includes('schema/') && path.includes('.json')) indicators.protocol += 2;
+  }
+
+  // Return type with highest score
+  const sorted = Object.entries(indicators).sort((a, b) => b[1] - a[1]);
+  return {
+    primary: sorted[0][0],
+    secondary: sorted[1][1] > 0 ? sorted[1][0] : null,
+    confidence: sorted[0][1] > 5 ? 'high' : sorted[0][1] > 2 ? 'medium' : 'low',
+    scores: indicators
+  };
+}
+
+/**
+ * Extract key insights from README, package.json, and main files
+ */
+function extractKeyInsights(files, cwd) {
+  const insights = {
+    purpose: null,
+    description: null,
+    mainFeatures: [],
+    architecture: null
+  };
+
+  for (const file of files) {
+    const path = file.path.toLowerCase();
+    const content = file.content || '';
+
+    // Extract from README
+    if (path.includes('readme.md') || path.includes('readme.txt')) {
+      // Extract first paragraph as description
+      const lines = content.split('\n');
+      let desc = '';
+      for (const line of lines) {
+        if (line.trim() && !line.startsWith('#') && !line.startsWith('[')) {
+          desc += line.trim() + ' ';
+          if (desc.length > 200) break;
+        }
+      }
+      if (desc) insights.description = desc.slice(0, 300);
+
+      // Extract features (look for bullet points or numbered lists)
+      const featureMatch = content.match(/(?:features|capabilities|includes)[\s\S]{0,50}?\n((?:[-*]\s.+\n)+)/i);
+      if (featureMatch) {
+        insights.mainFeatures = featureMatch[1]
+          .split('\n')
+          .map(f => f.replace(/^[-*]\s+/, '').trim())
+          .filter(f => f.length > 0)
+          .slice(0, 5);
+      }
+    }
+
+    // Extract from package.json
+    if (path === 'package.json') {
+      try {
+        const pkg = JSON.parse(content);
+        if (pkg.description && !insights.description) {
+          insights.description = pkg.description;
+        }
+        if (pkg.name && !insights.purpose) {
+          insights.purpose = `${pkg.name}: ${pkg.description || 'No description'}`;
+        }
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
+    }
+
+    // Extract from SPEC files
+    if (path.includes('spec.md') || path.includes('architecture.md')) {
+      const purposeMatch = content.match(/(?:purpose|goal|objective)[\s:]+([^\n]{50,300})/i);
+      if (purposeMatch && !insights.purpose) {
+        insights.purpose = purposeMatch[1].trim();
+      }
+    }
+  }
+
+  return insights;
+}
+
+/**
+ * Extract key code snippets (functions, classes, exports)
+ */
+function extractKeyCodeSnippets(files) {
+  const snippets = [];
+  let count = 0;
+  const maxSnippets = 15;
+
+  for (const file of files) {
+    if (count >= maxSnippets) break;
+    if (!file.content || file.type !== 'source') continue;
+
+    const content = file.content;
+    const path = file.path;
+
+    // Extract function definitions (JavaScript/TypeScript)
+    const funcMatches = content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\([^)]*\)\s*{([^}]{0,200})/g);
+    for (const match of funcMatches) {
+      if (count >= maxSnippets) break;
+      snippets.push({
+        file: path,
+        type: 'function',
+        name: match[1],
+        snippet: match[0].substring(0, 150)
+      });
+      count++;
+    }
+
+    // Extract class definitions
+    const classMatches = content.matchAll(/(?:export\s+)?class\s+(\w+)(?:\s+extends\s+\w+)?\s*{([^}]{0,150})/g);
+    for (const match of classMatches) {
+      if (count >= maxSnippets) break;
+      snippets.push({
+        file: path,
+        type: 'class',
+        name: match[1],
+        snippet: match[0].substring(0, 150)
+      });
+      count++;
+    }
+
+    // Extract key comments (JSDoc, purpose statements)
+    const commentMatches = content.matchAll(/\/\*\*\s*\n\s*\*\s*([^\n]{30,200})/g);
+    for (const match of commentMatches) {
+      if (count >= maxSnippets) break;
+      if (match[1].toLowerCase().includes('purpose') || match[1].toLowerCase().includes('description')) {
+        snippets.push({
+          file: path,
+          type: 'comment',
+          snippet: match[1].trim()
+        });
+        count++;
+      }
+    }
+  }
+
+  return snippets.slice(0, maxSnippets);
 }
 
 module.exports = {

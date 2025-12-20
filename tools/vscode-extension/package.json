@@ -40,7 +40,7 @@
   "homepage": "https://dylan-natter.github.io/ripp-protocol",
   "main": "./out/extension.js",
   "activationEvents": [
-    "onView:rippStatus"
+    "*"
   ],
   "contributes": {
     "views": {
@@ -101,7 +101,32 @@
       },
       {
         "command": "ripp.discover",
-        "title": "RIPP: Discover Intent (AI)",
+        "title": "RIPP: Discover Intent (External AI)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.discover.smart",
+        "title": "RIPP: Discover Intent",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.discover.copilot",
+        "title": "RIPP: Discover Intent (Copilot)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.analyze.copilot",
+        "title": "RIPP: Analyze Project (Copilot)",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.ai.configureMode",
+        "title": "RIPP: Configure AI Mode",
+        "category": "RIPP"
+      },
+      {
+        "command": "ripp.test",
+        "title": "RIPP: Test Command",
         "category": "RIPP"
       },
       {
@@ -183,6 +208,29 @@
           "default": false,
           "description": "Enable AI features locally (only works if repo config allows AI)."
         },
+        "ripp.ai.mode": {
+          "type": "string",
+          "enum": [
+            "endpoint",
+            "copilot"
+          ],
+          "default": "endpoint",
+          "enumDescriptions": [
+            "Use external AI endpoint (OpenAI, Azure OpenAI, etc.) - requires API keys",
+            "Use GitHub Copilot via VS Code Language Model API - no API key needed"
+          ],
+          "description": "AI mode for intent discovery: 'endpoint' uses external APIs with keys, 'copilot' uses GitHub Copilot in VS Code."
+        },
+        "ripp.ai.copilot.family": {
+          "type": "string",
+          "default": "gpt-4o",
+          "description": "Preferred Copilot model family (e.g., 'gpt-4o', 'gpt-3.5-turbo'). Falls back to any available Copilot model."
+        },
+        "ripp.ai.copilot.justification": {
+          "type": "string",
+          "default": "Analyzing code evidence to discover RIPP intent",
+          "description": "Human-readable justification shown to users when requesting Copilot access."
+        },
         "ripp.validateOnSave": {
           "type": "boolean",
           "default": false,
@@ -199,6 +247,7 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

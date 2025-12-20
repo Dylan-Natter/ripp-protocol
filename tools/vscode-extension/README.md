@@ -28,6 +28,19 @@ Each step shows:
 - **Trust-First Policy** - AI must be enabled in both repo config AND locally
 - **Clear State Visibility** - See exactly why AI is enabled/disabled
 
+#### **NEW: Copilot Mode** ✨
+
+Use GitHub Copilot for intent discovery without managing API keys:
+
+- **No API Keys Required** - Uses your existing Copilot subscription
+- **Built-in VS Code Integration** - Leverages VS Code Language Model API
+- **Same Quality Results** - Produces identical RIPP artifacts as endpoint mode
+- **Commands**:
+  - `RIPP: Discover Intent (Copilot)` - AI-powered discovery using Copilot
+  - `RIPP: Configure AI Mode` - Switch between endpoint and Copilot modes
+
+**Setup**: Simply install GitHub Copilot extension, sign in, and run `RIPP: Configure AI Mode` to switch to Copilot mode. No additional configuration needed!
+
 ### ⚙️ Configuration Management
 
 - **Config Editor** - Edit `.ripp/config.yaml` directly or via UI
@@ -66,6 +79,7 @@ All workflow commands are available from the RIPP sidebar or Command Palette:
 - **RIPP: Initialize Repository** - Create `.ripp/` structure and config
 - **RIPP: Build Evidence Pack** - Extract repository signals for AI discovery
 - **RIPP: Discover Intent (AI)** - Use AI to infer candidate intent (requires AI setup)
+- **RIPP: Discover Intent (Copilot)** - 🆕 Use GitHub Copilot for AI discovery (no API key needed)
 - **RIPP: Confirm Intent** - Review and approve discovered intent
 - **RIPP: Build Canonical Artifacts** - Generate final RIPP packets
 
@@ -73,6 +87,7 @@ All workflow commands are available from the RIPP sidebar or Command Palette:
 
 - **RIPP: Edit Configuration** - Edit `.ripp/config.yaml`
 - **RIPP: Manage AI Connections** - Configure API keys securely
+- **RIPP: Configure AI Mode** - 🆕 Switch between endpoint and Copilot modes
 - **RIPP: Validate Packet(s)** - Validate all RIPP packets against schema
 - **RIPP: Package Handoff** - Package RIPP into handoff document
 - **RIPP: Refresh Status** - Refresh workflow status

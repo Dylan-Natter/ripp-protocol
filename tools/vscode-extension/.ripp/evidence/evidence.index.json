@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "created": "2025-12-20T01:05:11.165Z",
+  "stats": {
+    "totalFiles": 0,
+    "totalSize": 0,
+    "includedFiles": 0,
+    "excludedFiles": 0
+  },
+  "includePatterns": [
+    "src/**",
+    "app/**",
+    "api/**",
+    "db/**",
+    ".github/workflows/**"
+  ],
+  "excludePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.lock",
+    "**/.git/**",
+    "**/vendor/**",
+    "**/.ripp/**"
+  ],
+  "files": [],
+  "evidence": {
+    "dependencies": [],
+    "routes": [],
+    "schemas": [],
+    "auth": [],
+    "workflows": []
+  }
+}
