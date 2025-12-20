@@ -39,7 +39,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
           cache-dependency-path: tools/ripp-cli/package-lock.json
       
@@ -57,7 +57,7 @@ jobs:
         working-directory: tools/ripp-cli
         run: |
           pkg . \
-            --targets node20-macos-arm64 \
+            --targets node18-macos-arm64 \
             --output ../../build/binaries/ripp-darwin-arm64
           
           echo "✅ Built ARM64 binary"
@@ -67,7 +67,7 @@ jobs:
         working-directory: tools/ripp-cli
         run: |
           pkg . \
-            --targets node20-macos-x64 \
+            --targets node18-macos-x64 \
             --output ../../build/binaries/ripp-darwin-amd64
           
           echo "✅ Built AMD64 binary"
