@@ -154,7 +154,7 @@ jobs:
           fi
       
       - name: Upload .vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: vscode-extension-${{ env.VERSION }}-build-${{ env.BUILD_ID }}
           path: tools/vscode-extension/dist/*.vsix
