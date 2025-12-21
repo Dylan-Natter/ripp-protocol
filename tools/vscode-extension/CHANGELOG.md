@@ -2,6 +2,13 @@
 
 All notable changes to the RIPP Protocol VS Code extension will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Fixed stuck status message bug where "RIPP: Building evidence pack..." and other workflow progress notifications never cleared after CLI command completion.
+  Progress notifications now clear immediately when the CLI process finishes, before showing user interaction dialogs.
+
 ## [0.4.1](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.4.0...v0.4.1) (2025-12-20)
 
 
