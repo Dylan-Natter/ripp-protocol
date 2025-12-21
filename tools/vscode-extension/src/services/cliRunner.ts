@@ -235,7 +235,7 @@ export class CliRunner {
           };
         }
       }
-    } catch (error) {
+    } catch {
       // CLI not found or error getting version
       return null;
     }
@@ -297,7 +297,7 @@ export class CliRunner {
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
-    } catch (error) {
+    } catch {
       // Not JSON or invalid JSON
     }
     return null;

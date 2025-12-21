@@ -128,7 +128,7 @@ export class RippDiagnosticsProvider {
 			diagnostic.source = 'RIPP';
 
 			return { uri, diag: diagnostic };
-		} catch (error) {
+		} catch {
 			// Couldn't resolve file path
 			return null;
 		}
