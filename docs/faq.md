@@ -594,7 +594,7 @@ A: Yes. Link RIPP packets in issue descriptions:
 ```markdown
 ## RIPP Packet
 
-See: [user-auth.ripp.yaml](../ripp/user-auth.ripp.yaml)
+See: [item-creation.ripp.yaml](../examples/item-creation.ripp.yaml)
 ```
 
 ---

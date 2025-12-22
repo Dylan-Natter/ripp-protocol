@@ -2,6 +2,48 @@
 
 This directory contains helper scripts for maintaining and releasing the RIPP protocol tools.
 
+## Documentation Validation
+
+### validate-links.py
+
+Python script to validate internal links in markdown files across the repository.
+
+**Usage:**
+
+```bash
+python3 scripts/validate-links.py
+```
+
+**What it does:**
+
+1. Scans all markdown files in the repository
+2. Validates that all internal relative links point to existing files or directories
+3. Handles special cases:
+   - Wiki-style links (without .md extension) in docs/wiki/
+   - Jekyll Liquid template syntax
+   - External links (http/https)
+   - Anchor-only links
+4. Reports any broken links with file location and expected path
+
+**Exit codes:**
+
+- `0`: All links are valid
+- `1`: One or more broken links found
+
+**Requirements:**
+
+- Python 3.6+
+- No additional dependencies (uses standard library only)
+
+**Example output:**
+
+```
+=== RIPP Protocol - Documentation Link Validator ===
+
+✅ All internal links are valid!
+   Checked markdown files in: docs/, tools/, examples/, *.md
+```
+
 ## Homebrew Release Scripts
 
 ### update-homebrew-formula.sh
