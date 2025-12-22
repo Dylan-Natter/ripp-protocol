@@ -121,7 +121,7 @@ def find_markdown_links(content: str) -> List[tuple]:
     Find all markdown-style links in content.
     Returns list of (text, url) tuples.
     """
-    link_pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+    link_pattern = r'\[([^\]]*)\]\(([^)]+)\)'
     return re.findall(link_pattern, content)
 
 
@@ -151,9 +151,6 @@ def check_links(root_dir: str = '.') -> List[Dict]:
                 content = f.read()
         except (IOError, OSError) as e:
             print(f"Warning: Could not read {md_file}: {e}", file=sys.stderr)
-            continue
-        except UnicodeDecodeError as e:
-            print(f"Warning: Encoding error in {md_file}: {e}", file=sys.stderr)
             continue
             
         # Find all markdown links
