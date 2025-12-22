@@ -7,7 +7,7 @@
     "ripp": "index.js"
   },
   "scripts": {
-    "test": "echo \"Warning: No tests specified\" && exit 0"
+    "test": "node test/checklist-parser.test.js"
   },
   "keywords": [
     "ripp",

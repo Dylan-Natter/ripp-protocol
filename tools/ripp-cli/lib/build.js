@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const {
+  parseChecklist,
+  buildConfirmedIntent,
+  validateConfirmedBlocks
+} = require('./checklist-parser');
 
 /**
  * RIPP Build - Canonical Artifact Compilation
@@ -11,17 +16,26 @@ const yaml = require('js-yaml');
  * Build canonical RIPP artifacts from confirmed intent
  */
 function buildCanonicalArtifacts(cwd, options = {}) {
-  const confirmedPath = path.join(cwd, '.ripp', 'intent.confirmed.yaml');
+  let confirmed;
 
-  if (!fs.existsSync(confirmedPath)) {
-    throw new Error('No confirmed intent found. Run "ripp confirm" first.');
-  }
+  // Check if building from checklist
+  if (options.fromChecklist) {
+    confirmed = buildFromChecklist(cwd, options);
+  } else {
+    const confirmedPath = path.join(cwd, '.ripp', 'intent.confirmed.yaml');
 
-  const confirmedContent = fs.readFileSync(confirmedPath, 'utf8');
-  const confirmed = yaml.load(confirmedContent);
+    if (!fs.existsSync(confirmedPath)) {
+      throw new Error(
+        'No confirmed intent found. Run "ripp confirm" first, or use "ripp build --from-checklist" to build from the checklist.'
+      );
+    }
 
-  if (!confirmed.confirmed || confirmed.confirmed.length === 0) {
-    throw new Error('No confirmed intent blocks found');
+    const confirmedContent = fs.readFileSync(confirmedPath, 'utf8');
+    confirmed = yaml.load(confirmedContent);
+
+    if (!confirmed.confirmed || confirmed.confirmed.length === 0) {
+      throw new Error('No confirmed intent blocks found');
+    }
   }
 
   // Build RIPP packet from confirmed intent
@@ -48,6 +62,97 @@ function buildCanonicalArtifacts(cwd, options = {}) {
     packet,
     level: packet.level
   };
+}
+
+/**
+ * Build from checklist markdown file
+ * Parses checklist, validates checked items, and generates confirmed intent
+ */
+function buildFromChecklist(cwd, options = {}) {
+  const checklistPath = path.join(cwd, '.ripp', 'intent.checklist.md');
+
+  // Check if checklist exists
+  if (!fs.existsSync(checklistPath)) {
+    throw new Error(
+      `Checklist not found at ${checklistPath}. Run "ripp confirm --checklist" to generate it.`
+    );
+  }
+
+  // Read and parse checklist
+  const checklistContent = fs.readFileSync(checklistPath, 'utf8');
+  const parseResult = parseChecklist(checklistContent);
+
+  // Check for parsing errors
+  if (parseResult.errors.length > 0) {
+    const errorMsg = [
+      'Failed to parse checklist:',
+      ...parseResult.errors.map(e => `  - ${e}`)
+    ].join('\n');
+    throw new Error(errorMsg);
+  }
+
+  // Check if any candidates were checked
+  if (parseResult.candidates.length === 0) {
+    throw new Error(
+      'No candidates selected in checklist. Mark candidates with [x] and save the file, then run this command again.'
+    );
+  }
+
+  // Display warnings if any
+  if (parseResult.warnings.length > 0 && options.showWarnings !== false) {
+    console.warn('\n⚠️  Warnings:');
+    parseResult.warnings.forEach(w => console.warn(`  - ${w}`));
+    console.warn('');
+  }
+
+  // Build confirmed intent structure
+  const confirmed = buildConfirmedIntent(parseResult.candidates, {
+    user: options.user || 'checklist',
+    timestamp: new Date().toISOString()
+  });
+
+  // Validate confirmed blocks
+  const validation = validateConfirmedBlocks(confirmed.confirmed);
+
+  // Store validation results for reporting
+  const validationResults = {
+    totalChecked: parseResult.candidates.length,
+    accepted: validation.accepted.length,
+    rejected: validation.rejected.length,
+    reasons: validation.reasons
+  };
+
+  // If there are rejected blocks, report them
+  if (validation.rejected.length > 0) {
+    console.warn('\n⚠️  Some candidates were rejected:');
+    validation.rejected.forEach(block => {
+      const reasons = validation.reasons[block.section] || [];
+      console.warn(`  - ${block.section}: ${reasons.join(', ')}`);
+    });
+    console.warn('');
+  }
+
+  // Check if we have any accepted blocks
+  if (validation.accepted.length === 0) {
+    throw new Error(
+      'No valid candidates found. All selected candidates failed validation. Please review and fix the checklist.'
+    );
+  }
+
+  // Use only accepted blocks
+  const finalConfirmed = {
+    version: confirmed.version,
+    confirmed: validation.accepted
+  };
+
+  // Save confirmed intent for traceability
+  const confirmedPath = path.join(cwd, '.ripp', 'intent.confirmed.yaml');
+  fs.writeFileSync(confirmedPath, yaml.dump(finalConfirmed, { indent: 2 }), 'utf8');
+
+  // Store validation results on options for reporting in handleBuildCommand
+  options._validationResults = validationResults;
+
+  return finalConfirmed;
 }
 
 /**
@@ -334,5 +439,6 @@ function generateHandoffMarkdown(packet, confirmed) {
 module.exports = {
   buildCanonicalArtifacts,
   buildRippPacket,
-  generateHandoffMarkdown
+  generateHandoffMarkdown,
+  buildFromChecklist
 };

@@ -300,9 +300,11 @@ ${colors.green}Confirm Options:${colors.reset}
   --user <id>                       User identifier for confirmation
 
 ${colors.green}Build Options:${colors.reset}
+  --from-checklist                  Build from intent.checklist.md (after manual review)
   --packet-id <id>                  Packet ID for generated RIPP (default: discovered-intent)
   --title <title>                   Title for generated RIPP packet
   --output-name <file>              Output file name (default: handoff.ripp.yaml)
+  --user <id>                       User identifier for confirmation tracking
 
 ${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
@@ -351,7 +353,10 @@ ${colors.blue}Intent Discovery Examples:${colors.reset}
   ripp evidence build
   RIPP_AI_ENABLED=true ripp discover --target-level 2
   ripp confirm --interactive
-  ripp build --packet-id my-feature --title "My Feature"
+  ripp confirm --checklist
+  ripp build
+  ripp build --from-checklist
+  ripp build --from-checklist --packet-id my-feature --title "My Feature"
 
 ${colors.gray}Note: Legacy paths (features/, handoffs/, packages/) are supported for backward compatibility.${colors.reset}
 
@@ -1272,7 +1277,7 @@ async function handleConfirmCommand(args) {
       console.log('  1. Review and edit the checklist');
       console.log('  2. Mark accepted candidates with [x]');
       console.log('  3. Save the file');
-      console.log('  4. Run "ripp build" to compile confirmed intent');
+      console.log('  4. Run "ripp build --from-checklist" to compile confirmed intent');
       console.log('');
     } else {
       log(colors.green, '✓', 'Intent confirmation complete');
@@ -1302,7 +1307,8 @@ async function handleBuildCommand(args) {
   const options = {
     packetId: null,
     title: null,
-    outputName: null
+    outputName: null,
+    fromChecklist: args.includes('--from-checklist')
   };
 
   const packetIdIndex = args.indexOf('--packet-id');
@@ -1320,10 +1326,31 @@ async function handleBuildCommand(args) {
     options.outputName = args[outputNameIndex + 1];
   }
 
-  console.log(`${colors.blue}Building canonical RIPP artifacts...${colors.reset}\n`);
+  const userIndex = args.indexOf('--user');
+  if (userIndex !== -1 && args[userIndex + 1]) {
+    options.user = args[userIndex + 1];
+  }
+
+  if (options.fromChecklist) {
+    console.log(`${colors.blue}Building from checklist...${colors.reset}\n`);
+  } else {
+    console.log(`${colors.blue}Building canonical RIPP artifacts...${colors.reset}\n`);
+  }
 
   try {
     const result = buildCanonicalArtifacts(cwd, options);
+
+    // Display summary of checklist processing if applicable
+    if (options.fromChecklist && options._validationResults) {
+      const vr = options._validationResults;
+      console.log(`${colors.blue}Checklist Summary:${colors.reset}`);
+      console.log(`  ${colors.gray}Total checked: ${vr.totalChecked}${colors.reset}`);
+      console.log(`  ${colors.green}✓ Accepted: ${vr.accepted}${colors.reset}`);
+      if (vr.rejected > 0) {
+        console.log(`  ${colors.yellow}⚠ Rejected: ${vr.rejected}${colors.reset}`);
+      }
+      console.log('');
+    }
 
     log(colors.green, '✓', 'Build complete');
     console.log(`  ${colors.gray}RIPP Packet: ${result.packetPath}${colors.reset}`);
@@ -1340,6 +1367,15 @@ async function handleBuildCommand(args) {
     process.exit(0);
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    if (options.fromChecklist) {
+      console.log('');
+      console.log(`${colors.blue}Troubleshooting:${colors.reset}`);
+      console.log('  1. Verify checklist file exists: .ripp/intent.checklist.md');
+      console.log('  2. Ensure at least one candidate is marked with [x]');
+      console.log('  3. Check YAML blocks for syntax errors');
+      console.log('  4. Run "ripp confirm --checklist" to regenerate checklist');
+    }
+    console.log('');
     process.exit(1);
   }
 }
