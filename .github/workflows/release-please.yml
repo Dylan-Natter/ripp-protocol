@@ -59,8 +59,12 @@ jobs:
           echo "# Releases Created! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # Parse the releases_created JSON output
-          echo '${{ steps.release.outputs.releases_created }}' | jq -r 'to_entries[] | "**\(.key)**: v\(.value.version) (tag: \(.value.tag_name))"' >> $GITHUB_STEP_SUMMARY || true
+          # Output information about created releases
+          # The releases_created output contains information about all packages that were released
+          RELEASES='${{ steps.release.outputs.releases_created }}'
+          if [ -n "$RELEASES" ]; then
+            echo "Releases have been created. Check the release-please action outputs for details." >> $GITHUB_STEP_SUMMARY
+          fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Downstream workflows will now run for each package." >> $GITHUB_STEP_SUMMARY
