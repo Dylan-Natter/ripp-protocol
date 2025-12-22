@@ -281,6 +281,136 @@ RIPP uses semantic versioning:
 - **MINOR**: New optional sections or backward-compatible features
 - **PATCH**: Clarifications, typo fixes, non-normative updates
 
+## Package Versioning and Release Process
+
+The repository uses automated versioning for published packages (ripp-cli and VS Code extension) via [release-please](https://github.com/googleapis/release-please).
+
+### How It Works
+
+1. **Commits drive versioning**: Version bumps are determined by conventional commit messages
+   - `feat:` → Minor version bump (0.1.0 → 0.2.0)
+   - `fix:` → Patch version bump (0.1.0 → 0.1.1)
+   - `feat!:` or `BREAKING CHANGE:` → Major version bump (0.1.0 → 1.0.0)
+
+2. **Release-please creates PRs**: On every push to `main`, the release-please workflow:
+   - Analyzes commits since the last release
+   - Determines version bumps for each package
+   - Creates or updates a "Release PR" with:
+     - Updated version numbers in `package.json`
+     - Updated `CHANGELOG.md` with grouped changes
+     - Draft release notes
+
+3. **Merging triggers releases**: When the Release PR is merged:
+   - GitHub releases are created with tags
+   - VS Code extension: Tag format `vX.Y.Z` → triggers VSIX build and marketplace publish
+   - RIPP CLI: Tag format `ripp-cli-vX.Y.Z` → triggers NPM publish
+
+### Package-Specific Tags
+
+To support multiple packages in the monorepo:
+
+- **VS Code Extension**: Uses simple tags like `v0.4.2`
+- **RIPP CLI**: Uses component tags like `ripp-cli-v1.0.1`
+
+This prevents tag collisions and allows independent versioning.
+
+### Writing Commit Messages for Versioning
+
+**Good commit messages** that trigger proper versioning:
+
+```bash
+# Minor version bump (new feature)
+git commit -m "feat(cli): add --json output format"
+
+# Patch version bump (bug fix)
+git commit -m "fix(cli): handle malformed YAML gracefully"
+
+# Major version bump (breaking change)
+git commit -m "feat(cli)!: remove deprecated --legacy flag"
+
+# Or with body
+git commit -m "feat(cli): redesign validation API
+
+BREAKING CHANGE: ValidationResult interface changed
+"
+
+# No version bump (internal change)
+git commit -m "chore: update dev dependencies"
+git commit -m "docs: fix typo in README"
+```
+
+**Scopes** help organize changelogs:
+
+- `feat(cli):` → Groups under "CLI" in changelog
+- `feat(vscode):` → Groups under "VS Code Extension"
+- `feat(spec):` → Groups under "Specification"
+
+### Manual Publishing (Emergency Override)
+
+If automated publishing fails, you can publish manually:
+
+**RIPP CLI:**
+
+1. Go to Actions → "Publish NPM Package"
+2. Click "Run workflow"
+3. Test with `dry_run=true` first
+4. Then run with `dry_run=false` to publish
+
+**VS Code Extension:**
+
+1. Go to Actions → "Publish to VS Code Marketplace"
+2. Click "Run workflow"
+3. Set `publish=false` to build only (artifact uploaded)
+4. Set `publish=true` to actually publish
+
+### Checking Current Versions
+
+```bash
+# RIPP CLI current version
+cat tools/ripp-cli/package.json | grep version
+
+# VS Code extension current version
+cat tools/vscode-extension/package.json | grep version
+
+# All tracked versions (release-please manifest)
+cat .release-please-manifest.json
+```
+
+### Release Checklist
+
+When merging a Release PR:
+
+1. ✅ Review the changelog for accuracy
+2. ✅ Verify version bumps are correct
+3. ✅ Check that CI checks pass
+4. ✅ Merge the Release PR
+5. ✅ Verify GitHub releases are created
+6. ✅ Monitor downstream publish workflows
+7. ✅ Verify packages are available:
+   - NPM: https://www.npmjs.com/package/ripp-cli
+   - VS Code Marketplace: Search for "RIPP Protocol"
+
+### Troubleshooting Releases
+
+**Release PR not created?**
+
+- Check that commits use conventional commit format
+- Verify commits have landed on `main` branch
+- Check release-please workflow run logs
+
+**Publishing failed?**
+
+- Ensure `ENABLE_AUTO_PUBLISH` repo variable is set to `true`
+- Check that secrets are configured (NPM_TOKEN, VSCE_PAT)
+- Review publish workflow logs for errors
+- Use manual publishing workflow as fallback
+
+**Version already exists error?**
+
+- This means the version wasn't bumped in the Release PR
+- Ensure at least one `feat:` or `fix:` commit was included
+- Check that `.release-please-manifest.json` reflects latest published version
+
 ## Questions?
 
 Open a discussion issue or comment on existing issues. We're here to help.
