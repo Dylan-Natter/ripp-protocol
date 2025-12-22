@@ -104,10 +104,10 @@ RIPP is an **intent specification protocol layer** that sits above implementatio
 
 ## Next Steps
 
-- **[Getting Started](../getting-started)** — Create your first RIPP packet
-- **[RIPP Specification](../spec)** — Full protocol reference
-- **[FAQ](../faq)** — Common questions and answers
-- **[Design Philosophy](../../wiki/Design-Philosophy)** — Core principles and design decisions
+- **[Getting Started]({{ '/getting-started' | relative_url }})** — Create your first RIPP packet
+- **[RIPP Specification]({{ '/spec' | relative_url }})** — Full protocol reference
+- **[FAQ]({{ '/faq' | relative_url }})** — Common questions and answers
+- **[Design Philosophy]({{ '/wiki/Design-Philosophy' | relative_url }})** — Core principles and design decisions
 
 ---
 
