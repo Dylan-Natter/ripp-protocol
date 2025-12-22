@@ -29,7 +29,7 @@ In an era where AI can generate features from prompts, specifications must be pr
 
 **Build fast. Ship safely. Regenerate always.**
 
-**New to RIPP?** Understand its category and position: **[What RIPP Is (and Is Not)](category/WHAT-RIPP-IS-AND-IS-NOT)** | **[RIPP vs IaC/GitOps/Policy-as-Code](category/RIPP-VS-EXISTING-PARADIGMS)** | **[Who Should Use RIPP](category/WHO-RIPP-IS-FOR)**
+**New to RIPP?** Understand its category and position: **[What RIPP Is (and Is Not)]({{ '/category/WHAT-RIPP-IS-AND-IS-NOT' | relative_url }})** | **[RIPP vs IaC/GitOps/Policy-as-Code]({{ '/category/RIPP-VS-EXISTING-PARADIGMS' | relative_url }})** | **[Who Should Use RIPP]({{ '/category/WHO-RIPP-IS-FOR' | relative_url }})**
 
 ---
 

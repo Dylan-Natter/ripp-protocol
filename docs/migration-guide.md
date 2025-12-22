@@ -225,7 +225,7 @@ ripp/
 
 ## Support
 
-- **Documentation**: [Directory Layout Guide](./directory-layout.md)
+- **Documentation**: [Directory Layout Guide]({{ '/directory-layout' | relative_url }})
 - **Issues**: [GitHub Issues](https://github.com/Dylan-Natter/ripp-protocol/issues)
 - **CLI Help**: `ripp migrate --help`
 

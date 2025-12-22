@@ -9,7 +9,7 @@ This guide will help you create your first RIPP packet in under 10 minutes.
 
 RIPP is designed to feel familiar if you've worked with user stories, API specs, or technical design documents. The difference is that RIPP brings all of these into one structured, validated format that preserves intent from concept to production.
 
-**New to RIPP?** Start by understanding what RIPP is (and is not): **[RIPP Category Documentation](category/)**
+**New to RIPP?** Start by understanding what RIPP is (and is not): **[RIPP Category Documentation]({{ '/category/' | relative_url }})**
 
 **If you're coming from Agile:** Think of RIPP as the detailed specification that follows your user story. The user story defines "what" and "why" at a high level; RIPP adds "how," "who can," "what if," and "how to verify."
 
@@ -64,7 +64,7 @@ This creates:
 - ✅ Documentation and examples
 - ✅ Clear separation of source vs generated content
 
-**[📖 Learn more about directory structure →](directory-layout.md)**
+**[📖 Learn more about directory structure →]({{ '/directory-layout' | relative_url }})**
 
 Now skip to **Step 4** to create your first RIPP packet.
 
