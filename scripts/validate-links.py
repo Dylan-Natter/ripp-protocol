@@ -40,6 +40,9 @@ def is_path_safe(target_path: Path) -> bool:
         resolved_root = REPO_ROOT.resolve()
         
         # Check if target is within repository root
+        # Logic: If repo_root is in target's parents, then target is inside repo
+        # Example: /repo in /repo/docs/file.md.parents → True (safe)
+        #          /repo in /etc/passwd.parents → False (unsafe)
         return resolved_target == resolved_root or resolved_root in resolved_target.parents
     except (ValueError, OSError):
         return False
@@ -219,8 +222,8 @@ def main():
     """Main entry point for the link validator."""
     print("=== RIPP Protocol - Documentation Link Validator ===\n")
     
-    # Check links
-    errors = check_links()
+    # Check links from repository root to ensure consistent behavior
+    errors = check_links(str(REPO_ROOT))
     
     if errors:
         print(f"❌ Found {len(errors)} broken link(s):\n")
