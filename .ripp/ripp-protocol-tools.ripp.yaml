@@ -2,89 +2,196 @@ ripp_version: '1.0'
 packet_id: 'ripp-protocol-tools'
 title: 'RIPP Protocol CLI and VS Code Extension'
 created: '2025-12-19'
-updated: '2025-12-19'
-status: 'draft'
-level: 1
+updated: '2025-12-22'
+status: 'approved'
+level: 2
 
 purpose:
   problem: |
     AI-generated prototypes and ideas lose critical context during handoffs between developers 
     or from prototype to production. Requirements get misinterpreted, edge cases missed, and 
-    the original intent behind design decisions is lost.
+    the original intent behind design decisions is lost. Traditional documentation becomes 
+    stale and disconnected from code reality.
 
   solution: |
     RIPP provides a structured protocol for capturing and preserving intent through standardized 
     YAML/JSON packets validated by schema and tooling. The protocol includes:
-    - CLI tools (ripp-cli) for validation, linting, and intent discovery
-    - VS Code extension for IDE-integrated workflow
-    - Evidence-based AI discovery to infer intent from code
-    - Three maturity levels (L1: Purpose only, L2: +Contracts, L3: +Failure Modes)
+    - CLI tools (ripp-cli) for validation, linting, packaging, and evidence-based intent discovery
+    - VS Code extension for IDE-integrated 5-step guided workflow
+    - Evidence pack builder to scan repository and capture codebase context
+    - AI-powered discovery to infer intent from code using OpenAI, Azure, or GitHub Copilot
+    - Interactive checklist workflow for manual confirmation of AI-discovered candidates
+    - Three maturity levels (L1: Purpose+Flow only, L2: +API/Permissions/Failures, L3: +Audit/NFRs/Tests)
 
   value: |
     Enables seamless handoffs without losing context. Teams can confidently move from AI 
     prototypes to production implementation with full visibility into original intent, 
-    requirements, and design decisions.
+    requirements, and design decisions. Evidence-based discovery ensures documentation 
+    reflects actual codebase structure, not wishful thinking.
 
-  out_of_scope: 'Runtime code generation, automated implementation, project scaffolding'
+  out_of_scope: 'Runtime code generation, automated implementation, project scaffolding, code refactoring, automated testing'
 
   assumptions:
-    - 'Developers have Node.js 18+ installed for CLI tools'
-    - 'VS Code users have GitHub Copilot for AI-powered discovery'
-    - 'Projects follow standard repository layouts for evidence scanning'
+    - 'Developers have Node.js 20+ installed for CLI tools'
+    - 'VS Code users have GitHub Copilot for AI-powered discovery (optional, can use OpenAI/Azure)'
+    - 'Projects follow standard repository layouts for evidence scanning (Git repositories)'
+    - 'Users have filesystem read/write access to create .ripp/ directory'
 
   references:
     - title: 'RIPP Specification'
       url: 'https://dylan-natter.github.io/ripp-protocol/spec.html'
     - title: 'Getting Started Guide'
       url: 'https://dylan-natter.github.io/ripp-protocol/getting-started.html'
+    - title: 'RIPP Schema v1.0'
+      url: 'https://dylan-natter.github.io/ripp-protocol/schema/ripp-1.0.schema.json'
+
+design_philosophy: |
+  RIPP follows these core principles:
+  
+  **Spec-First Approach**: Schema is the source of truth. Tooling validates against schema, 
+  not the other way around. This ensures consistency and prevents ad-hoc variations.
+  
+  **Intent Preservation**: Original design decisions and "why" rationale must survive handoffs. 
+  Documentation is treated as first-class code artifact, not an afterthought.
+  
+  **Additive-Only Evolution**: New RIPP versions add capabilities without breaking existing 
+  packets. Level 1 packets remain valid forever. Tools are backward-compatible.
+  
+  **Evidence-Based Discovery**: AI inference is grounded in actual codebase artifacts (files, 
+  structure, dependencies) rather than pure speculation. Evidence pack provides context.
+  
+  **CLI as Single Source of Truth**: VS Code extension is a thin orchestration layer that 
+  delegates all operations to the CLI. This ensures consistency across environments and 
+  enables CI/CD integration.
+
+design_decisions:
+  - decision: 'Use YAML/JSON for packet format'
+    rationale: |
+      Human-readable, version-control friendly, widely supported by tooling. Avoids lock-in 
+      to proprietary formats. Enables easy diffing and merging in code review.
+    alternatives_considered:
+      - 'Markdown with YAML frontmatter: Too loose, harder to validate strictly'
+      - 'XML: Verbose, less developer-friendly'
+      - 'Protocol Buffers: Requires compilation, not human-editable'
+
+  - decision: 'Evidence-based AI discovery workflow'
+    rationale: |
+      Pure LLM speculation produces hallucinations. Grounding inference in actual repository 
+      artifacts (file list, structure, package.json, etc.) dramatically improves accuracy. 
+      Evidence pack provides bounded context for AI to reason within.
+    alternatives_considered:
+      - 'Manual documentation only: Too slow, error-prone, falls out of sync'
+      - 'Pure AI with no evidence: Hallucinates features that do not exist'
+      - 'Static analysis only: Misses high-level intent and "why" rationale'
+
+  - decision: '3-level maturity system (L1/L2/L3)'
+    rationale: |
+      Allows progressive disclosure. Small projects start with L1 (purpose+flow only). 
+      Production systems graduate to L2 (add API contracts, permissions, failure modes). 
+      Regulated environments reach L3 (add audit events, NFRs, acceptance tests). 
+      Prevents all-or-nothing documentation burden.
+    alternatives_considered:
+      - 'Single required level: Too heavyweight for prototypes, too light for production'
+      - 'Freeform sections: No consistency, harder to validate and consume'
+
+  - decision: 'Interactive checklist confirmation workflow'
+    rationale: |
+      AI discovery produces candidates that may be partially incorrect or incomplete. Human 
+      review via checklist enables quick accept/reject decisions without manual YAML editing. 
+      Markdown checklist is familiar, easy to edit, and preserves structured YAML for rebuild.
+    alternatives_considered:
+      - 'Auto-accept all AI candidates: Introduces errors, no human oversight'
+      - 'Direct YAML editing: Error-prone, requires YAML expertise'
+      - 'Web UI for approval: Adds infrastructure dependency, breaks CLI-first principle'
+
+  - decision: 'CLI-first with thin VS Code UI layer'
+    rationale: |
+      CLI ensures tooling works in any environment (CI/CD, terminal, scripts). VS Code 
+      extension delegates to CLI for all operations, ensuring consistency. Avoids duplicating 
+      logic in TypeScript. CLI can be distributed as standalone binary (Homebrew, npm).
+    alternatives_considered:
+      - 'VS Code extension with embedded logic: Limits portability, duplicates CLI logic'
+      - 'Web service for operations: Requires hosting, connectivity, latency'
+
+constraints:
+  technical:
+    - 'Node.js 20+ required for CLI (uses modern JavaScript features, ESM-compatible dependencies)'
+    - 'VS Code 1.85.0+ required for extension (uses latest webview API, progress notifications)'
+    - 'Git repository required for evidence scanning (uses `git ls-files` for file discovery)'
+    - 'Filesystem read/write access required for .ripp/ directory and artifacts'
+    - 'AI providers (OpenAI/Azure/Copilot) optional but enhance discovery workflow'
+
+  workflow:
+    - 'Evidence pack must be built before AI discovery (discovery reads .ripp/evidence/evidence.index.json)'
+    - 'Checklist must be generated before build --from-checklist (requires .ripp/intent.checklist.md)'
+    - 'Validation requires schema availability (bundled with CLI or accessible at URL)'
+    - 'Cannot infer intent from binary-only artifacts (requires source code)'
+
+  compatibility:
+    - 'RIPP 1.0 schema is stable and frozen (additive-only changes in future versions)'
+    - 'All changes must maintain backward compatibility with existing Level 1/2/3 packets'
+    - 'CLI flags can be added but not removed (deprecation path required)'
+    - 'VS Code extension activates on workspace open if .ripp directory or *.ripp.yaml files present'
 
 ux_flow:
   - step: 1
     actor: 'Developer'
     action: 'Initializes RIPP in repository'
-    trigger: 'Runs `ripp init` or uses VS Code command'
-    result: 'Creates .ripp/config.yaml and directory structure'
+    trigger: 'Runs `ripp init` or uses VS Code command "RIPP: Initialize Repository"'
+    result: 'Creates .ripp/config.yaml, .ripp/evidence/ directory, and templates'
 
   - step: 2
     actor: 'Developer'
     action: 'Builds evidence pack from codebase'
-    trigger: 'Runs `ripp evidence build`'
-    result: 'Scans repository and creates .ripp/evidence/evidence.index.json'
+    trigger: 'Runs `ripp evidence build` or uses VS Code command "RIPP: Build Evidence Pack"'
+    result: 'Scans repository with `git ls-files`, creates .ripp/evidence/evidence.index.json with file paths, sizes, types'
 
   - step: 3
     actor: 'Developer'
     action: 'Discovers candidate intent using AI'
-    trigger: 'Runs `ripp discover` with configured AI provider (OpenAI/Azure/Copilot)'
-    result: 'AI generates .ripp/intent.candidates.yaml with inferred intent'
+    trigger: 'Runs `ripp discover` (OpenAI/Azure) or `ripp discover --copilot` (GitHub Copilot integration)'
+    result: 'AI analyzes evidence pack and generates .ripp/intent.candidates.yaml with inferred purpose, ux_flow, data_contracts'
 
   - step: 4
     actor: 'Developer'
-    action: 'Reviews and confirms candidates'
-    trigger: 'Runs `ripp confirm --checklist`'
-    result: 'Generates .ripp/intent.checklist.md for manual review'
+    action: 'Reviews AI candidates and generates checklist'
+    trigger: 'Runs `ripp confirm --checklist` or uses VS Code command "RIPP: Confirm Intent"'
+    result: 'Generates .ripp/intent.checklist.md with [ ] checkboxes and embedded YAML blocks for each candidate'
 
   - step: 5
     actor: 'Developer'
-    action: 'Marks accepted candidates and saves checklist'
-    trigger: 'Edits checklist file, marks items with [x]'
-    result: 'Checklist saved with confirmed selections'
+    action: 'Reviews checklist and marks accepted items'
+    trigger: 'Opens .ripp/intent.checklist.md in editor, marks items with [x]'
+    result: 'Checklist saved with confirmed selections (checked items will be built, unchecked items ignored)'
 
   - step: 6
     actor: 'Developer'
-    action: 'Builds canonical RIPP artifacts'
-    trigger: 'Runs `ripp build`'
-    result: 'Creates .ripp/handoff.ripp.yaml and .ripp/handoff.ripp.md'
+    action: 'Builds canonical RIPP artifacts from confirmed items'
+    trigger: 'Runs `ripp build --from-checklist` or uses VS Code command "RIPP: Build Canonical Artifacts"'
+    result: 'Parses checklist, extracts checked YAML blocks, creates .ripp/handoff.ripp.yaml and .ripp/handoff.ripp.md'
 
   - step: 7
     actor: 'Developer'
     action: 'Validates packet before commit'
-    trigger: 'Runs `ripp validate .ripp/*.ripp.yaml`'
-    result: 'Schema validation confirms packet structure is correct'
+    trigger: 'Runs `ripp validate .ripp/*.ripp.yaml` or uses VS Code command "RIPP: Validate Packet(s)"'
+    result: 'Schema validation confirms packet structure, level requirements met, provides error messages if invalid'
+
+  - step: 8
+    actor: 'Developer'
+    action: 'Packages packet for external handoff'
+    trigger: 'Runs `ripp package --in .ripp/handoff.ripp.yaml --out handoff.md`'
+    result: 'Generates single-file Markdown export for sharing with external teams or AI tools'
+
+  - step: 9
+    actor: 'Developer'
+    action: 'Views workflow metrics and health'
+    trigger: 'Runs `ripp metrics` or uses VS Code command "RIPP: Show Metrics"'
+    result: 'Displays evidence coverage, discovery quality, validation status, workflow completion percentage'
 
 data_contracts:
   inputs:
     - name: 'RIPP Packet YAML/JSON'
-      description: 'Structured intent documentation file'
+      description: 'Structured intent documentation file conforming to RIPP schema'
       fields:
         - name: 'ripp_version'
           type: 'string'
@@ -93,7 +200,7 @@ data_contracts:
         - name: 'packet_id'
           type: 'string'
           required: true
-          description: 'Unique identifier for this packet'
+          description: 'Unique identifier for this packet (kebab-case)'
         - name: 'title'
           type: 'string'
           required: true
@@ -107,19 +214,147 @@ data_contracts:
         - name: 'purpose'
           type: 'object'
           required: true
-          description: 'Problem, solution, and value statements'
+          description: 'Problem, solution, value, out_of_scope, assumptions, references'
         - name: 'ux_flow'
           type: 'array'
           required: true
-          description: 'User interaction steps'
+          description: 'User interaction steps with actor, action, trigger, result'
         - name: 'data_contracts'
+          type: 'object'
+          required: true
+          description: 'Input/output data structures (inputs and/or outputs arrays)'
+
+    - name: 'RIPP Config (.ripp/config.yaml)'
+      description: 'Repository-level RIPP configuration'
+      fields:
+        - name: 'ai.enabled'
+          type: 'boolean'
+          required: false
+          description: 'Enable AI-powered discovery (default: true if provider configured)'
+        - name: 'ai.provider'
+          type: 'string'
+          required: false
+          description: 'AI provider: "openai", "azure", "copilot" (default: "copilot")'
+        - name: 'ai.model'
+          type: 'string'
+          required: false
+          description: 'Model name for OpenAI/Azure (e.g., "gpt-4o")'
+        - name: 'evidence.exclude'
+          type: 'array'
+          required: false
+          description: 'Patterns to exclude from evidence scanning (e.g., ["node_modules/**", "*.log"])'
+
+    - name: 'Evidence Index (.ripp/evidence/evidence.index.json)'
+      description: 'Repository scan results for AI discovery context'
+      fields:
+        - name: 'timestamp'
+          type: 'string'
+          required: true
+          description: 'ISO 8601 timestamp of evidence build'
+        - name: 'files'
           type: 'array'
           required: true
-          description: 'Input/output data structures'
+          description: 'Array of file objects with path, size, type, category'
+        - name: 'repository_url'
+          type: 'string'
+          required: false
+          description: 'Git remote URL (from git config --get remote.origin.url)'
+        - name: 'total_files'
+          type: 'integer'
+          required: true
+          description: 'Count of tracked files'
+        - name: 'total_size'
+          type: 'integer'
+          required: true
+          description: 'Total bytes of tracked files'
+
+    - name: 'Intent Candidates (.ripp/intent.candidates.yaml)'
+      description: 'AI-discovered candidate intents for manual review'
+      fields:
+        - name: 'candidates'
+          type: 'array'
+          required: true
+          description: 'Array of candidate objects with purpose, ux_flow, data_contracts, confidence'
+        - name: 'metadata.model'
+          type: 'string'
+          required: false
+          description: 'AI model used for discovery (e.g., "gpt-4o")'
+        - name: 'metadata.timestamp'
+          type: 'string'
+          required: false
+          description: 'ISO 8601 timestamp of discovery'
+
+    - name: 'Intent Checklist (.ripp/intent.checklist.md)'
+      description: 'Markdown checklist for human review and confirmation of AI candidates'
+      fields:
+        - name: 'checkbox markers'
+          type: 'string'
+          required: true
+          description: '[ ] for unchecked, [x] for checked items'
+        - name: 'embedded YAML'
+          type: 'string'
+          required: true
+          description: 'YAML blocks (```yaml...```) containing full candidate structure'
+
+    - name: 'Confirmed Intent (.ripp/intent.confirmed.yaml)'
+      description: 'Human-confirmed candidates extracted from checklist (intermediate artifact)'
+      fields:
+        - name: 'candidates'
+          type: 'array'
+          required: true
+          description: 'Array of confirmed candidate objects'
 
   outputs:
-    - name: 'Validation Report'
-      description: 'JSON report from ripp validate command'
+    - name: 'Canonical RIPP Packet (.ripp/handoff.ripp.yaml)'
+      description: 'Final, validated RIPP packet for team handoff'
+      fields:
+        - name: 'ripp_version'
+          type: 'string'
+          required: true
+          description: 'Always "1.0"'
+        - name: 'packet_id'
+          type: 'string'
+          required: true
+          description: 'Generated from repository name or user-provided'
+        - name: 'level'
+          type: 'integer'
+          required: true
+          description: 'Defaults to 1 (purpose+ux_flow only) unless manually elevated'
+        - name: 'purpose'
+          type: 'object'
+          required: true
+          description: 'Merged from confirmed candidates'
+        - name: 'ux_flow'
+          type: 'array'
+          required: true
+          description: 'Merged from confirmed candidates'
+        - name: 'data_contracts'
+          type: 'object'
+          required: true
+          description: 'Merged from confirmed candidates'
+
+    - name: 'Markdown Export (.ripp/handoff.ripp.md)'
+      description: 'Human-readable Markdown export of canonical packet'
+      fields:
+        - name: 'frontmatter'
+          type: 'string'
+          required: true
+          description: 'YAML frontmatter with packet metadata'
+        - name: 'purpose section'
+          type: 'string'
+          required: true
+          description: 'Formatted problem/solution/value'
+        - name: 'ux_flow section'
+          type: 'string'
+          required: true
+          description: 'Numbered list of user interaction steps'
+        - name: 'data_contracts section'
+          type: 'string'
+          required: true
+          description: 'Tables or lists of input/output structures'
+
+    - name: 'Validation Report (JSON)'
+      description: 'Schema validation output from `ripp validate` command'
       fields:
         - name: 'valid'
           type: 'boolean'
@@ -128,8 +363,263 @@ data_contracts:
         - name: 'errors'
           type: 'array'
           required: true
-          description: 'Schema validation errors'
+          description: 'Schema validation errors (empty if valid)'
         - name: 'warnings'
           type: 'array'
           required: false
-          description: 'Style and best-practice warnings'
+          description: 'Style and best-practice warnings (non-blocking)'
+
+    - name: 'Lint Report (JSON/Markdown)'
+      description: 'Linting output from `ripp lint` command'
+      fields:
+        - name: 'files_checked'
+          type: 'integer'
+          required: true
+          description: 'Number of RIPP packets linted'
+        - name: 'issues'
+          type: 'array'
+          required: true
+          description: 'Array of style/quality issues found'
+
+    - name: 'Metrics Report (.ripp/metrics.json)'
+      description: 'Workflow analytics from `ripp metrics --report`'
+      fields:
+        - name: 'evidence.file_count'
+          type: 'integer'
+          required: true
+          description: 'Number of files in evidence pack'
+        - name: 'evidence.total_size'
+          type: 'integer'
+          required: true
+          description: 'Total bytes of tracked files'
+        - name: 'evidence.coverage_percent'
+          type: 'number'
+          required: true
+          description: 'Percentage of git-tracked files included in evidence (0-100)'
+        - name: 'discovery.candidate_count'
+          type: 'integer'
+          required: false
+          description: 'Number of AI-discovered candidates (if discovery ran)'
+        - name: 'discovery.avg_confidence'
+          type: 'number'
+          required: false
+          description: 'Average confidence score (0.0-1.0) of candidates'
+        - name: 'validation.status'
+          type: 'string'
+          required: false
+          description: '"pass" or "fail" (if validation ran)'
+        - name: 'workflow.completion_percent'
+          type: 'number'
+          required: true
+          description: 'Overall workflow completion (0-100, based on artifact presence)'
+
+api_contracts:
+  - endpoint: 'ripp validate <file>'
+    method: 'GET'
+    purpose: 'Validate RIPP packet(s) against schema, check level requirements'
+    response:
+      success:
+        status: 200
+        content_type: 'application/json'
+      errors:
+        - status: 400
+          description: 'Invalid file path or unreadable file'
+        - status: 422
+          description: 'Schema validation failed'
+
+  - endpoint: 'ripp lint <file>'
+    method: 'GET'
+    purpose: 'Lint RIPP packet(s) for style and best practices'
+    response:
+      success:
+        status: 200
+        content_type: 'application/json'
+      errors:
+        - status: 400
+          description: 'Invalid file path'
+
+  - endpoint: 'ripp evidence build'
+    method: 'POST'
+    purpose: 'Scan repository and build evidence pack'
+    response:
+      success:
+        status: 201
+        content_type: 'application/json'
+      errors:
+        - status: 500
+          description: 'Git repository not found or not accessible'
+
+  - endpoint: 'ripp discover'
+    method: 'POST'
+    purpose: 'Use AI to discover intent candidates from evidence pack'
+    response:
+      success:
+        status: 201
+        content_type: 'text/yaml'
+      errors:
+        - status: 400
+          description: 'Evidence pack not found (run ripp evidence build first)'
+        - status: 401
+          description: 'AI provider credentials not configured'
+        - status: 429
+          description: 'AI provider rate limit exceeded'
+        - status: 500
+          description: 'AI provider error or network failure'
+
+  - endpoint: 'ripp confirm --checklist'
+    method: 'POST'
+    purpose: 'Generate interactive checklist from candidates for human review'
+    response:
+      success:
+        status: 201
+        content_type: 'text/markdown'
+      errors:
+        - status: 400
+          description: 'Candidates file not found (run ripp discover first)'
+
+  - endpoint: 'ripp build --from-checklist'
+    method: 'POST'
+    purpose: 'Build canonical artifacts from confirmed checklist items'
+    response:
+      success:
+        status: 201
+        content_type: 'text/yaml'
+      errors:
+        - status: 400
+          description: 'Checklist not found or no items checked'
+        - status: 422
+          description: 'Malformed YAML in checklist blocks'
+
+  - endpoint: 'ripp metrics'
+    method: 'GET'
+    purpose: 'Display workflow analytics and health metrics'
+    response:
+      success:
+        status: 200
+        content_type: 'text/plain'
+      errors:
+        - status: 404
+          description: 'RIPP directory not initialized (run ripp init first)'
+
+permissions:
+  - action: 'Read filesystem (repository files, .ripp directory)'
+    required_roles: ['developer', 'ci-system']
+    resource_scope: 'Repository root and .ripp/ directory'
+    description: 'Required for evidence scanning, validation, and artifact generation'
+
+  - action: 'Write filesystem (.ripp directory)'
+    required_roles: ['developer', 'ci-system']
+    resource_scope: '.ripp/ directory only'
+    description: 'Required for creating artifacts (evidence, candidates, checklist, handoff files)'
+
+  - action: 'Execute git commands'
+    required_roles: ['developer', 'ci-system']
+    resource_scope: 'Repository root'
+    description: 'Required for evidence scanning (git ls-files), determining repository URL'
+
+  - action: 'Network access to AI providers'
+    required_roles: ['developer']
+    resource_scope: 'OpenAI/Azure/GitHub Copilot APIs'
+    description: 'Optional, required only for `ripp discover` command if using external AI'
+
+  - action: 'Access environment variables'
+    required_roles: ['developer', 'ci-system']
+    resource_scope: 'OPENAI_API_KEY, AZURE_OPENAI_API_KEY, GITHUB_TOKEN'
+    description: 'Required for AI discovery if using OpenAI or Azure providers'
+
+failure_modes:
+  - scenario: 'User runs `ripp build --from-checklist` but checklist file is missing'
+    impact: 'Build cannot proceed, workflow blocked'
+    handling: 'CLI exits with error code 1, displays message: "Checklist not found at .ripp/intent.checklist.md. Run `ripp confirm --checklist` first."'
+    user_message: 'Checklist not found at .ripp/intent.checklist.md. Run `ripp confirm --checklist` first.'
+
+  - scenario: 'User marks items in checklist but YAML blocks are malformed or truncated'
+    impact: 'Build fails with YAML parse error'
+    handling: 'CLI parses each checked block, collects parse errors, displays line numbers and specific syntax errors'
+    user_message: 'Failed to parse YAML in checklist at lines X-Y: [specific error]. Fix YAML syntax and retry.'
+
+  - scenario: 'VS Code extension command shows indefinite "Loading..." progress'
+    impact: 'User cannot determine if operation succeeded or failed'
+    handling: 'Extension wraps CLI calls in `vscode.window.withProgress`, ensures progress always clears on completion or error. Logs command output to dedicated "RIPP" OutputChannel.'
+    user_message: 'Progress indicator clears, notification shows success or error, OutputChannel logs full details'
+
+  - scenario: 'User runs `ripp discover` but Copilot access denied (extension not installed or not signed in)'
+    impact: 'Discovery fails, cannot generate candidates'
+    handling: 'CLI detects Copilot unavailability, suggests alternatives: configure OpenAI/Azure in config.yaml or manually create candidates file'
+    user_message: 'GitHub Copilot not available. Configure OpenAI/Azure in .ripp/config.yaml or manually create .ripp/intent.candidates.yaml.'
+
+  - scenario: 'Evidence scanning finds zero files (empty repository or all files ignored)'
+    impact: 'Evidence pack is empty, AI discovery has no context'
+    handling: 'CLI warns if file count is zero, suggests checking .gitignore and evidence.exclude patterns in config'
+    user_message: 'Warning: Evidence pack is empty (0 files). Check .gitignore and .ripp/config.yaml exclude patterns.'
+
+  - scenario: 'AI provider rate limit exceeded during discovery'
+    impact: 'Discovery fails partway through, no candidates generated'
+    handling: 'CLI catches 429 error from provider, logs detailed error, suggests retry with exponential backoff or switch provider'
+    user_message: 'AI provider rate limit exceeded. Wait a few minutes and retry, or configure a different provider in .ripp/config.yaml.'
+
+  - scenario: 'User edits checklist and removes YAML blocks, only keeps checkbox headings'
+    impact: 'Build cannot extract any candidates, no YAML to parse'
+    handling: 'CLI detects no YAML blocks in checked items, provides clear error explaining checklist structure requirements'
+    user_message: 'No YAML blocks found in checked items. Checklist must include ```yaml...``` blocks. Regenerate checklist with `ripp confirm --checklist`.'
+
+  - scenario: 'Schema validation fails for canonical packet (missing required fields for Level 2)'
+    impact: 'Packet cannot be used for handoff, does not meet RIPP standard'
+    handling: 'CLI displays detailed schema validation errors with field paths and requirements. Provides link to schema documentation.'
+    user_message: 'Validation failed: Level 2 requires api_contracts, permissions, failure_modes. See https://dylan-natter.github.io/ripp-protocol/schema.html'
+
+  - scenario: 'CLI run in non-Git repository'
+    impact: 'Evidence scanning fails, cannot detect file list'
+    handling: 'CLI checks for .git directory on init, warns if not found, suggests running `git init` first'
+    user_message: 'Not a Git repository. Run `git init` first, or use RIPP in an existing repository.'
+
+  - scenario: 'VS Code extension activates but CLI not installed or not in PATH'
+    impact: 'All commands fail, extension unusable'
+    handling: 'Extension attempts to run `ripp --version` on activation, displays error notification if CLI not found, provides install instructions'
+    user_message: 'RIPP CLI not found. Install with `npm install -g ripp-cli` or ensure it is in your PATH. See https://dylan-natter.github.io/ripp-protocol/getting-started.html'
+
+  - scenario: 'User runs `ripp metrics` before any workflow steps completed'
+    impact: 'Metrics show 0% completion, no useful data'
+    handling: 'CLI displays metrics with "N/A" for missing artifacts, explains which steps are incomplete'
+    user_message: 'Metrics available but workflow incomplete. Run `ripp evidence build` to begin.'
+
+success_criteria:
+  - metric: 'CLI test coverage'
+    target: '>80% for new modules (metrics, doctor, checklist-parser)'
+    how_to_measure: 'Run `npm test --coverage` in tools/ripp-cli directory'
+    current: 'Checklist parser: ~85%, other modules: TBD'
+
+  - metric: 'Average candidate confidence (AI discovery quality)'
+    target: '>0.7 (70%) for evidence-based discovery'
+    how_to_measure: 'Parse candidates.yaml metadata.avg_confidence after `ripp discover`'
+    current: 'Varies by repository complexity, typically 0.65-0.85'
+
+  - metric: 'Validation pass rate for generated packets'
+    target: '100% for canonical artifacts from `ripp build`'
+    how_to_measure: 'Run `ripp validate .ripp/*.ripp.yaml` after build'
+    current: '100% (enforced by build logic)'
+
+  - metric: 'Workflow completion rate'
+    target: '>90% of users complete init → evidence → discover → confirm → build → validate'
+    how_to_measure: 'Analyze telemetry (if implemented) or manual survey'
+    current: 'Unknown (no telemetry yet, anecdotal evidence suggests ~70%)'
+
+  - metric: 'CLI performance (metrics command)'
+    target: '<2 seconds for typical repository'
+    how_to_measure: 'Run `time ripp metrics` in test repository'
+    current: 'TBD (not yet implemented)'
+
+  - metric: 'VS Code extension command success rate'
+    target: '100% for users with CLI installed and configured'
+    how_to_measure: 'Manual testing + CI integration tests'
+    current: '~95% (progress indicator fixes improved reliability)'
+
+  - metric: 'Documentation completeness'
+    target: '100% of CLI commands and flags documented'
+    how_to_measure: 'Compare `ripp --help` output to docs/tooling.md and CLI README'
+    current: '~90% (metrics command not yet documented)'
+
+  - metric: 'Schema validation strictness'
+    target: '0 false positives (valid packets rejected), 0 false negatives (invalid packets accepted)'
+    how_to_measure: 'Run test suite with valid and invalid packet fixtures'
+    current: '100% (schema is authoritative, no known issues)'
