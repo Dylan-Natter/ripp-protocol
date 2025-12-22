@@ -23,6 +23,26 @@
           "jsonpath": "$.version"
         }
       ]
+    },
+    "tools/ripp-cli": {
+      "release-type": "node",
+      "package-name": "ripp-cli",
+      "changelog-path": "CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": false,
+      "draft": false,
+      "prerelease": false,
+      "include-component-in-tag": true,
+      "component": "ripp-cli",
+      "include-v-in-tag": true,
+      "tag-separator": "-",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "package.json",
+          "jsonpath": "$.version"
+        }
+      ]
     }
   },
   "bootstrap-sha": "b967c3b1fffd0b00b04a7cf19cb15461c56b747c",

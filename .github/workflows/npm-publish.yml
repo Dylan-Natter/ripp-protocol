@@ -1,7 +1,11 @@
 name: Publish NPM Package
 
 # This workflow publishes the RIPP CLI npm package to the npm registry.
-# It is designed to be run manually with safety controls.
+# It can be triggered automatically by release-please or manually with safety controls.
+#
+# Automatic trigger:
+# - When a GitHub Release is published with a tag matching "ripp-cli-v*"
+# - This happens when release-please PRs are merged
 #
 # Prerequisites:
 # - An npm access token with publish rights must be configured as NPM_TOKEN secret
@@ -23,6 +27,8 @@ name: Publish NPM Package
 # - Override package_path if needed (default: tools/ripp-cli)
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       package_path:
@@ -45,6 +51,11 @@ on:
         type: boolean
         default: true
 
+# Prevent concurrent publishes
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -53,6 +64,14 @@ jobs:
     name: Publish to NPM Registry
     runs-on: ubuntu-latest
     
+    # Only run if:
+    # - Auto-publish is enabled (for release events), OR
+    # - Manual workflow_dispatch
+    # - For release events, only run for ripp-cli tags
+    if: |
+      (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'ripp-cli-v') && vars.ENABLE_AUTO_PUBLISH == 'true') ||
+      github.event_name == 'workflow_dispatch'
+    
     defaults:
       run:
         working-directory: ${{ github.event.inputs.package_path || 'tools/ripp-cli' }}
@@ -60,6 +79,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -179,7 +200,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
       
       - name: Dry run publish
-        if: github.event.inputs.dry_run == 'true'
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true'
         run: |
           echo "# 🧪 Dry Run Mode" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -193,7 +214,10 @@ jobs:
           echo "**To publish for real, re-run with \`dry_run=false\`**" >> $GITHUB_STEP_SUMMARY
       
       - name: Publish to NPM
-        if: github.event.inputs.dry_run == 'false'
+        # Only publish if:
+        # - This is a release event (auto-publish), OR
+        # - Manual workflow with dry_run=false
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false')
         run: |
           # Determine access flag (public for unscoped packages)
           ACCESS_FLAG=""
@@ -211,10 +235,11 @@ jobs:
       - name: Job summary
         if: always()
         run: |
-          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}"
           TAG="${{ github.event.inputs.tag || 'latest' }}"
+          PUBLISH_STATUS="${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}"
           
-          if [ "$DRY_RUN" == "false" ]; then
+          if [ "$PUBLISH_STATUS" == "true" ]; then
             echo "# ✅ Successfully Published to NPM! 🎉" >> $GITHUB_STEP_SUMMARY
           else
             echo "# 📦 Dry Run Complete (Not Published)" >> $GITHUB_STEP_SUMMARY
@@ -234,7 +259,7 @@ jobs:
           
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ "$DRY_RUN" == "false" ]; then
+          if [ "$PUBLISH_STATUS" == "true" ]; then
             echo "**NPM URL:** https://www.npmjs.com/package/${{ steps.metadata.outputs.name }}" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "The package should be available via \`npm install ${{ steps.metadata.outputs.name }}\` within a few minutes." >> $GITHUB_STEP_SUMMARY
