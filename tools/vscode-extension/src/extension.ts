@@ -691,12 +691,17 @@ async function confirmIntent(): Promise<void> {
 
   // Handle user interaction after progress clears
   if (succeeded) {
+    const checklistPath = path.join(workspaceRoot, '.ripp', 'intent.checklist.md');
     const action = await vscode.window.showInformationMessage(
-      'Intent confirmed successfully!',
-      'Next: Build Artifacts'
+      `Checklist generated at ${path.basename(checklistPath)}. Review and mark accepted candidates with [x], then build.`,
+      'Edit Checklist',
+      'Next: Build'
     );
 
-    if (action === 'Next: Build Artifacts') {
+    if (action === 'Edit Checklist') {
+      const doc = await vscode.workspace.openTextDocument(checklistPath);
+      await vscode.window.showTextDocument(doc);
+    } else if (action === 'Next: Build') {
       await vscode.commands.executeCommand('ripp.build');
     }
   }
@@ -711,18 +716,25 @@ async function buildArtifacts(): Promise<void> {
     return;
   }
 
+  // Check if checklist exists to decide build strategy
+  const checklistPath = path.join(workspaceRoot, '.ripp', 'intent.checklist.md');
+  const checklistExists = fs.existsSync(checklistPath);
+  const buildArgs = checklistExists ? ['build', '--from-checklist'] : ['build'];
+
   let succeeded = false;
 
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: 'RIPP: Building canonical artifacts...',
+      title: checklistExists
+        ? 'RIPP: Building from checklist...'
+        : 'RIPP: Building canonical artifacts...',
       cancellable: false
     },
     async () => {
       try {
         const result = await cliRunner.execute({
-          args: ['build'],
+          args: buildArgs,
           cwd: workspaceRoot
         });
 
@@ -730,7 +742,10 @@ async function buildArtifacts(): Promise<void> {
           succeeded = true;
           workflowProvider.refresh();
         } else {
-          vscode.window.showErrorMessage('Build failed. Check output for details.');
+          const errorMessage = checklistExists
+            ? 'Build from checklist failed. Check output for details.'
+            : 'Build failed. Check output for details.';
+          vscode.window.showErrorMessage(errorMessage);
         }
       } catch (error: any) {
         if (error.code === 'CLI_NOT_FOUND') {
