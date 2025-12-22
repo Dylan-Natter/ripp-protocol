@@ -225,7 +225,7 @@ Yes! You can switch between modes anytime using `RIPP: Configure AI Mode`.
 - [VS Code Language Model API](https://code.visualstudio.com/api/extension-guides/language-model)
 - [GitHub Copilot Documentation](https://docs.github.com/en/copilot)
 - [RIPP Intent Discovery Workflow](https://dylan-natter.github.io/ripp-protocol/docs/INTENT-DISCOVERY-MODE)
-- [RIPP VS Code Extension README](../tools/vscode-extension/README.md)
+- [RIPP VS Code Extension README](../../tools/vscode-extension/README.md)
 
 ## Support
 
