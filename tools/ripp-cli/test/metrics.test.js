@@ -26,7 +26,10 @@ function runTests() {
   const metrics1 = gatherMetrics('/tmp/nonexistent/.ripp');
   assert(metrics1.evidence.status === 'not_built', 'Evidence status should be not_built');
   assert(metrics1.discovery.status === 'not_run', 'Discovery status should be not_run');
-  assert(metrics1.validation.status === 'not_validated', 'Validation status should be not_validated');
+  assert(
+    metrics1.validation.status === 'not_validated',
+    'Validation status should be not_validated'
+  );
   assert(metrics1.workflow.completion_percent === 0, 'Workflow completion should be 0%');
   console.log('');
 
@@ -48,11 +51,11 @@ function runTests() {
   const rippDir = path.join(tmpDir, '.ripp');
   fs.mkdirSync(rippDir, { recursive: true });
   fs.writeFileSync(path.join(rippDir, 'config.yaml'), 'ai:\n  enabled: true\n');
-  
+
   const metrics2 = gatherMetrics(rippDir);
   assert(metrics2.workflow.steps.initialized === true, 'Should detect initialized config');
   assert(metrics2.workflow.completion_percent === 20, 'Should be 20% complete (1/5 steps)');
-  
+
   // Cleanup
   fs.rmSync(tmpDir, { recursive: true, force: true });
   console.log('');
@@ -65,7 +68,10 @@ function runTests() {
   assert(typeof metrics3.discovery === 'object', 'Should have discovery object');
   assert(typeof metrics3.validation === 'object', 'Should have validation object');
   assert(typeof metrics3.workflow === 'object', 'Should have workflow object');
-  assert(typeof metrics3.workflow.completion_percent === 'number', 'Completion percent should be number');
+  assert(
+    typeof metrics3.workflow.completion_percent === 'number',
+    'Completion percent should be number'
+  );
   console.log('');
 
   // Summary

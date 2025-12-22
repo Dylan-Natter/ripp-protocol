@@ -17,7 +17,13 @@ const { discoverIntent } = require('./lib/discovery');
 const { confirmIntent } = require('./lib/confirmation');
 const { buildCanonicalArtifacts } = require('./lib/build');
 const { migrateDirectoryStructure } = require('./lib/migrate');
-const { gatherMetrics, formatMetricsText, loadMetricsHistory, saveMetricsHistory, formatMetricsHistory } = require('./lib/metrics');
+const {
+  gatherMetrics,
+  formatMetricsText,
+  loadMetricsHistory,
+  saveMetricsHistory,
+  formatMetricsHistory
+} = require('./lib/metrics');
 
 // ANSI color codes
 const colors = {
@@ -1423,10 +1429,10 @@ async function handleMetricsCommand(args) {
     if (options.report) {
       const reportPath = path.join(rippDir, 'metrics.json');
       fs.writeFileSync(reportPath, JSON.stringify(metrics, null, 2), 'utf8');
-      
+
       // Save to history
       saveMetricsHistory(rippDir, metrics);
-      
+
       console.log('');
       log(colors.green, '✓', `Metrics report saved to ${reportPath}`);
       console.log('');

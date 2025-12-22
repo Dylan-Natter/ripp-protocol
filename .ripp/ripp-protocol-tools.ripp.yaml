@@ -47,19 +47,19 @@ purpose:
 
 design_philosophy: |
   RIPP follows these core principles:
-  
+
   **Spec-First Approach**: Schema is the source of truth. Tooling validates against schema, 
   not the other way around. This ensures consistency and prevents ad-hoc variations.
-  
+
   **Intent Preservation**: Original design decisions and "why" rationale must survive handoffs. 
   Documentation is treated as first-class code artifact, not an afterthought.
-  
+
   **Additive-Only Evolution**: New RIPP versions add capabilities without breaking existing 
   packets. Level 1 packets remain valid forever. Tools are backward-compatible.
-  
+
   **Evidence-Based Discovery**: AI inference is grounded in actual codebase artifacts (files, 
   structure, dependencies) rather than pure speculation. Evidence pack provides context.
-  
+
   **CLI as Single Source of Truth**: VS Code extension is a thin orchestration layer that 
   delegates all operations to the CLI. This ensures consistency across environments and 
   enables CI/CD integration.

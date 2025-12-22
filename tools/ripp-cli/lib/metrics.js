@@ -5,7 +5,7 @@ const { execSync } = require('child_process');
 /**
  * Gather metrics about the RIPP workflow in the current repository.
  * Metrics are best-effort and never fabricated - if data is unavailable, it is marked as N/A.
- * 
+ *
  * @param {string} rippDir - Path to .ripp directory (default: ./.ripp)
  * @returns {object} Metrics object with evidence, discovery, validation, and workflow stats
  */
@@ -26,7 +26,7 @@ function gatherMetrics(rippDir = './.ripp') {
  */
 function gatherEvidenceMetrics(rippDir) {
   const evidenceIndexPath = path.join(rippDir, 'evidence', 'evidence.index.json');
-  
+
   if (!fs.existsSync(evidenceIndexPath)) {
     return {
       status: 'not_built',
@@ -44,12 +44,15 @@ function gatherEvidenceMetrics(rippDir) {
     // Calculate coverage: evidence files vs total git-tracked files
     let gitFileCount = 0;
     try {
-      const gitFiles = execSync('git ls-files --exclude-standard', { 
-        encoding: 'utf8', 
+      const gitFiles = execSync('git ls-files --exclude-standard', {
+        encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'ignore'],
         cwd: path.dirname(rippDir)
       });
-      gitFileCount = gitFiles.trim().split('\n').filter(f => f.length > 0).length;
+      gitFileCount = gitFiles
+        .trim()
+        .split('\n')
+        .filter(f => f.length > 0).length;
     } catch (error) {
       // Not a git repo or git command failed, coverage unknown
       gitFileCount = fileCount; // Assume 100% if git unavailable
@@ -80,7 +83,7 @@ function gatherEvidenceMetrics(rippDir) {
  */
 function gatherDiscoveryMetrics(rippDir) {
   const candidatesPath = path.join(rippDir, 'intent.candidates.yaml');
-  
+
   if (!fs.existsSync(candidatesPath)) {
     return {
       status: 'not_run',
@@ -94,23 +97,24 @@ function gatherDiscoveryMetrics(rippDir) {
     const candidates = yaml.load(candidatesContent);
 
     const candidateCount = candidates.candidates?.length || 0;
-    
+
     // Calculate average confidence if available
     let avgConfidence = null;
     if (candidates.candidates && candidateCount > 0) {
       const confidences = candidates.candidates
         .map(c => c.confidence)
         .filter(conf => typeof conf === 'number' && conf >= 0 && conf <= 1);
-      
+
       if (confidences.length > 0) {
         avgConfidence = confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
       }
     }
 
     // Quality score (simple heuristic: avg confidence * candidate count normalization)
-    const qualityScore = avgConfidence !== null 
-      ? Math.round(avgConfidence * Math.min(candidateCount / 3, 1) * 100) 
-      : null;
+    const qualityScore =
+      avgConfidence !== null
+        ? Math.round(avgConfidence * Math.min(candidateCount / 3, 1) * 100)
+        : null;
 
     return {
       status: 'completed',
@@ -134,7 +138,7 @@ function gatherDiscoveryMetrics(rippDir) {
 function gatherValidationMetrics(rippDir) {
   // Look for canonical handoff packet
   const handoffPath = path.join(rippDir, 'handoff.ripp.yaml');
-  
+
   if (!fs.existsSync(handoffPath)) {
     return {
       status: 'not_validated',
@@ -198,7 +202,7 @@ function gatherWorkflowMetrics(rippDir) {
  */
 function formatMetricsText(metrics) {
   const lines = [];
-  
+
   lines.push('RIPP Workflow Metrics');
   lines.push('='.repeat(60));
   lines.push('');
@@ -260,9 +264,13 @@ function formatMetricsText(metrics) {
 
   // Workflow completion
   lines.push('Workflow Progress:');
-  lines.push(`  Completion: ${metrics.workflow.completion_percent}% (${metrics.workflow.steps_completed}/${metrics.workflow.steps_total} steps)`);
+  lines.push(
+    `  Completion: ${metrics.workflow.completion_percent}% (${metrics.workflow.steps_completed}/${metrics.workflow.steps_total} steps)`
+  );
   lines.push(`  Steps:`);
-  lines.push(`    ${metrics.workflow.steps.initialized ? '✓' : '✗'} Initialized (.ripp/config.yaml)`);
+  lines.push(
+    `    ${metrics.workflow.steps.initialized ? '✓' : '✗'} Initialized (.ripp/config.yaml)`
+  );
   lines.push(`    ${metrics.workflow.steps.evidence_built ? '✓' : '✗'} Evidence Built`);
   lines.push(`    ${metrics.workflow.steps.discovery_run ? '✓' : '✗'} Discovery Run`);
   lines.push(`    ${metrics.workflow.steps.checklist_generated ? '✓' : '✗'} Checklist Generated`);
@@ -304,7 +312,7 @@ function formatTimestamp(timestamp) {
  */
 function loadMetricsHistory(rippDir) {
   const historyPath = path.join(rippDir, 'metrics-history.json');
-  
+
   if (!fs.existsSync(historyPath)) {
     return [];
   }
@@ -323,10 +331,10 @@ function loadMetricsHistory(rippDir) {
  */
 function saveMetricsHistory(rippDir, metrics) {
   const historyPath = path.join(rippDir, 'metrics-history.json');
-  
+
   try {
     const history = loadMetricsHistory(rippDir);
-    
+
     // Add current metrics to history (keep last 50 entries)
     history.push({
       timestamp: metrics.timestamp,
@@ -337,7 +345,7 @@ function saveMetricsHistory(rippDir, metrics) {
     });
 
     const trimmedHistory = history.slice(-50);
-    
+
     fs.writeFileSync(historyPath, JSON.stringify(trimmedHistory, null, 2), 'utf8');
   } catch (error) {
     console.error(`Warning: Could not save metrics history: ${error.message}`);
@@ -359,10 +367,10 @@ function formatMetricsHistory(history) {
 
   // Show trends for key metrics
   const recent = history.slice(-10); // Last 10 entries
-  
+
   lines.push('Recent Trends (last 10 runs):');
   lines.push('');
-  
+
   // Evidence coverage trend
   lines.push('Evidence Coverage:');
   recent.forEach((entry, idx) => {
