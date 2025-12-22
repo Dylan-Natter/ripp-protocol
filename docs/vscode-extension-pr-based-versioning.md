@@ -1,6 +1,6 @@
 # VS Code Extension Versioning - Historical Implementation Notes
 
-> **Note:** This document contains historical implementation details. For current versioning information, see **[/docs/VERSIONING.md](/docs/VERSIONING.md)**.
+> **Note:** This document contains historical implementation details. For current versioning information, see **[VERSIONING.md]({{ '/VERSIONING' | relative_url }})**.
 
 ---
 
@@ -8,7 +8,7 @@
 
 This document describes the implementation of PR-based auto-versioning for the VS Code extension using release-please. This approach provides production-grade release automation while respecting branch protection rules.
 
-**Current Documentation:** See [/docs/VERSIONING.md](/docs/VERSIONING.md) for the complete versioning strategy.
+**Current Documentation:** See [VERSIONING.md]({{ '/VERSIONING' | relative_url }}) for the complete versioning strategy.
 
 ---
 
@@ -32,7 +32,7 @@ The previous approach had two issues:
 
 The approach uses [release-please](https://github.com/googleapis/release-please) to automate versioning through Pull Requests.
 
-For complete details, see [/docs/VERSIONING.md](/docs/VERSIONING.md).
+For complete details, see [VERSIONING.md]({{ '/VERSIONING' | relative_url }}).
 │ Release PR │
 │ - Version bump │
 │ - CHANGELOG update │
