@@ -235,7 +235,7 @@ jobs:
       - name: Job summary
         if: always()
         run: |
-          DRY_RUN="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}"
+          DRY_RUN="${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run) || 'false' }}"
           TAG="${{ github.event.inputs.tag || 'latest' }}"
           PUBLISH_STATUS="${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}"
           
