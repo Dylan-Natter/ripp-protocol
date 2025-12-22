@@ -13,7 +13,6 @@ Exit codes:
     1: One or more broken links found
 """
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -199,7 +198,7 @@ def check_links(root_dir: str = '.') -> List[Dict]:
                 errors.append({
                     'file': str(md_file),
                     'link': link,
-                    'expected': 'UNSAFE PATH (outside repository)',
+                    'expected': f'UNSAFE: Path resolves outside repository boundaries. Link attempts to access files outside {REPO_ROOT}. Use relative paths that stay within the repository.',
                     'type': 'security'
                 })
                 continue
@@ -237,11 +236,11 @@ def main():
         print("  - Verify relative path depth (../ for parent directory)")
         print("  - Wiki-style links should not include .md extension")
         print("  - Use liquid template syntax for Jekyll links: {{ '/path' | relative_url }}")
+        print("  - Security errors indicate paths outside the repository")
         
         return 1
     else:
         print("✅ All internal links are valid!")
-        print(f"   Checked markdown files in: docs/, tools/, examples/, *.md")
         return 0
 
 
