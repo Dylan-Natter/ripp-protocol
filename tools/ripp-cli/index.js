@@ -17,6 +17,7 @@ const { discoverIntent } = require('./lib/discovery');
 const { confirmIntent } = require('./lib/confirmation');
 const { buildCanonicalArtifacts } = require('./lib/build');
 const { migrateDirectoryStructure } = require('./lib/migrate');
+const { gatherMetrics, formatMetricsText, loadMetricsHistory, saveMetricsHistory, formatMetricsHistory } = require('./lib/metrics');
 
 // ANSI color codes
 const colors = {
@@ -277,6 +278,7 @@ ${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
   ripp discover                     Infer candidate intent (requires AI enabled)
   ripp confirm                      Confirm candidate intent (interactive)
   ripp build                        Build canonical RIPP artifacts from confirmed intent
+  ripp metrics                      Display workflow analytics and health metrics
 
   ripp --help                       Show this help message
   ripp --version                    Show version
@@ -305,6 +307,10 @@ ${colors.green}Build Options:${colors.reset}
   --title <title>                   Title for generated RIPP packet
   --output-name <file>              Output file name (default: handoff.ripp.yaml)
   --user <id>                       User identifier for confirmation tracking
+
+${colors.green}Metrics Options:${colors.reset}
+  --report                          Write metrics to .ripp/metrics.json
+  --history                         Show metrics trends from previous runs
 
 ${colors.green}Validate Options:${colors.reset}
   --min-level <1|2|3>               Enforce minimum RIPP level
@@ -570,6 +576,8 @@ async function main() {
     await handleConfirmCommand(args);
   } else if (command === 'build') {
     await handleBuildCommand(args);
+  } else if (command === 'metrics') {
+    await handleMetricsCommand(args);
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
@@ -1376,6 +1384,57 @@ async function handleBuildCommand(args) {
       console.log('  4. Run "ripp confirm --checklist" to regenerate checklist');
     }
     console.log('');
+    process.exit(1);
+  }
+}
+
+async function handleMetricsCommand(args) {
+  const cwd = process.cwd();
+  const rippDir = path.join(cwd, '.ripp');
+
+  // Parse options
+  const options = {
+    report: args.includes('--report'),
+    history: args.includes('--history')
+  };
+
+  // Check if .ripp directory exists
+  if (!fs.existsSync(rippDir)) {
+    console.error(`${colors.red}Error: RIPP directory not found${colors.reset}`);
+    console.error('Run "ripp init" to initialize RIPP in this repository');
+    process.exit(1);
+  }
+
+  try {
+    if (options.history) {
+      // Show metrics history
+      const history = loadMetricsHistory(rippDir);
+      console.log(formatMetricsHistory(history));
+      process.exit(0);
+    }
+
+    // Gather current metrics
+    const metrics = gatherMetrics(rippDir);
+
+    // Display metrics
+    console.log(formatMetricsText(metrics));
+
+    // Write report if requested
+    if (options.report) {
+      const reportPath = path.join(rippDir, 'metrics.json');
+      fs.writeFileSync(reportPath, JSON.stringify(metrics, null, 2), 'utf8');
+      
+      // Save to history
+      saveMetricsHistory(rippDir, metrics);
+      
+      console.log('');
+      log(colors.green, '✓', `Metrics report saved to ${reportPath}`);
+      console.log('');
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
     process.exit(1);
   }
 }
