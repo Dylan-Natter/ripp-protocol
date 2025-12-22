@@ -235,9 +235,21 @@ jobs:
       - name: Job summary
         if: always()
         run: |
-          DRY_RUN="${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run) || 'false' }}"
+          # Determine if this was a dry run
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            DRY_RUN="true"
+          else
+            DRY_RUN="false"
+          fi
+          
           TAG="${{ github.event.inputs.tag || 'latest' }}"
-          PUBLISH_STATUS="${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false') }}"
+          
+          # Determine if package was actually published
+          if [ "${{ github.event_name }}" == "release" ] || ([ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ github.event.inputs.dry_run }}" == "false" ]); then
+            PUBLISH_STATUS="true"
+          else
+            PUBLISH_STATUS="false"
+          fi
           
           if [ "$PUBLISH_STATUS" == "true" ]; then
             echo "# ✅ Successfully Published to NPM! 🎉" >> $GITHUB_STEP_SUMMARY
