@@ -548,8 +548,8 @@ Expand as you see value.
 
 ## Next Steps
 
-- **New to RIPP?** → [Getting Started](Getting-Started)
-- **Need to validate?** → [CLI Reference](CLI-Reference)
-- **Setting up CI?** → [GitHub Integration](GitHub-Integration)
-- **Questions on design?** → [Design Philosophy](Design-Philosophy)
-- **Term definitions?** → [Glossary](Glossary)
+- **New to RIPP?** → [Getting Started](Getting-Started.md)
+- **Need to validate?** → [CLI Reference](CLI-Reference.md)
+- **Setting up CI?** → [GitHub Integration](GitHub-Integration.md)
+- **Questions on design?** → [Design Philosophy](Design-Philosophy.md)
+- **Term definitions?** → [Glossary](Glossary.md)

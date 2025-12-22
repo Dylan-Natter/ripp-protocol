@@ -7,9 +7,9 @@ title: 'FAQ - Frequently Asked Questions'
 
 **Looking for category and positioning information?** See:
 
-- **[What RIPP Is and Is Not](category/WHAT-RIPP-IS-AND-IS-NOT)** — Boundaries and common misconceptions
-- **[RIPP vs Existing Paradigms](category/RIPP-VS-EXISTING-PARADIGMS)** — How RIPP relates to IaC, GitOps, Policy-as-Code
-- **[Who RIPP Is For](category/WHO-RIPP-IS-FOR)** — Ideal adopters and use cases
+- **[What RIPP Is and Is Not]({{ '/category/WHAT-RIPP-IS-AND-IS-NOT' | relative_url }})** — Boundaries and common misconceptions
+- **[RIPP vs Existing Paradigms]({{ '/category/RIPP-VS-EXISTING-PARADIGMS' | relative_url }})** — How RIPP relates to IaC, GitOps, Policy-as-Code
+- **[Who RIPP Is For]({{ '/category/WHO-RIPP-IS-FOR' | relative_url }})** — Ideal adopters and use cases
 
 ---
 
