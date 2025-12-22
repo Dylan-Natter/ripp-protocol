@@ -54,20 +54,28 @@ jobs:
       
       - name: Output release information
         if: steps.release.outputs.releases_created
+        env:
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          VERSION_MAJOR: ${{ steps.release.outputs.major }}
+          VERSION_MINOR: ${{ steps.release.outputs.minor }}
+          VERSION_PATCH: ${{ steps.release.outputs.patch }}
+          RELEASE_URL: ${{ steps.release.outputs.html_url }}
         run: |
           echo "# Release Created! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** \`${{ steps.release.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Release URL:** ${{ steps.release.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${TAG_NAME}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** ${RELEASE_URL}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The build workflow will now create the VSIX package." >> $GITHUB_STEP_SUMMARY
       
       - name: Output PR information
         if: steps.release.outputs.pr
+        env:
+          PR_NUMBER: ${{ steps.release.outputs.pr }}
         run: |
           echo "# Release PR Updated 📝" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**PR:** ${{ steps.release.outputs.pr }}" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** #${PR_NUMBER}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Review and merge the Release PR to publish a new version." >> $GITHUB_STEP_SUMMARY
