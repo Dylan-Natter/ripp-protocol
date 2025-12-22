@@ -17,7 +17,33 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
+
+
+# Get the repository root directory
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def is_path_safe(target_path: Path) -> bool:
+    """
+    Check if a resolved path is within the repository boundaries.
+    Prevents directory traversal attacks.
+    
+    Args:
+        target_path: The resolved path to check
+    
+    Returns:
+        True if path is safe (within repository), False otherwise
+    """
+    try:
+        # Resolve both paths to absolute paths
+        resolved_target = target_path.resolve()
+        resolved_root = REPO_ROOT.resolve()
+        
+        # Check if target is within repository root
+        return resolved_target == resolved_root or resolved_root in resolved_target.parents
+    except (ValueError, OSError):
+        return False
 
 
 def is_external_link(link: str) -> bool:
@@ -48,7 +74,7 @@ def is_wiki_style_link(link: str, file_path: Path) -> bool:
     )
 
 
-def resolve_target_path(link: str, file_path: Path) -> Path:
+def resolve_target_path(link: str, file_path: Path) -> Optional[Path]:
     """
     Resolve the target path for a link relative to the file it's in.
     
@@ -57,17 +83,23 @@ def resolve_target_path(link: str, file_path: Path) -> Path:
         file_path: Path to the markdown file containing the link
     
     Returns:
-        Path object for the expected target location
+        Path object for the expected target location, or None if path is unsafe
     """
     # Remove anchor from link
     clean_link = link.split('#')[0]
     
     # Handle absolute paths from docs root
     if clean_link.startswith('/'):
-        return Path('docs') / clean_link.lstrip('/')
+        target = REPO_ROOT / 'docs' / clean_link.lstrip('/')
+    else:
+        # Handle relative paths
+        target = (file_path.parent / clean_link).resolve()
     
-    # Handle relative paths
-    return (file_path.parent / clean_link).resolve()
+    # Validate path is within repository boundaries
+    if not is_path_safe(target):
+        return None
+    
+    return target
 
 
 def check_wiki_style_link(link: str, file_path: Path) -> bool:
@@ -76,6 +108,11 @@ def check_wiki_style_link(link: str, file_path: Path) -> bool:
     Wiki-style links don't include the .md extension.
     """
     target_with_ext = file_path.parent / f"{link}.md"
+    
+    # Validate path is safe
+    if not is_path_safe(target_with_ext):
+        return False
+    
     return target_with_ext.exists()
 
 
@@ -110,10 +147,13 @@ def check_links(root_dir: str = '.') -> List[Dict]:
             continue
             
         try:
-            with open(md_file, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(md_file, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
-        except Exception as e:
+        except (IOError, OSError) as e:
             print(f"Warning: Could not read {md_file}: {e}", file=sys.stderr)
+            continue
+        except UnicodeDecodeError as e:
+            print(f"Warning: Encoding error in {md_file}: {e}", file=sys.stderr)
             continue
             
         # Find all markdown links
@@ -156,6 +196,16 @@ def check_links(root_dir: str = '.') -> List[Dict]:
             
             # Resolve target path for regular links
             target = resolve_target_path(clean_link, md_file)
+            
+            # Skip if path is unsafe (outside repository)
+            if target is None:
+                errors.append({
+                    'file': str(md_file),
+                    'link': link,
+                    'expected': 'UNSAFE PATH (outside repository)',
+                    'type': 'security'
+                })
+                continue
             
             # Check if target exists (file or directory)
             if not target.exists():
