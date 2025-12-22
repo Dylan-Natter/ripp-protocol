@@ -391,6 +391,6 @@ mv ripp/intent/my-feature.ripp.yaml ripp/output/handoffs/
 
 **Learn more:**
 
-- [RIPP Specification](../../SPEC.md)
+- [RIPP Specification](../SPEC.md)
 - [Getting Started Guide]({{ '/getting-started' | relative_url }})
 - [Tooling Documentation]({{ '/tooling' | relative_url }})
