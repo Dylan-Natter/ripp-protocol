@@ -199,6 +199,13 @@ function registerUtilityCommands(context: vscode.ExtensionContext) {
     })
   );
 
+  // Show metrics
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ripp.metrics', async () => {
+      await showMetrics();
+    })
+  );
+
   // Open docs
   context.subscriptions.push(
     vscode.commands.registerCommand('ripp.openDocs', () => {
@@ -891,6 +898,92 @@ async function packageHandoff(): Promise<void> {
       }
     }
   );
+}
+
+/**
+ * Show workflow metrics
+ */
+async function showMetrics(): Promise<void> {
+  const workspaceRoot = getWorkspaceRoot();
+  if (!workspaceRoot || !checkWorkspaceTrust()) {
+    return;
+  }
+
+  // Check if .ripp directory exists
+  const rippDir = path.join(workspaceRoot, '.ripp');
+  if (!fs.existsSync(rippDir)) {
+    vscode.window.showErrorMessage('RIPP directory not found. Run "RIPP: Initialize Repository" first.');
+    return;
+  }
+
+  let metricsOutput = '';
+  let succeeded = false;
+
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: 'RIPP: Gathering metrics...',
+      cancellable: false
+    },
+    async () => {
+      try {
+        const result = await cliRunner.execute({
+          args: ['metrics', '--report'],
+          cwd: workspaceRoot
+        });
+
+        if (result.success) {
+          succeeded = true;
+          metricsOutput = result.stdout;
+          workflowProvider.refresh();
+        } else {
+          vscode.window.showErrorMessage('Metrics command failed. Check output for details.');
+        }
+      } catch (error: any) {
+        if (error.code === 'CLI_NOT_FOUND') {
+          await cliRunner.showInstallHelp();
+        } else {
+          vscode.window.showErrorMessage(`Metrics failed: ${error.message}`);
+        }
+      }
+    }
+  );
+
+  // Handle user interaction after progress clears
+  if (succeeded) {
+    // Show metrics in output channel
+    outputChannel.clear();
+    outputChannel.appendLine(metricsOutput);
+    outputChannel.show(true);
+
+    // Offer to open metrics file
+    const metricsPath = path.join(rippDir, 'metrics.json');
+    if (fs.existsSync(metricsPath)) {
+      const action = await vscode.window.showInformationMessage(
+        'Metrics gathered successfully!',
+        'View Report',
+        'View History'
+      );
+
+      if (action === 'View Report') {
+        const uri = vscode.Uri.file(metricsPath);
+        const doc = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(doc);
+      } else if (action === 'View History') {
+        // Run metrics --history
+        const historyResult = await cliRunner.execute({
+          args: ['metrics', '--history'],
+          cwd: workspaceRoot
+        });
+        
+        if (historyResult.success) {
+          outputChannel.clear();
+          outputChannel.appendLine(historyResult.stdout);
+          outputChannel.show(true);
+        }
+      }
+    }
+  }
 }
 
 // ============================================================================
