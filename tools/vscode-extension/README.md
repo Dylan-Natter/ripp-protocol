@@ -398,6 +398,113 @@ Examples:
 - [Extension Testing Guide](./docs/TESTING.md)
 - [Extension Publishing Guide](./docs/PUBLISHING.md)
 
+## Developer Setup
+
+**Prerequisites:**
+
+- Node.js 20.0.0 or higher
+- VS Code 1.85.0 or higher
+- npm or compatible package manager
+
+**Build from Source:**
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Dylan-Natter/ripp-protocol.git
+   cd ripp-protocol/tools/vscode-extension
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm ci
+   ```
+
+3. Compile TypeScript:
+
+   ```bash
+   npm run compile
+   ```
+
+4. Run linter:
+
+   ```bash
+   npm run lint
+   ```
+
+**Package Extension Locally:**
+
+1. Build VSIX file:
+
+   ```bash
+   npm run package
+   ```
+
+   This creates `ripp-protocol-<version>.vsix` in the current directory.
+
+2. Install in VS Code:
+   - Open VS Code
+   - Go to Extensions view (Ctrl+Shift+X / Cmd+Shift+X)
+   - Click "..." menu → "Install from VSIX..."
+   - Select the generated `.vsix` file
+
+**Development Workflow:**
+
+1. Open `tools/vscode-extension` folder in VS Code
+
+2. Press F5 to launch Extension Development Host
+   - This opens a new VS Code window with the extension loaded
+   - Extension runs from TypeScript source (no need to package)
+   - Changes require reloading the extension host (Ctrl+R / Cmd+R in dev window)
+
+3. Make changes to TypeScript files in `src/`
+
+4. Reload Extension Development Host to test changes
+
+5. Check console and Debug Console for errors
+
+**Common Development Tasks:**
+
+- **Watch mode**: `npm run watch` (auto-compiles on file changes)
+- **Clean build**: `rm -rf out && npm run compile`
+- **Format code**: `npm run format` (if available)
+- **Type check only**: `tsc --noEmit`
+
+**Debugging:**
+
+- Set breakpoints in VS Code source files
+- Press F5 to start debugging
+- Debug Console shows extension logs
+- Use `console.log()` or `outputChannel.appendLine()` for logging
+
+**Troubleshooting:**
+
+- **Extension not loading**: Check terminal output for compilation errors
+- **Changes not visible**: Reload Extension Development Host (Ctrl+R / Cmd+R)
+- **TypeScript errors**: Run `npm run compile` to see all errors
+- **Extension crashes**: Check Debug Console for stack traces
+
+**Testing with RIPP CLI:**
+
+The extension requires the RIPP CLI to function. During development:
+
+1. Install CLI in a test workspace:
+
+   ```bash
+   cd /path/to/test-workspace
+   npm install -D ripp-cli
+   ```
+
+2. Or link local CLI development version:
+
+   ```bash
+   cd /path/to/ripp-protocol/tools/ripp-cli
+   npm link
+   cd /path/to/test-workspace
+   npm link ripp-cli
+   ```
+
 ## Support
 
 - [GitHub Issues](https://github.com/Dylan-Natter/ripp-protocol/issues)

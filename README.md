@@ -65,6 +65,8 @@ RIPP fixes this. Write a RIPP packet first. Review it. Approve it. Then build it
 
 **[📖 Read the Intent Discovery Mode Guide →](docs/INTENT-DISCOVERY-MODE.md)**
 
+**📦 Reference Implementation:** The RIPP protocol itself is documented as a Level 2 gold-standard packet: [.ripp/ripp-protocol-tools.ripp.yaml](https://github.com/Dylan-Natter/ripp-protocol/blob/main/.ripp/ripp-protocol-tools.ripp.yaml). This serves as both documentation and proof that RIPP can describe real-world production systems. Use it as a reference when creating your own Level 2 packets.
+
 ---
 
 ## User Story vs RIPP: A Comparison
