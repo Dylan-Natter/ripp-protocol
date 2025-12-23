@@ -1,4 +1,4 @@
 {
-  "tools/vscode-extension": "0.4.2",
-  "tools/ripp-cli": "1.0.1"
+  "tools/vscode-extension": "0.5.0",
+  "tools/ripp-cli": "1.1.0"
 }
