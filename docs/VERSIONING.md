@@ -16,11 +16,13 @@ All RIPP Protocol packages follow [Semantic Versioning 2.0.0](https://semver.org
 
 The RIPP Protocol repository contains multiple deliverables that version independently:
 
-| Package               | Location                  | Current Version | Automation     |
-| --------------------- | ------------------------- | --------------- | -------------- |
-| **VS Code Extension** | `tools/vscode-extension/` | 0.4.0           | release-please |
-| **RIPP CLI**          | `tools/ripp-cli/`         | 1.0.0           | Manual         |
-| **Protocol Spec**     | `SPEC.md`, `schema/`      | 1.0             | Manual         |
+| Package               | Location                  | Current Version | Automation     | Tag Format        |
+| --------------------- | ------------------------- | --------------- | -------------- | ----------------- |
+| **VS Code Extension** | `tools/vscode-extension/` | 0.5.0           | release-please | `vX.Y.Z`          |
+| **RIPP CLI**          | `tools/ripp-cli/`         | 1.1.0           | release-please | `ripp-cli-vX.Y.Z` |
+| **Protocol Spec**     | `SPEC.md`, `schema/`      | 1.0             | Manual         | N/A               |
+
+**Fully Automated:** Both the VS Code Extension and RIPP CLI use release-please for automatic versioning and publishing. Only the Protocol Spec requires manual versioning.
 
 ---
 
@@ -115,43 +117,58 @@ The extension supports both simple and component-prefixed tags:
 
 ## RIPP CLI Versioning
 
-### Current Process: Manual
+### Automated PR-Based Versioning
 
-The RIPP CLI uses **manual versioning**:
+The RIPP CLI now uses **automated PR-based versioning** via [release-please](https://github.com/googleapis/release-please), matching the VS Code extension workflow.
 
-1. Update `tools/ripp-cli/package.json` version
-2. Update `tools/ripp-cli/README.md` if needed
-3. Create git tag: `git tag ripp-cli-v1.0.1`
-4. Push tag: `git push origin ripp-cli-v1.0.1`
-5. Trigger `npm-publish.yml` workflow manually or via tag
+**Benefits:**
 
-### Publishing to npm
+- ✅ Respects branch protection rules (no direct pushes to main)
+- ✅ Version changes are reviewable before release
+- ✅ Prevents version conflicts and race conditions
+- ✅ Automatic CHANGELOG generation
+- ✅ Clear audit trail
+- ✅ Automatic publishing to npm
 
-**Manual Publish:**
+### Release Flow
 
-```bash
-cd tools/ripp-cli
-npm version [major|minor|patch]  # Updates package.json
-npm publish                       # Publishes to npm
-```
+The CLI follows the same release flow as the VS Code extension:
 
-**Automated Publish:** Triggered by GitHub Actions workflow on tag push or manual dispatch.
+1. **Commit with Conventional Commits**: Use [conventional commit](https://www.conventionalcommits.org/) messages:
 
-### Future: Consider Automation
+   ```bash
+   feat(cli): add new command     # Minor bump (1.1.0 → 1.2.0)
+   fix(cli): resolve bug          # Patch bump (1.1.0 → 1.1.1)
+   feat(cli)!: breaking change    # Major bump (1.1.0 → 2.0.0)
+   ```
 
-The CLI could be added to `release-please-config.json` for automated versioning:
+2. **Release PR Created Automatically**: The `release-please` workflow:
+   - Analyzes commits since last release
+   - Determines next version based on conventional commits
+   - Creates/updates a "Release PR" with:
+     - Version bump in `package.json`
+     - Updated `CHANGELOG.md`
+     - Git tag
 
-```json
-{
-  "packages": {
-    "tools/ripp-cli": {
-      "release-type": "node",
-      "package-name": "ripp-cli",
-      "changelog-path": "CHANGELOG.md"
-    }
-  }
-}
-```
+3. **Review and Merge Release PR**: Verify:
+   - Version number is correct
+   - CHANGELOG accurately reflects changes
+   - No unintended changes
+
+4. **Release Published Automatically**: When Release PR is merged:
+   - GitHub Release created with tag `ripp-cli-vX.Y.Z`
+   - Tag triggers npm publish workflow
+   - Package automatically published to npm
+   - Binaries built and attached to GitHub Release
+
+### Tag Format
+
+The CLI uses **component-prefixed tags** to avoid conflicts with the VS Code extension:
+
+- **CLI tags:** `ripp-cli-v1.1.0`, `ripp-cli-v1.2.0`
+- **Extension tags:** `v0.5.0`, `v0.6.0`
+
+This allows both packages to version independently within the same repository.
 
 ---
 
@@ -183,20 +200,28 @@ JSON schemas are versioned independently:
 
 ## How to Trigger a Release
 
-### VS Code Extension
+### VS Code Extension and RIPP CLI (Automated)
 
-1. Ensure commits use conventional commit format
-2. Merge PR to `main`
-3. Wait for `release-please` to create Release PR
-4. Review and merge Release PR
-5. Release and VSIX build happen automatically
+Both packages use the **same automated release flow**:
 
-### RIPP CLI
+1. **Use conventional commits** when making changes
+2. **Merge PR to `main`** with conventional commit messages
+3. **Wait for release-please** to create/update Release PR automatically
+4. **Review and merge Release PR** to trigger publishing
+5. **Verify publication:**
+   - VS Code Extension: [Marketplace](https://marketplace.visualstudio.com/items?itemName=RIPP.ripp-protocol)
+   - RIPP CLI: [npm](https://www.npmjs.com/package/ripp-cli)
 
-1. Update version in `package.json`
-2. Update CHANGELOG (if applicable)
-3. Create and push tag: `git tag ripp-cli-v1.0.1 && git push origin ripp-cli-v1.0.1`
-4. Manually trigger `npm-publish` workflow or publish via npm
+**Important:** The `ENABLE_AUTO_PUBLISH` repository variable must be set to `true` for automatic publishing to work.
+
+### Manual Override (Emergency Only)
+
+If automatic publishing fails, manual workflows are available:
+
+- **VS Code Extension:** Actions → "Publish to VS Code Marketplace"
+- **RIPP CLI:** Actions → "Publish NPM Package"
+
+See [PUBLISHING.md](PUBLISHING.md) for detailed manual publishing instructions.
 
 ### Protocol Specification
 
@@ -211,9 +236,9 @@ JSON schemas are versioned independently:
 
 See individual CHANGELOGs:
 
-- **VS Code Extension**: `/tools/vscode-extension/CHANGELOG.md`
-- **RIPP CLI**: `/tools/ripp-cli/package.json` (version field)
-- **Protocol**: `/CHANGELOG.md` (root)
+- **VS Code Extension**: `/tools/vscode-extension/CHANGELOG.md` (auto-generated by release-please)
+- **RIPP CLI**: `/tools/ripp-cli/CHANGELOG.md` (auto-generated by release-please)
+- **Protocol**: `/CHANGELOG.md` (root, manually maintained)
 
 ---
 

@@ -283,7 +283,17 @@ RIPP uses semantic versioning:
 
 ## Package Versioning and Release Process
 
-The repository uses automated versioning for published packages (ripp-cli and VS Code extension) via [release-please](https://github.com/googleapis/release-please).
+The repository uses **fully automated versioning and publishing** for published packages (ripp-cli and VS Code extension) via [release-please](https://github.com/googleapis/release-please).
+
+### Prerequisites for Automatic Publishing
+
+For automatic publishing to work, the repository must have:
+
+- ✅ **ENABLE_AUTO_PUBLISH** variable set to `true` (in Settings → Secrets and variables → Actions → Variables)
+- ✅ **NPM_TOKEN** secret configured (for CLI publishing)
+- ✅ **VSCE_PAT** secret configured (for VS Code extension publishing)
+
+Without these, only manual publishing workflows will be available.
 
 ### How It Works
 
@@ -300,17 +310,18 @@ The repository uses automated versioning for published packages (ripp-cli and VS
      - Updated `CHANGELOG.md` with grouped changes
      - Draft release notes
 
-3. **Merging triggers releases**: When the Release PR is merged:
+3. **Merging triggers releases and publishing**: When the Release PR is merged:
    - GitHub releases are created with tags
-   - VS Code extension: Tag format `vX.Y.Z` → triggers VSIX build and marketplace publish
-   - RIPP CLI: Tag format `ripp-cli-vX.Y.Z` → triggers NPM publish
+   - VS Code extension: Tag `vX.Y.Z` → triggers VSIX build and automatic marketplace publish
+   - RIPP CLI: Tag `ripp-cli-vX.Y.Z` → triggers automatic NPM publish and binary builds
+   - macOS binaries: Built and attached to CLI releases automatically
 
 ### Package-Specific Tags
 
 To support multiple packages in the monorepo:
 
-- **VS Code Extension**: Uses simple tags like `v0.4.2`
-- **RIPP CLI**: Uses component tags like `ripp-cli-v1.0.1`
+- **VS Code Extension**: Uses simple tags like `v0.5.0`
+- **RIPP CLI**: Uses component tags like `ripp-cli-v1.1.0`
 
 This prevents tag collisions and allows independent versioning.
 
@@ -363,6 +374,15 @@ If automated publishing fails, you can publish manually:
 3. Set `publish=false` to build only (artifact uploaded)
 4. Set `publish=true` to actually publish
 
+**macOS Binaries:**
+
+1. Go to Actions → "Build and Attach Binaries to Release"
+2. Click "Run workflow"
+3. Enter the tag name (e.g., `ripp-cli-v1.1.0`)
+4. Binaries will be built and attached to the existing release
+
+See [PUBLISHING.md](docs/PUBLISHING.md) for detailed instructions.
+
 ### Checking Current Versions
 
 ```bash
@@ -381,14 +401,15 @@ cat .release-please-manifest.json
 When merging a Release PR:
 
 1. ✅ Review the changelog for accuracy
-2. ✅ Verify version bumps are correct
+2. ✅ Verify version bumps are correct (follow semver)
 3. ✅ Check that CI checks pass
 4. ✅ Merge the Release PR
-5. ✅ Verify GitHub releases are created
-6. ✅ Monitor downstream publish workflows
+5. ✅ Verify GitHub releases are created automatically
+6. ✅ Monitor downstream publish workflows (should complete in 5-10 minutes)
 7. ✅ Verify packages are available:
    - NPM: https://www.npmjs.com/package/ripp-cli
    - VS Code Marketplace: Search for "RIPP Protocol"
+   - GitHub Releases: https://github.com/Dylan-Natter/ripp-protocol/releases
 
 ### Troubleshooting Releases
 
@@ -410,6 +431,14 @@ When merging a Release PR:
 - This means the version wasn't bumped in the Release PR
 - Ensure at least one `feat:` or `fix:` commit was included
 - Check that `.release-please-manifest.json` reflects latest published version
+
+**Binaries missing from release?**
+
+- Check "Build and Attach Binaries to Release" workflow logs
+- Manually trigger the workflow with the release tag if it failed
+- Verify macOS runners are available in GitHub Actions
+
+For more troubleshooting, see [PUBLISHING.md](docs/PUBLISHING.md#troubleshooting).
 
 ## Questions?
 

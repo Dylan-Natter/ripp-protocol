@@ -1,25 +1,66 @@
 # Publishing Guide
 
-This guide explains how to publish RIPP packages and extensions using GitHub Actions workflows.
+This guide explains how to publish RIPP packages and extensions using the **fully automated** GitHub Actions publishing pipeline.
 
 ---
 
 ## Overview
 
-RIPP uses GitHub Actions workflows to automate publishing:
+RIPP uses **automated PR-based versioning and publishing** with GitHub Actions:
 
-1. **VS Code Extension** → VS Code Marketplace (`vscode-extension-publish.yml`)
-2. **RIPP CLI (npm)** → npm Registry (`npm-publish.yml`)
+1. **VS Code Extension** → VS Code Marketplace (automatic on release)
+2. **RIPP CLI (npm)** → npm Registry (automatic on release)
+3. **macOS Binaries** → GitHub Releases (automatic on release)
 
-Both workflows are **manual by default** with dry-run safety controls to prevent accidental publishes.
+**Key Principle:** Developers only merge conventional commit PRs to `main`. Everything else happens automatically through release-please and downstream workflows.
+
+---
+
+## How Automatic Publishing Works
+
+### The Complete Flow
+
+1. **Developer**: Merges PR with conventional commits to `main`
+2. **release-please**: Creates/updates Release PR with version bumps and CHANGELOG
+3. **Maintainer**: Reviews and merges Release PR
+4. **Automation**:
+   - Creates GitHub Releases with appropriate tags
+   - Triggers publishing workflows for each package
+   - Publishes to npm and VS Code Marketplace
+   - Attaches binaries to releases
+
+**No manual intervention required** beyond merging the Release PR.
+
+### Package-Specific Tags
+
+To support multiple packages in the monorepo:
+
+- **VS Code Extension**: `vX.Y.Z` (e.g., `v0.5.0`)
+- **RIPP CLI**: `ripp-cli-vX.Y.Z` (e.g., `ripp-cli-v1.1.0`)
+
+Tags trigger the correct downstream workflows automatically.
 
 ---
 
 ## Prerequisites
 
+### Required Repository Variable
+
+**ENABLE_AUTO_PUBLISH** must be set to `true` to enable automatic publishing.
+
+**How to set:**
+
+1. Go to repository **Settings** → **Secrets and variables** → **Actions** → **Variables** tab
+2. Click **New repository variable**
+3. Name: `ENABLE_AUTO_PUBLISH`
+4. Value: `true`
+5. Click **Add variable**
+
+**Purpose:** Acts as a safety gate to prevent accidental auto-publishing. When set to `false` or unset, only manual workflow triggers will publish packages.
+
 ### Required Secrets
 
-Both workflows require secrets to be configured in the GitHub repository:
+Both publishing workflows require secrets to be configured in the GitHub repository:
 
 #### 1. VSCE_PAT (VS Code Extension Publishing)
 
@@ -59,9 +100,15 @@ Both workflows require secrets to be configured in the GitHub repository:
 
 1. Log in to [npmjs.com](https://www.npmjs.com)
 2. Click your profile icon → **Access Tokens**
-3. Click **Generate New Token** → **Classic Token**
-4. Select **Automation** token type (recommended for CI/CD)
+3. Click **Generate New Token** → **Granular Access Token** (recommended)
+4. Configure:
+   - **Name:** `RIPP CLI Publishing Token` (or similar)
+   - **Expiration:** Choose appropriate duration (e.g., 1 year)
+   - **Packages and scopes:** Select `ripp-cli` with **Read and write** permissions
+   - **2FA requirement:** Enable "Bypass 2FA requirement" (required for CI/CD)
 5. Copy the token (starts with `npm_...`)
+
+**Important:** The token MUST have "Bypass 2FA" enabled for automated publishing to work. Standard tokens may fail with E403 if 2FA is enabled on your npm account.
 
 **How to add to GitHub:**
 
@@ -73,27 +120,121 @@ Both workflows require secrets to be configured in the GitHub repository:
 
 **Security notes:**
 
-- Use "Automation" tokens for CI/CD (never "Publish" tokens which are more privileged)
+- Use "Granular Access Tokens" with specific package scope when possible
+- Enable "Bypass 2FA" for automated publishing
 - Never commit it to source code
 - Revoke and regenerate if compromised
-- Consider using granular access tokens (if available) to limit scope to specific packages
+- Rotate tokens annually or as needed
 
 ---
 
-## Publishing the VS Code Extension
+## Automated Publishing (Primary Method)
 
-### Workflow: `vscode-extension-publish.yml`
+### Prerequisites Checklist
+
+Before automatic publishing can work:
+
+- ✅ `ENABLE_AUTO_PUBLISH` variable set to `true`
+- ✅ `NPM_TOKEN` secret configured (for CLI publishing)
+- ✅ `VSCE_PAT` secret configured (for VS Code extension publishing)
+- ✅ All commits use conventional commit format
+- ✅ Branch protection rules enforced on `main`
+
+### Publishing a New Version
+
+**Step 1: Make Changes with Conventional Commits**
+
+Use conventional commit messages to drive versioning:
+
+```bash
+# Minor version bump (new feature)
+git commit -m "feat(cli): add --json output format"
+
+# Patch version bump (bug fix)
+git commit -m "fix(extension): resolve validation error display"
+
+# Major version bump (breaking change)
+git commit -m "feat(cli)!: redesign command interface"
+```
+
+**Step 2: Merge to Main**
+
+Once your PR is reviewed and approved, merge it to `main`. The release-please workflow will automatically run.
+
+**Step 3: Wait for Release PR**
+
+Within minutes, release-please will:
+
+- Analyze all commits since last release
+- Determine version bumps for affected packages
+- Create or update a "Release PR" with:
+  - Version bumps in `package.json`
+  - Updated `CHANGELOG.md`
+  - Git tags
+
+**Step 4: Review and Merge Release PR**
+
+Review the Release PR to verify:
+
+- Version numbers are correct
+- CHANGELOG accurately reflects changes
+- No unintended version bumps
+- All CI checks pass
+
+Then merge the Release PR.
+
+**Step 5: Automatic Publishing Happens**
+
+When the Release PR merges:
+
+1. **GitHub Releases created** with tags (e.g., `v0.5.0`, `ripp-cli-v1.1.0`)
+2. **VS Code Extension** (if applicable):
+   - `vscode-extension-publish.yml` triggered by `vX.Y.Z` tag
+   - Extension built, packaged, and published to Marketplace
+   - VSIX uploaded as artifact
+3. **RIPP CLI** (if applicable):
+   - `npm-publish.yml` triggered by `ripp-cli-vX.Y.Z` tag
+   - Package built, tested, and published to npm
+4. **macOS Binaries** (if applicable):
+   - `build-binaries.yml` triggered by `ripp-cli-vX.Y.Z` tag
+   - Binaries built and attached to GitHub Release
+
+All workflows run in parallel and complete within 5-10 minutes.
+
+**Step 6: Verify Publication**
+
+Check that packages are available:
+
+- **npm**: https://www.npmjs.com/package/ripp-cli
+- **VS Code Marketplace**: https://marketplace.visualstudio.com/items?itemName=RIPP.ripp-protocol
+- **GitHub Releases**: https://github.com/Dylan-Natter/ripp-protocol/releases
+
+---
+
+## Manual Publishing (Emergency Override)
+
+If automatic publishing fails or you need to publish without going through release-please, use the manual workflows.
+
+### Manual VS Code Extension Publishing
+
+**Only use manual publishing if:**
+
+- Automatic publishing failed and you need to retry
+- You need to publish a hotfix without going through release-please
+- Testing the publishing workflow itself
+
+#### Workflow: `vscode-extension-publish.yml`
 
 **Location:** `.github/workflows/vscode-extension-publish.yml`
 
 **Triggers:**
 
-- **Automatic:** When a GitHub Release is published (if `ENABLE_AUTO_PUBLISH` is set)
-- **Manual:** Via workflow_dispatch (recommended)
+- **Automatic:** When a GitHub Release is published with tag `vX.Y.Z` (if `ENABLE_AUTO_PUBLISH` is `true`)
+- **Manual:** Via workflow_dispatch (always available)
 
-### Manual Publishing (Recommended)
+#### Manual Publishing Steps
 
-#### Step 1: Test the Build (Dry Run)
+##### Step 1: Test the Build (Dry Run)
 
 1. Go to **Actions** → **Publish to VS Code Marketplace**
 2. Click **Run workflow**
@@ -109,7 +250,7 @@ Both workflows require secrets to be configured in the GitHub repository:
    code --install-extension vscode-extension-0.2.2.vsix
    ```
 
-#### Step 2: Publish to Marketplace
+##### Step 2: Publish to Marketplace
 
 Once you've verified the VSIX works correctly:
 
@@ -143,19 +284,17 @@ Once you've verified the VSIX works correctly:
 - Concurrency control prevents double publishes
 - Secrets are never exposed in logs
 
-### Automatic Publishing (Optional)
-
-To enable automatic publishing when a GitHub Release is created:
-
-1. Set repository variable `ENABLE_AUTO_PUBLISH` to `true`
-2. When release-please creates a GitHub Release, the publish workflow will automatically run
-3. The VSIX will be published to the Marketplace without manual intervention
-
-**⚠️ Warning:** Only enable this if you're confident in your release process. Manual publishing is safer.
-
 ---
 
-## Publishing the RIPP CLI (npm)
+### Manual RIPP CLI Publishing
+
+### Manual RIPP CLI Publishing
+
+**Only use manual publishing if:**
+
+- Automatic publishing failed and you need to retry
+- You need to publish a hotfix without going through release-please
+- Testing the publishing workflow itself
 
 ### Workflow: `npm-publish.yml`
 
@@ -163,21 +302,23 @@ To enable automatic publishing when a GitHub Release is created:
 
 **Triggers:**
 
-- **Manual only:** Via workflow_dispatch
+- **Automatic:** When a GitHub Release is published with tag `ripp-cli-vX.Y.Z` (if `ENABLE_AUTO_PUBLISH` is `true`)
+- **Manual:** Via workflow_dispatch (always available)
 
-### Publishing Steps
+### Publishing Steps (Manual Override Only)
 
-#### Step 1: Bump the Version
+**⚠️ Note:** These steps are only needed if automatic publishing failed. Under normal circumstances, publishing happens automatically when the Release PR is merged.
 
-Before publishing, update the version in `tools/ripp-cli/package.json`:
+#### Step 1: Verify Version is Tagged
+
+Ensure the version you want to publish has been tagged by release-please:
 
 ```bash
-cd tools/ripp-cli
-npm version patch  # or minor, major, prerelease
-git add package.json package-lock.json
-git commit -m "chore(cli): bump version to X.Y.Z"
-git push
+git fetch --tags
+git tag -l "ripp-cli-v*"
 ```
+
+If the tag doesn't exist, the Release PR may not have been merged yet.
 
 #### Step 2: Dry Run (Test)
 
@@ -233,16 +374,57 @@ Once the dry run succeeds:
 - Uses `NODE_AUTH_TOKEN` (secrets not exposed)
 - Supports custom dist-tags (`latest`, `next`, `beta`)
 
+### Automatic Publishing (Enabled by Default)
+
+Automatic publishing is **enabled by default** when `ENABLE_AUTO_PUBLISH` is set to `true`.
+
+When a GitHub Release is published with a tag matching `ripp-cli-vX.Y.Z` (e.g., `ripp-cli-v1.1.0`), the workflow:
+
+1. Automatically checks out the tagged version
+2. Installs dependencies and runs tests
+3. Publishes to npm registry
+4. Generates a summary with package URL
+
+**To disable automatic publishing:**
+
+1. Go to repository **Settings** → **Secrets and variables** → **Actions** → **Variables**
+2. Set `ENABLE_AUTO_PUBLISH` to `false` or delete the variable
+
+---
+
+### macOS Binaries Publishing
+
+Binaries are automatically built and attached to CLI releases when `ENABLE_AUTO_PUBLISH` is enabled.
+
+**Workflow:** `build-binaries.yml`
+
+**Triggers:**
+
+- **Automatic:** When a GitHub Release is published with tag `ripp-cli-vX.Y.Z` (if `ENABLE_AUTO_PUBLISH` is `true`)
+- **Manual:** Via workflow_dispatch (always available)
+
+**What it does:**
+
+1. Builds standalone binaries for macOS (ARM64 and AMD64)
+2. Creates tar.gz archives with SHA256 checksums
+3. Attaches binaries to the existing GitHub Release
+
+**Note:** This workflow does NOT create releases - it only attaches binaries to releases created by release-please.
+
+**Manual Trigger:** If binaries failed to build automatically, you can manually trigger the workflow:
+
+1. Go to **Actions** → **Build and Attach Binaries to Release**
+2. Click **Run workflow**
+3. Enter the tag name (e.g., `ripp-cli-v1.1.0`)
+4. Click **Run workflow**
+
 ---
 
 ## Release Checklist
 
-Follow this checklist before publishing:
+### Before Merging to Main
 
-### Pre-Release
-
-- [ ] **Version bump:** Update `package.json` version (for npm CLI)
-  - VS Code extension version is managed by release-please
+- [ ] **Use conventional commits:** Ensure PR uses proper commit format (`feat:`, `fix:`, `feat!:`)
 - [ ] **Run validation:**
   ```bash
   npm run test          # Run tests (root)
@@ -254,45 +436,73 @@ Follow this checklist before publishing:
   npm run ripp:lint     # Lint RIPP examples
   ripp validate examples/
   ```
-- [ ] **Build locally:**
-  - VS Code extension: `cd tools/vscode-extension && npm run compile`
-  - CLI: `cd tools/ripp-cli && npm link`
-- [ ] **Test manually:**
+- [ ] **Test locally:**
   - VS Code extension: Load in Extension Development Host
-  - CLI: Run `ripp validate`, `ripp lint`, etc.
-- [ ] **Review CHANGELOG:** Ensure all changes are documented
+  - CLI: Run `npm link` in `tools/ripp-cli` and test commands
+- [ ] **Review CHANGELOG:** Ensure commit messages accurately describe changes
 
-### Publishing (VS Code Extension)
+### Reviewing Release PR
 
-- [ ] **Dry run workflow:** Run with `publish=false`
-- [ ] **Download and test VSIX:** Install locally and verify
-- [ ] **Publish:** Re-run with `publish=true`
-- [ ] **Verify on Marketplace:** Check extension page and version
-- [ ] **Test installation:** Install from Marketplace in clean VS Code
+- [ ] **Verify version bumps:** Check that version numbers follow semver correctly
+- [ ] **Review CHANGELOG:** Ensure all changes are accurately documented
+- [ ] **Check CI status:** All checks must pass
+- [ ] **No unintended changes:** Only version numbers and CHANGELOG should change
 
-### Publishing (npm CLI)
+### After Merging Release PR
 
-- [ ] **Commit version bump:** Ensure `package.json` version is committed
-- [ ] **Dry run workflow:** Run with `dry_run=true`
-- [ ] **Review package contents:** Check the dry run output
-- [ ] **Publish:** Re-run with `dry_run=false`
-- [ ] **Verify on npm:** Check package page and version
-- [ ] **Test installation:** Install globally and verify commands work
+- [ ] **Monitor GitHub Actions:** Watch for successful completion of publish workflows
+- [ ] **Verify publications:**
+  - VS Code Extension: Check [Marketplace](https://marketplace.visualstudio.com/items?itemName=RIPP.ripp-protocol)
+  - RIPP CLI: Check [npm](https://www.npmjs.com/package/ripp-cli)
+  - Binaries: Check [GitHub Releases](https://github.com/Dylan-Natter/ripp-protocol/releases)
+- [ ] **Test installations:**
 
-### Post-Release
-
-- [ ] **Tag the release (if not auto-tagged):**
   ```bash
-  git tag -a v0.2.2 -m "Release v0.2.2"
-  git push origin v0.2.2
+  # VS Code Extension
+  # Search "RIPP Protocol" in VS Code Extensions
+
+  # CLI
+  npm install -g ripp-cli
+  ripp --version
+
+  # Homebrew (after formula update)
+  brew tap Dylan-Natter/ripp
+  brew install ripp
+  ripp --version
   ```
-- [ ] **Create GitHub Release:** If not using release-please
-- [ ] **Update documentation:** If APIs or usage changed
-- [ ] **Announce release:** Update README, social media, etc.
+
+- [ ] **Update Homebrew formula:** If CLI was released, update checksums in homebrew-ripp tap
+- [ ] **Announce release:** Update README, social media, etc. if major release
 
 ---
 
 ## Troubleshooting
+
+### Automated Publishing
+
+**Problem:** Release PR was not created after merging to main
+
+- **Solution:** Verify commits use conventional commit format (`feat:`, `fix:`, etc.)
+- **Check:** Review release-please workflow logs in GitHub Actions
+- **Tip:** Only `feat:` and `fix:` commits trigger version bumps
+
+**Problem:** Release PR was merged but no packages were published
+
+- **Solution:** Check that `ENABLE_AUTO_PUBLISH` variable is set to `true`
+- **Check:** Review publish workflow logs in GitHub Actions
+- **Verify:** Secrets `NPM_TOKEN` and `VSCE_PAT` are configured
+
+**Problem:** Only one package published, not both
+
+- **Solution:** This is expected - packages only publish when their versions change
+- **Check:** Review Release PR to see which packages had version bumps
+- **Note:** CLI and extension version independently based on which files changed
+
+**Problem:** Binaries failed to attach to release
+
+- **Solution:** Manually trigger "Build and Attach Binaries to Release" workflow
+- **Input:** Provide the tag name (e.g., `ripp-cli-v1.1.0`)
+- **Check:** Ensure macOS runner is available (GitHub Actions status)
 
 ### VS Code Extension
 
@@ -306,11 +516,12 @@ Follow this checklist before publishing:
 
 **Problem:** Version already exists on Marketplace
 
-- **Solution:** Bump the version in `tools/vscode-extension/package.json` before publishing
+- **Solution:** This shouldn't happen with release-please; check that the Release PR had the correct version bump
+- **Recovery:** Manually bump version and create a new Release PR
 
 **Problem:** VSIX package is malformed
 
-- **Solution:** Run `npm run compile` locally and test the extension before publishing
+- **Solution:** Run `npm run compile` locally in `tools/vscode-extension` and test the extension before triggering manual publish
 
 ### npm CLI
 
@@ -320,11 +531,12 @@ Follow this checklist before publishing:
 
 **Problem:** "Version X.Y.Z is already published"
 
-- **Solution:** Bump the version in `tools/ripp-cli/package.json` using `npm version`
+- **Solution:** This shouldn't happen with release-please; check that the Release PR had the correct version bump
+- **Recovery:** Manually bump version and create a new Release PR
 
 **Problem:** "Working tree is dirty"
 
-- **Solution:** Commit or stash all changes before running the publish workflow
+- **Solution:** This shouldn't happen in automated flow; check for uncommitted changes in the repository
 
 **Problem:** Tests or linter fail
 
@@ -340,15 +552,15 @@ Follow this checklist before publishing:
 
 2. **Use minimal permissions**
    - VSCE_PAT: Only Marketplace: Manage scope
-   - NPM_TOKEN: Use "Automation" token type
+   - NPM_TOKEN: Use granular tokens with package-specific scope and "Bypass 2FA" enabled
 
 3. **Rotate secrets regularly**
    - Regenerate PATs every 90 days
    - Revoke and regenerate if compromised
 
-4. **Test before publishing**
+4. **Test before publishing (when using manual workflows)**
    - Always run dry-run/build-only mode first
-   - Manually test VSIX or npm package locally
+   - Automated flow includes built-in testing
 
 5. **Review workflow runs**
    - Check logs for unexpected errors or warnings
@@ -366,7 +578,8 @@ Follow this checklist before publishing:
 - [npm Publishing Guide](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry)
 - [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 - [Release Please Documentation](https://github.com/googleapis/release-please)
-- [RIPP PR-Based Versioning Guide](vscode-extension-pr-based-versioning.md)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+- [RIPP Versioning Strategy](VERSIONING.md)
 
 ---
 
