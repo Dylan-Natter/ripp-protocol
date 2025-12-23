@@ -24,6 +24,7 @@ const {
   saveMetricsHistory,
   formatMetricsHistory
 } = require('./lib/metrics');
+const { runHealthChecks, formatHealthCheckText } = require('./lib/doctor');
 
 // ANSI color codes
 const colors = {
@@ -285,6 +286,7 @@ ${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
   ripp confirm                      Confirm candidate intent (interactive)
   ripp build                        Build canonical RIPP artifacts from confirmed intent
   ripp metrics                      Display workflow analytics and health metrics
+  ripp doctor                       Run health checks and diagnostics
 
   ripp --help                       Show this help message
   ripp --version                    Show version
@@ -584,6 +586,8 @@ async function main() {
     await handleBuildCommand(args);
   } else if (command === 'metrics') {
     await handleMetricsCommand(args);
+  } else if (command === 'doctor') {
+    handleDoctorCommand(args);
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
@@ -1441,6 +1445,28 @@ async function handleMetricsCommand(args) {
     process.exit(0);
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
+function handleDoctorCommand(args) {
+  const cwd = process.cwd();
+
+  console.log(`${colors.blue}Running RIPP health checks...${colors.reset}`);
+  console.log('');
+
+  try {
+    const results = runHealthChecks(cwd);
+    console.log(formatHealthCheckText(results));
+
+    // Exit with non-zero if there are critical failures
+    const hasCriticalFailures = Object.values(results.checks).some(
+      check => check.status === 'fail'
+    );
+
+    process.exit(hasCriticalFailures ? 1 : 0);
+  } catch (error) {
+    console.error(`${colors.red}Error running health checks: ${error.message}${colors.reset}`);
     process.exit(1);
   }
 }
