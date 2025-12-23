@@ -464,9 +464,6 @@ jobs:
         working-directory: tools/ripp-cli
         run: npm ci
       
-      - name: Install pkg
-        run: npm install -g @yao-pkg/pkg
-      
       - name: Build test binary (ARM64)
         working-directory: tools/ripp-cli
         run: |
