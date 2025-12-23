@@ -333,6 +333,7 @@ ${colors.green}Package Options:${colors.reset}
   --in <file>                       Input RIPP packet file (required)
   --out <file>                      Output file path (required)
   --format <json|yaml|md>           Output format (auto-detected from extension)
+  --single                          Generate consolidated single-file markdown
   --package-version <version>       Version string for the package (e.g., 1.0.0)
   --force                           Overwrite existing output file without versioning
   --skip-validation                 Skip validation entirely
@@ -355,6 +356,7 @@ ${colors.green}Examples:${colors.reset}
   ripp lint ripp/intent/
   ripp lint ripp/intent/ --strict
   ripp package --in feature.ripp.yaml --out handoff.md
+  ripp package --in feature.ripp.yaml --out handoff.md --single
   ripp package --in feature.ripp.yaml --out handoff.md --package-version 1.0.0
   ripp package --in feature.ripp.yaml --out handoff.md --force
   ripp package --in feature.ripp.yaml --out handoff.md --warn-on-invalid
@@ -883,7 +885,8 @@ async function handlePackageCommand(args) {
     version: null,
     force: args.includes('--force'),
     skipValidation: args.includes('--skip-validation'),
-    warnOnInvalid: args.includes('--warn-on-invalid')
+    warnOnInvalid: args.includes('--warn-on-invalid'),
+    single: args.includes('--single')
   };
 
   const inIndex = args.indexOf('--in');
@@ -1034,7 +1037,7 @@ async function handlePackageCommand(args) {
     } else if (options.format === 'yaml') {
       output = formatAsYaml(packaged);
     } else if (options.format === 'md') {
-      output = formatAsMarkdown(packaged);
+      output = formatAsMarkdown(packaged, { single: options.single });
     }
 
     // Write to output file

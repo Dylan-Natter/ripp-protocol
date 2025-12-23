@@ -150,28 +150,40 @@ function formatAsYaml(packaged, options = {}) {
 
 /**
  * Format packaged packet as Markdown
+ * @param {Object} packaged - Packaged RIPP packet
+ * @param {Object} options - Formatting options
+ * @param {boolean} options.single - Generate consolidated single-file format
  */
 function formatAsMarkdown(packaged, options = {}) {
+  const isSingle = options.single || false;
   let md = '';
 
   // Header
   md += `# ${packaged.title}\n\n`;
-  md += `**Packet ID**: \`${packaged.packet_id}\`  \n`;
-  md += `**Level**: ${packaged.level}  \n`;
-  md += `**Status**: ${packaged.status}  \n`;
-  md += `**Created**: ${packaged.created}  \n`;
-  md += `**Updated**: ${packaged.updated}  \n`;
+  
+  if (isSingle) {
+    // Consolidated single-file format (more concise, optimized for AI consumption)
+    md += `> **RIPP Handoff Document**\n`;
+    md += `> Packet ID: \`${packaged.packet_id}\` | Level: ${packaged.level} | Status: ${packaged.status}\n\n`;
+  } else {
+    // Standard format with full metadata
+    md += `**Packet ID**: \`${packaged.packet_id}\`  \n`;
+    md += `**Level**: ${packaged.level}  \n`;
+    md += `**Status**: ${packaged.status}  \n`;
+    md += `**Created**: ${packaged.created}  \n`;
+    md += `**Updated**: ${packaged.updated}  \n`;
 
-  if (packaged.version) {
-    md += `**Version**: ${packaged.version}  \n`;
+    if (packaged.version) {
+      md += `**Version**: ${packaged.version}  \n`;
+    }
+
+    md += '\n---\n\n';
+
+    // Packaging metadata (omit in single-file mode for brevity)
+    md += '## Packaging Information\n\n';
+    md += `This document was packaged by \`${packaged._meta.packaged_by}\` on ${packaged._meta.packaged_at}.\n\n`;
+    md += '---\n\n';
   }
-
-  md += '\n---\n\n';
-
-  // Packaging metadata
-  md += '## Packaging Information\n\n';
-  md += `This document was packaged by \`${packaged._meta.packaged_by}\` on ${packaged._meta.packaged_at}.\n\n`;
-  md += '---\n\n';
 
   // Purpose
   md += '## Purpose\n\n';
