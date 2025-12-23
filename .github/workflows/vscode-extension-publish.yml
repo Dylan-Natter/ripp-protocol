@@ -50,9 +50,11 @@ jobs:
     runs-on: ubuntu-latest
     
     # Only run if:
-    # - Auto-publish is enabled (for release events), OR
+    # - Auto-publish is enabled (for release events) AND tag is for VS Code extension (vX.Y.Z not ripp-cli-vX.Y.Z), OR
     # - Manual workflow_dispatch
-    if: vars.ENABLE_AUTO_PUBLISH == 'true' || github.event_name == 'workflow_dispatch'
+    if: |
+      (github.event_name == 'release' && !startsWith(github.event.release.tag_name, 'ripp-cli-v') && vars.ENABLE_AUTO_PUBLISH == 'true') ||
+      github.event_name == 'workflow_dispatch'
     
     defaults:
       run:
