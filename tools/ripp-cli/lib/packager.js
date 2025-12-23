@@ -160,7 +160,7 @@ function formatAsMarkdown(packaged, options = {}) {
 
   // Header
   md += `# ${packaged.title}\n\n`;
-  
+
   if (isSingle) {
     // Consolidated single-file format (more concise, optimized for AI consumption)
     md += `> **RIPP Handoff Document**\n`;

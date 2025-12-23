@@ -1,6 +1,6 @@
 /**
  * RIPP CLI Integration Test
- * 
+ *
  * End-to-end test of the complete RIPP workflow without external dependencies.
  * This test is offline-friendly and deterministic.
  */
@@ -79,10 +79,7 @@ try {
       path.join(fixturesPath, 'sample-code.js'),
       path.join(srcDir, 'user-service.js')
     );
-    fs.copyFileSync(
-      path.join(fixturesPath, 'sample-docs.md'),
-      path.join(testDir, 'README.md')
-    );
+    fs.copyFileSync(path.join(fixturesPath, 'sample-docs.md'), path.join(testDir, 'README.md'));
     assert(fs.existsSync(path.join(srcDir, 'user-service.js')), 'Sample code copied');
     assert(fs.existsSync(path.join(testDir, 'README.md')), 'Sample docs copied');
   }
@@ -100,8 +97,11 @@ try {
   console.log('\nStep 4: Build evidence pack');
   {
     const result = runCommand(`node ${cliPath} evidence build`, testDir);
-    assert(result.success || result.output.includes('Evidence pack built'), 'Evidence build command ran');
-    
+    assert(
+      result.success || result.output.includes('Evidence pack built'),
+      'Evidence build command ran'
+    );
+
     const evidenceIndex = path.join(testDir, '.ripp', 'evidence', 'index.yaml');
     if (fs.existsSync(evidenceIndex)) {
       assert(true, 'Evidence index created');
@@ -121,17 +121,17 @@ try {
       path.join(fixturesPath, 'candidate-1.yaml'),
       path.join(candidatesDir, 'user-management.yaml')
     );
-    assert(fs.existsSync(path.join(candidatesDir, 'user-management.yaml')), 'Candidate file created');
+    assert(
+      fs.existsSync(path.join(candidatesDir, 'user-management.yaml')),
+      'Candidate file created'
+    );
   }
 
   // Step 6: Setup checklist (simulate confirm)
   console.log('\nStep 6: Setup checklist (simulate confirm)');
   {
     const checklistPath = path.join(testDir, '.ripp', 'intent.checklist.md');
-    fs.copyFileSync(
-      path.join(fixturesPath, 'checklist.md'),
-      checklistPath
-    );
+    fs.copyFileSync(path.join(fixturesPath, 'checklist.md'), checklistPath);
     assert(fs.existsSync(checklistPath), 'Checklist file created');
   }
 
@@ -142,10 +142,10 @@ try {
       `node ${cliPath} build --from-checklist --packet-id test-feature --title "Test Feature"`,
       testDir
     );
-    
+
     if (result.success || result.output.includes('Build complete')) {
       assert(true, 'Build command succeeded');
-      
+
       // Check for output files
       const intentFile = path.join(testDir, '.ripp', 'intent.confirmed.yaml');
       if (fs.existsSync(intentFile)) {
@@ -162,7 +162,8 @@ try {
   {
     // Check if we have any RIPP files to validate
     const rippDir = path.join(testDir, '.ripp');
-    const rippFiles = fs.readdirSync(rippDir)
+    const rippFiles = fs
+      .readdirSync(rippDir)
       .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
       .filter(f => !f.includes('config'));
 
@@ -180,10 +181,7 @@ try {
   {
     const result = runCommand(`node ${cliPath} doctor`, testDir);
     // Doctor should succeed even with warnings
-    assert(
-      result.success || result.output.includes('RIPP Health Check'),
-      'Doctor command ran'
-    );
+    assert(result.success || result.output.includes('RIPP Health Check'), 'Doctor command ran');
     assert(result.output.includes('Node.js Version'), 'Doctor output includes checks');
   }
 
@@ -191,10 +189,7 @@ try {
   console.log('\nStep 10: Check metrics');
   {
     const result = runCommand(`node ${cliPath} metrics`, testDir);
-    assert(
-      result.success || result.output.includes('Workflow Analytics'),
-      'Metrics command ran'
-    );
+    assert(result.success || result.output.includes('Workflow Analytics'), 'Metrics command ran');
   }
 
   // Step 11: Verify directory structure
@@ -203,7 +198,7 @@ try {
     assert(fs.existsSync(path.join(testDir, '.ripp')), '.ripp directory exists');
     assert(fs.existsSync(path.join(testDir, '.ripp', 'config.yaml')), 'config.yaml exists');
     assert(fs.existsSync(path.join(testDir, '.ripp', 'candidates')), 'candidates directory exists');
-    
+
     const hasIntent = fs.existsSync(path.join(testDir, '.ripp', 'intent.confirmed.yaml'));
     if (hasIntent) {
       assert(true, 'intent.confirmed.yaml exists');
@@ -211,7 +206,6 @@ try {
       console.log('  ℹ intent.confirmed.yaml not created (workflow incomplete)');
     }
   }
-
 } finally {
   // Cleanup
   console.log('\nCleaning up test directory...');

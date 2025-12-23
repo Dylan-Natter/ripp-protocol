@@ -3,11 +3,13 @@
 ## User Management API
 
 ### Create User
+
 **POST /api/users**
 
 Creates a new user account.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -16,6 +18,7 @@ Creates a new user account.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "user-123",
@@ -26,11 +29,13 @@ Creates a new user account.
 ```
 
 ### Get User
+
 **GET /api/users/:id**
 
 Retrieves a user by ID.
 
 **Response:**
+
 ```json
 {
   "id": "user-123",
@@ -40,11 +45,13 @@ Retrieves a user by ID.
 ```
 
 ### Update User
+
 **PUT /api/users/:id**
 
 Updates user information.
 
 ### Delete User
+
 **DELETE /api/users/:id**
 
 Deletes a user account.

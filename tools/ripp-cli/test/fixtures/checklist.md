@@ -29,17 +29,17 @@ ux_flow:
     actor: 'API Client'
     action: 'Create new user account'
     outcome: 'User created with unique ID'
-  
+
   - step: 'Client calls GET /api/users/:id'
     actor: 'API Client'
     action: 'Retrieve user information'
     outcome: 'User data returned'
-  
+
   - step: 'Client calls PUT /api/users/:id with updates'
     actor: 'API Client'
     action: 'Update user information'
     outcome: 'User data updated'
-  
+
   - step: 'Client calls DELETE /api/users/:id'
     actor: 'API Client'
     action: 'Delete user account'
@@ -61,5 +61,6 @@ data_contracts:
 ---
 
 **After marking your selections:**
+
 1. Save this file
 2. Run `ripp build --from-checklist` to generate artifacts

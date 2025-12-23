@@ -451,7 +451,7 @@ function getGitInfo() {
       commit,
       branch
     };
-  } catch (error) {
+  } catch {
     // Not in a git repo or git not available
     return null;
   }
@@ -1452,7 +1452,7 @@ async function handleMetricsCommand(args) {
   }
 }
 
-function handleDoctorCommand(args) {
+function handleDoctorCommand() {
   const cwd = process.cwd();
 
   console.log(`${colors.blue}Running RIPP health checks...${colors.reset}`);

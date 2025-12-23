@@ -55,7 +55,7 @@ class UserService {
    */
   async updateUser(userId, updates) {
     const user = await this.getUserById(userId);
-    
+
     const updated = await this.db.update('users', userId, {
       ...updates,
       updated_at: new Date()

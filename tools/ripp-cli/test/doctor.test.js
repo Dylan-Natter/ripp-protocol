@@ -110,11 +110,7 @@ console.log('\nTest 4: RIPP with candidates');
   const rippDir = path.join(tmpDir, '.ripp');
   fs.mkdirSync(path.join(rippDir, 'candidates'), { recursive: true });
   fs.writeFileSync(path.join(rippDir, 'config.yaml'), 'rippVersion: "1.0"\n', 'utf8');
-  fs.writeFileSync(
-    path.join(rippDir, 'candidates', 'feature-1.yaml'),
-    'title: Test\n',
-    'utf8'
-  );
+  fs.writeFileSync(path.join(rippDir, 'candidates', 'feature-1.yaml'), 'title: Test\n', 'utf8');
 
   const results = runHealthChecks(tmpDir);
 
@@ -138,11 +134,7 @@ console.log('\nTest 5: Complete RIPP setup');
   fs.mkdirSync(path.join(rippDir, 'candidates'), { recursive: true });
   fs.writeFileSync(path.join(rippDir, 'config.yaml'), 'rippVersion: "1.0"\n', 'utf8');
   fs.writeFileSync(path.join(rippDir, 'evidence', 'index.yaml'), 'files: []\n', 'utf8');
-  fs.writeFileSync(
-    path.join(rippDir, 'candidates', 'feature-1.yaml'),
-    'title: Test\n',
-    'utf8'
-  );
+  fs.writeFileSync(path.join(rippDir, 'candidates', 'feature-1.yaml'), 'title: Test\n', 'utf8');
   fs.writeFileSync(path.join(rippDir, 'intent.confirmed.yaml'), 'purpose: {}\n', 'utf8');
 
   const results = runHealthChecks(tmpDir);
@@ -203,7 +195,8 @@ console.log('\nTest 8: Summary calculation');
   assert(typeof results.summary.failed === 'number', 'Failed should be a number');
   assert(typeof results.summary.healthy === 'boolean', 'Healthy should be a boolean');
   assert(
-    results.summary.total === results.summary.passed + results.summary.warnings + results.summary.failed,
+    results.summary.total ===
+      results.summary.passed + results.summary.warnings + results.summary.failed,
     'Total should equal sum of passed, warnings, and failed'
   );
 

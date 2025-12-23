@@ -219,7 +219,8 @@ function checkConfirmedIntent(cwd) {
  */
 function checkSchema() {
   try {
-    const schemaPath = path.join(__dirname, '..', '..', '..', 'schema', 'ripp-1.0.schema.json');
+    const projectRoot = path.resolve(__dirname, '../../..');
+    const schemaPath = path.join(projectRoot, 'schema', 'ripp-1.0.schema.json');
     if (fs.existsSync(schemaPath)) {
       return {
         status: 'pass',

@@ -42,6 +42,7 @@ npm link
 | `ripp confirm`  | Confirm candidate intent (human-in-loop)   | ✅ Yes (creates new file) |
 | `ripp build`    | Build canonical RIPP from confirmed intent | ✅ Yes (creates new file) |
 | `ripp metrics`  | Display workflow analytics and health      | ✅ Yes (optional report)  |
+| `ripp doctor`   | Run health checks and diagnostics          | ✅ Yes                    |
 
 ---
 
@@ -1210,6 +1211,139 @@ Workflow Completion:
 
 ---
 
+## `ripp doctor`
+
+**vNext Feature** — Run health checks and diagnostics for your RIPP setup.
+
+### Purpose
+
+Diagnoses common setup issues and provides actionable fix-it commands with documentation links. Useful for troubleshooting failed workflows or verifying environment configuration.
+
+### What It Does
+
+- ✅ Checks Node.js version (>= 20.0.0 required)
+- ✅ Verifies Git repository exists
+- ✅ Checks RIPP directory structure (`.ripp/`)
+- ✅ Validates configuration file (`config.yaml`)
+- ✅ Checks evidence pack status
+- ✅ Verifies intent candidates exist
+- ✅ Confirms intent artifact status
+- ✅ Tests RIPP schema accessibility
+- ✅ Displays CLI version
+- ✅ Provides fix-it commands for failed checks
+
+### What It Never Does
+
+- ❌ Modifies any files
+- ❌ Sends data externally
+- ❌ Requires network access
+- ❌ Includes secrets or PII in output
+
+### Usage
+
+```bash
+# Run all health checks
+ripp doctor
+```
+
+### Example Output
+
+```
+🔍 RIPP Health Check
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Node.js Version: Node.js v20.19.6
+
+✓ Git Repository: Git repository detected
+
+✓ RIPP Directory: .ripp directory exists
+
+✓ Configuration: config.yaml present
+
+⚠ Evidence Pack: Evidence pack not built
+  → Fix: Build evidence: ripp evidence build
+  → Docs: https://dylan-natter.github.io/ripp-protocol/getting-started.html#step-2-build-evidence
+
+✓ Intent Candidates: 3 candidate(s) found
+
+⚠ Confirmed Intent: Intent not confirmed
+  → Fix: Confirm intent: ripp confirm --checklist (then ripp build --from-checklist)
+  → Docs: https://dylan-natter.github.io/ripp-protocol/getting-started.html#step-4-confirm-intent
+
+✓ RIPP Schema: RIPP schema accessible
+
+✓ CLI Version: ripp-cli v1.0.1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 Next Steps:
+
+  All critical checks passed. Address warnings to improve workflow.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For more help: https://dylan-natter.github.io/ripp-protocol/getting-started.html
+```
+
+### Health Checks
+
+#### 1. Node.js Version
+
+- **Status**: ✓ Pass if >= 20.0.0, ✗ Fail otherwise
+- **Fix**: Install Node.js 20 or later from https://nodejs.org/
+
+#### 2. Git Repository
+
+- **Status**: ✓ Pass if `.git/` exists, ✗ Fail otherwise
+- **Fix**: `git init` to initialize repository
+
+#### 3. RIPP Directory
+
+- **Status**: ✓ Pass if `.ripp/` exists, ✗ Fail otherwise
+- **Fix**: `ripp init` to initialize RIPP
+
+#### 4. Configuration
+
+- **Status**: ✓ Pass if `config.yaml` exists, ⚠ Warning otherwise
+- **Fix**: `ripp init` to create default config
+
+#### 5. Evidence Pack
+
+- **Status**: ✓ Pass if evidence built, ⚠ Warning otherwise
+- **Fix**: `ripp evidence build` to scan repository
+
+#### 6. Intent Candidates
+
+- **Status**: ✓ Pass if candidates exist, ⚠ Warning otherwise
+- **Fix**: `ripp discover` (requires AI enabled)
+
+#### 7. Confirmed Intent
+
+- **Status**: ✓ Pass if intent confirmed, ⚠ Warning otherwise
+- **Fix**: `ripp confirm --checklist` then `ripp build --from-checklist`
+
+#### 8. RIPP Schema
+
+- **Status**: ✓ Pass if schema accessible, ⚠ Warning otherwise
+- **Note**: Schema loaded from repository when needed
+
+#### 9. CLI Version
+
+- **Status**: ✓ Always pass
+- **Info**: Displays installed CLI version
+
+### Use Cases
+
+- **Troubleshooting**: Identify missing setup steps or failed workflows
+- **Onboarding**: Verify new team members have correct environment
+- **CI/CD**: Pre-flight checks before running RIPP workflows
+- **Support**: Generate diagnostic output for issue reports
+
+### Exit Codes
+
+- `0` — All checks passed (or only warnings)
+- `1` — One or more critical checks failed
+
+---
+
 ## Expected Behavior in Monorepos
 
 The RIPP CLI supports monorepo structures:
@@ -1263,6 +1397,7 @@ It finds all `*.ripp.yaml` and `*.ripp.json` files in the repository.
 | `ripp confirm`  | `0`     | `1` (confirmation failed)                 |
 | `ripp build`    | `0`     | `1` (build failed, validation failed)     |
 | `ripp metrics`  | `0`     | `1` (RIPP directory not initialized)      |
+| `ripp doctor`   | `0`     | `1` (critical health checks failed)       |
 
 ---
 
