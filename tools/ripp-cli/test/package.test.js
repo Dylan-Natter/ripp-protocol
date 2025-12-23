@@ -39,6 +39,7 @@ const cliPath = path.join(__dirname, '..', 'index.js');
 const fixturesPath = path.join(__dirname, 'fixtures');
 const tmpDir = createTempDir();
 
+(async () => {
 try {
   // Create a test RIPP packet
   const testPacket = {
@@ -181,8 +182,8 @@ try {
         { encoding: 'utf8', stdio: 'pipe' }
       );
       
-      // Wait a moment
-      execSync('sleep 0.1', { stdio: 'pipe' });
+      // Wait a moment using a portable delay
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       execSync(
         `node ${cliPath} package --in ${testPacketPath} --out ${output2Path} --single`,
@@ -222,3 +223,4 @@ console.log(`Failed: ${failed}`);
 console.log('='.repeat(60));
 
 process.exit(failed > 0 ? 1 : 0);
+})();
