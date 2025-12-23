@@ -5,6 +5,19 @@ All notable changes to the RIPP CLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://github.com/Dylan-Natter/ripp-protocol/compare/ripp-cli-v1.0.1...ripp-cli-v1.1.0) (2025-12-23)
+
+
+### Features
+
+* **cli:** add metrics, doctor, and enhanced workflow commands ([b5c413d](https://github.com/Dylan-Natter/ripp-protocol/commit/b5c413d335088350527e6e9aa8cd6fa1f0debf9f))
+* **vscode:** add metrics command and enhanced workflow integration ([24a3cd0](https://github.com/Dylan-Natter/ripp-protocol/commit/24a3cd02f3657958321cc8f04ca55f487853205c))
+
+
+### Documentation
+
+* upgrade reference implementation to Level 2 ([a4b18e3](https://github.com/Dylan-Natter/ripp-protocol/commit/a4b18e320d95fbb2754d4eb07dafc8da00eef673))
+
 ## [1.0.1] - 2025-12-22
 
 ### Changed

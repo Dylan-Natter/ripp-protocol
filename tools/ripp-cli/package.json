@@ -1,6 +1,6 @@
 {
   "name": "ripp-cli",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Official CLI validator for Regenerative Intent Prompting Protocol (RIPP)",
   "main": "index.js",
   "bin": {
