@@ -892,3 +892,5 @@ MIT License. See [LICENSE](LICENSE).
 ---
 
 **Tagline**: Build fast. Ship safely. Regenerate always.
+
+<!-- Automation test: 2025-12-23 -->
