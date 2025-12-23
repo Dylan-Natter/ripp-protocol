@@ -51,7 +51,7 @@ jobs:
           manifest-file: .release-please-manifest.json
           
           # Token with permissions to create PRs and tags
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_PAT }}
       
       - name: Output release information
         if: steps.release.outputs.releases_created
