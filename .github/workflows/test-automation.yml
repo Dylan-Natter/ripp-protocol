@@ -464,9 +464,6 @@ jobs:
         working-directory: tools/ripp-cli
         run: npm ci
       
-      - name: Install pkg
-        run: npm install -g pkg
-      
       - name: Build test binary (ARM64)
         working-directory: tools/ripp-cli
         run: |
@@ -475,7 +472,7 @@ jobs:
           
           mkdir -p ../../build/binaries
           
-          pkg . \
+          npx @yao-pkg/pkg . \
             --targets node20-macos-arm64 \
             --output ../../build/binaries/ripp-darwin-arm64
           
