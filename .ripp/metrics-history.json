@@ -1,0 +1,31 @@
+[
+  {
+    "timestamp": "2025-12-22T19:15:44.570Z",
+    "evidence": {
+      "status": "not_built",
+      "file_count": 0,
+      "total_size": 0,
+      "coverage_percent": 0
+    },
+    "discovery": {
+      "status": "not_run",
+      "candidate_count": 0
+    },
+    "validation": {
+      "status": "not_validated",
+      "last_run": null
+    },
+    "workflow": {
+      "completion_percent": 20,
+      "steps_completed": 1,
+      "steps_total": 5,
+      "steps": {
+        "initialized": true,
+        "evidence_built": false,
+        "discovery_run": false,
+        "checklist_generated": false,
+        "artifacts_built": false
+      }
+    }
+  }
+]

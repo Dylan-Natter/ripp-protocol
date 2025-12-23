@@ -59,6 +59,7 @@
     "onCommand:ripp.openDocs",
     "onCommand:ripp.openCI",
     "onCommand:ripp.refreshStatus",
+    "onCommand:ripp.metrics",
     "onView:rippStatus",
     "onView:ripp.reportView",
     "onLanguage:yaml",
@@ -188,6 +189,11 @@
         "title": "RIPP: Refresh Status",
         "category": "RIPP",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "ripp.metrics",
+        "title": "RIPP: Show Metrics",
+        "category": "RIPP"
       }
     ],
     "menus": {

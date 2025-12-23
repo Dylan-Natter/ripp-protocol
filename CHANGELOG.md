@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **RIPP 2.0 Enhancements**: Gold-standard documentation, Node 20 standardization, metrics, and release automation
+- **CLI Metrics Command**: New `ripp metrics` command with `--report` and `--history` flags for workflow analytics
+  - Evidence metrics: file count, size, coverage percentage
+  - Discovery metrics: candidate count, average confidence, quality score
+  - Validation metrics: last run timestamp, pass/fail status
+  - Workflow metrics: completion percentage based on artifact presence
+  - Comprehensive test suite with 19 tests (all passing)
+- **VS Code Extension**: "RIPP: Show Metrics" command with OutputChannel display and report/history viewing
+- **Level 2 Reference Implementation**: Upgraded `.ripp/ripp-protocol-tools.ripp.yaml` to Level 2 with:
+  - Design philosophy and rationale
+  - Design decisions with alternatives considered
+  - Technical, workflow, and compatibility constraints
+  - Comprehensive data contracts for all workflow artifacts
+  - API contracts for CLI commands
+  - Permission requirements
+  - Real-world failure modes with mitigations
+  - Measurable success criteria
+- **Documentation**: 
+  - Release checklist in `docs/release/RELEASE_CHECKLIST.md`
+  - VS Code extension developer setup guide
+  - Updated `docs/examples.md` with gold-standard packet reference
+  - Updated `README.md` with prominent link to reference implementation
+- **Node 20 Standardization**: All GitHub Actions workflows now use Node 20 consistently
 - ESLint configuration for JavaScript code quality
 - Prettier configuration for code formatting
 - EditorConfig for consistent cross-editor formatting
@@ -22,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Workflow Refinements**: Improved docs-enforcement.yml path filters to exclude config files
+- **VS Code Extension**: Enhanced command registration and activation events for metrics command
 - Enhanced `CONTRIBUTING.md` with code quality and formatting guidelines
 - Updated `package.json` with proper metadata, repository URLs, and devDependencies
 - Fixed `package.json` license from ISC to MIT (matching LICENSE file)

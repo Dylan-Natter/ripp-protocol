@@ -9,6 +9,56 @@ Learn by example. These real-world RIPP packets demonstrate best practices at ea
 
 ---
 
+## Reference Implementation: RIPP Protocol Tools (Level 2)
+
+**The gold-standard reference implementation for RIPP itself.**
+
+This Level 2 packet documents the RIPP CLI and VS Code extension. It serves as both documentation and validation that RIPP can describe real-world production tooling.
+
+**Demonstrates:**
+
+- Design philosophy and rationale
+- Design decisions with alternatives considered
+- Technical, workflow, and compatibility constraints
+- Comprehensive data contracts (evidence pack, candidates, checklist, confirmed intent)
+- API contracts for CLI commands
+- Permission requirements
+- Real-world failure modes with mitigations
+- Measurable success criteria
+
+**[View: .ripp/ripp-protocol-tools.ripp.yaml →](https://github.com/Dylan-Natter/ripp-protocol/blob/main/.ripp/ripp-protocol-tools.ripp.yaml)**
+
+**Key Sections:**
+
+```yaml
+level: 2
+design_philosophy: |
+  Spec-First Approach: Schema is the source of truth...
+  Intent Preservation: Original design decisions must survive handoffs...
+  Additive-Only Evolution: New RIPP versions add capabilities without breaking...
+
+design_decisions:
+  - decision: 'Evidence-based AI discovery workflow'
+    rationale: |
+      Pure LLM speculation produces hallucinations. Grounding inference in actual 
+      repository artifacts dramatically improves accuracy.
+    alternatives_considered:
+      - 'Manual documentation only: Too slow, error-prone'
+      - 'Pure AI with no evidence: Hallucinates features that do not exist'
+
+failure_modes:
+  - scenario: 'User runs `ripp build --from-checklist` but checklist file is missing'
+    impact: 'Build cannot proceed, workflow blocked'
+    handling: 'CLI exits with error code 1, displays message...'
+    user_message: 'Checklist not found. Run `ripp confirm --checklist` first.'
+```
+
+**Why This Matters:**
+
+This packet proves RIPP can document production systems with real constraints, failure modes, and measurable success criteria. If you're creating a Level 2 packet for your own project, use this as a reference.
+
+---
+
 ## Level 3 Examples
 
 ### Item Creation Feature

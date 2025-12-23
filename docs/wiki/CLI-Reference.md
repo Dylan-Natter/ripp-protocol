@@ -41,6 +41,7 @@ npm link
 | `ripp discover` | AI-assisted intent discovery (optional)    | ✅ Yes (creates new file) |
 | `ripp confirm`  | Confirm candidate intent (human-in-loop)   | ✅ Yes (creates new file) |
 | `ripp build`    | Build canonical RIPP from confirmed intent | ✅ Yes (creates new file) |
+| `ripp metrics`  | Display workflow analytics and health      | ✅ Yes (optional report)  |
 
 ---
 
@@ -1020,6 +1021,195 @@ Given the same confirmed intent:
 
 ---
 
+## `ripp metrics`
+
+**vNext Feature** — Display workflow analytics and health metrics.
+
+### Purpose
+
+Provides visibility into RIPP workflow progress and quality metrics to help identify bottlenecks and validate completeness.
+
+### What It Does
+
+- ✅ Gathers evidence pack metrics (file count, size, coverage %)
+- ✅ Calculates discovery metrics (candidate count, confidence, quality score)
+- ✅ Checks validation status (last run, pass/fail)
+- ✅ Measures workflow completion (% of artifacts present)
+- ✅ Optionally writes metrics report to `.ripp/metrics.json`
+- ✅ Optionally shows historical trends
+
+### What It Never Does
+
+- ❌ Modifies any files (except when writing reports with `--report`)
+- ❌ Sends data externally
+- ❌ Requires network access
+- ❌ Includes secrets or PII in reports
+
+### Usage
+
+```bash
+# Display human-readable metrics summary
+ripp metrics
+
+# Write metrics report to .ripp/metrics.json
+ripp metrics --report
+
+# Show historical trends (if multiple runs)
+ripp metrics --history
+```
+
+### Options
+
+| Option      | Description                           | Default |
+| ----------- | ------------------------------------- | ------- |
+| `--report`  | Write metrics to `.ripp/metrics.json` | `false` |
+| `--history` | Show metrics trends from past runs    | `false` |
+
+### Example Output
+
+```
+RIPP Workflow Metrics
+============================================================
+
+Evidence Pack:
+  Status: ✓ Built
+  Files: 127
+  Size: 2.3 MB
+  Coverage: 85% of git-tracked files
+  Last Build: 12/22/2025, 7:15:33 PM
+
+Intent Discovery:
+  Status: ✓ Completed
+  Candidates: 5
+  Avg Confidence: 78%
+  Quality Score: 65/100
+  Model: gpt-4o
+
+Validation:
+  Status: ✓ Pass
+  Level: 2
+  Last Run: 12/22/2025, 7:20:10 PM
+
+Workflow Progress:
+  Completion: 100% (5/5 steps)
+  Steps:
+    ✓ Initialized (.ripp/config.yaml)
+    ✓ Evidence Built
+    ✓ Discovery Run
+    ✓ Checklist Generated
+    ✓ Artifacts Built
+
+============================================================
+Generated: 12/22/2025, 7:25:00 PM
+```
+
+### Metrics Tracked
+
+#### Evidence Metrics
+
+- **File Count**: Number of files in evidence pack
+- **Total Size**: Total bytes of tracked files
+- **Coverage %**: Percentage of git-tracked files included in evidence
+
+#### Discovery Metrics
+
+- **Candidate Count**: Number of AI-discovered candidates
+- **Avg Confidence**: Average confidence score (0.0-1.0)
+- **Quality Score**: Composite quality metric (0-100)
+
+#### Validation Metrics
+
+- **Status**: Pass or fail from last validation
+- **Last Run**: Timestamp of last validation
+- **Level**: RIPP level of validated packet
+
+#### Workflow Metrics
+
+- **Completion %**: Overall workflow progress (0-100)
+- **Steps Completed**: Count of completed vs total steps
+- **Step Status**: Individual status for each workflow step
+
+### Report Format
+
+When using `--report`, metrics are written to `.ripp/metrics.json`:
+
+```json
+{
+  "timestamp": "2025-12-22T19:15:44.570Z",
+  "evidence": {
+    "status": "built",
+    "file_count": 127,
+    "total_size": 2456789,
+    "coverage_percent": 85,
+    "last_build": "2025-12-22T19:10:00.000Z"
+  },
+  "discovery": {
+    "status": "completed",
+    "candidate_count": 5,
+    "avg_confidence": 0.78,
+    "quality_score": 65,
+    "model": "gpt-4o"
+  },
+  "validation": {
+    "status": "pass",
+    "last_run": "2025-12-22T19:20:10.000Z",
+    "level": 2
+  },
+  "workflow": {
+    "completion_percent": 100,
+    "steps_completed": 5,
+    "steps_total": 5,
+    "steps": {
+      "initialized": true,
+      "evidence_built": true,
+      "discovery_run": true,
+      "checklist_generated": true,
+      "artifacts_built": true
+    }
+  }
+}
+```
+
+### History Tracking
+
+With `--history`, view trends across multiple runs:
+
+```
+RIPP Metrics History
+============================================================
+
+Recent Trends (last 10 runs):
+
+Evidence Coverage:
+  12/22/2025, 7:00:00 PM    ████████████████ 80%
+  12/22/2025, 7:10:00 PM    █████████████████ 85%
+  12/22/2025, 7:15:00 PM    █████████████████ 85%
+
+Discovery Quality Score:
+  12/22/2025, 7:05:00 PM    ████████████ 60/100
+  12/22/2025, 7:12:00 PM    █████████████ 65/100
+  12/22/2025, 7:15:00 PM    █████████████ 65/100
+
+Workflow Completion:
+  12/22/2025, 7:00:00 PM    ████████ 40%
+  12/22/2025, 7:10:00 PM    ████████████████ 80%
+  12/22/2025, 7:15:00 PM    ████████████████████ 100%
+```
+
+### Use Cases
+
+- **CI/CD Integration**: Track workflow completion in automated builds
+- **Quality Monitoring**: Verify discovery confidence meets thresholds
+- **Debugging**: Identify which workflow steps failed or are incomplete
+- **Progress Tracking**: Monitor RIPP adoption across team
+
+### Exit Codes
+
+- `0` — Metrics gathered successfully
+- `1` — RIPP directory not initialized (run `ripp init` first)
+
+---
+
 ## Expected Behavior in Monorepos
 
 The RIPP CLI supports monorepo structures:
@@ -1072,6 +1262,7 @@ It finds all `*.ripp.yaml` and `*.ripp.json` files in the repository.
 | `ripp discover` | `0`     | `1` (AI not enabled, discovery failed)    |
 | `ripp confirm`  | `0`     | `1` (confirmation failed)                 |
 | `ripp build`    | `0`     | `1` (build failed, validation failed)     |
+| `ripp metrics`  | `0`     | `1` (RIPP directory not initialized)      |
 
 ---
 
