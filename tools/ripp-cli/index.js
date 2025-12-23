@@ -24,6 +24,7 @@ const {
   saveMetricsHistory,
   formatMetricsHistory
 } = require('./lib/metrics');
+const { runHealthChecks, formatHealthCheckText } = require('./lib/doctor');
 
 // ANSI color codes
 const colors = {
@@ -285,6 +286,7 @@ ${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
   ripp confirm                      Confirm candidate intent (interactive)
   ripp build                        Build canonical RIPP artifacts from confirmed intent
   ripp metrics                      Display workflow analytics and health metrics
+  ripp doctor                       Run health checks and diagnostics
 
   ripp --help                       Show this help message
   ripp --version                    Show version
@@ -331,6 +333,7 @@ ${colors.green}Package Options:${colors.reset}
   --in <file>                       Input RIPP packet file (required)
   --out <file>                      Output file path (required)
   --format <json|yaml|md>           Output format (auto-detected from extension)
+  --single                          Generate consolidated single-file markdown
   --package-version <version>       Version string for the package (e.g., 1.0.0)
   --force                           Overwrite existing output file without versioning
   --skip-validation                 Skip validation entirely
@@ -353,6 +356,7 @@ ${colors.green}Examples:${colors.reset}
   ripp lint ripp/intent/
   ripp lint ripp/intent/ --strict
   ripp package --in feature.ripp.yaml --out handoff.md
+  ripp package --in feature.ripp.yaml --out handoff.md --single
   ripp package --in feature.ripp.yaml --out handoff.md --package-version 1.0.0
   ripp package --in feature.ripp.yaml --out handoff.md --force
   ripp package --in feature.ripp.yaml --out handoff.md --warn-on-invalid
@@ -447,7 +451,7 @@ function getGitInfo() {
       commit,
       branch
     };
-  } catch (error) {
+  } catch {
     // Not in a git repo or git not available
     return null;
   }
@@ -584,6 +588,8 @@ async function main() {
     await handleBuildCommand(args);
   } else if (command === 'metrics') {
     await handleMetricsCommand(args);
+  } else if (command === 'doctor') {
+    handleDoctorCommand(args);
   } else {
     console.error(`${colors.red}Error: Unknown command '${command}'${colors.reset}`);
     console.error("Run 'ripp --help' for usage information.");
@@ -879,7 +885,8 @@ async function handlePackageCommand(args) {
     version: null,
     force: args.includes('--force'),
     skipValidation: args.includes('--skip-validation'),
-    warnOnInvalid: args.includes('--warn-on-invalid')
+    warnOnInvalid: args.includes('--warn-on-invalid'),
+    single: args.includes('--single')
   };
 
   const inIndex = args.indexOf('--in');
@@ -1030,7 +1037,7 @@ async function handlePackageCommand(args) {
     } else if (options.format === 'yaml') {
       output = formatAsYaml(packaged);
     } else if (options.format === 'md') {
-      output = formatAsMarkdown(packaged);
+      output = formatAsMarkdown(packaged, { single: options.single });
     }
 
     // Write to output file
@@ -1441,6 +1448,28 @@ async function handleMetricsCommand(args) {
     process.exit(0);
   } catch (error) {
     console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+    process.exit(1);
+  }
+}
+
+function handleDoctorCommand() {
+  const cwd = process.cwd();
+
+  console.log(`${colors.blue}Running RIPP health checks...${colors.reset}`);
+  console.log('');
+
+  try {
+    const results = runHealthChecks(cwd);
+    console.log(formatHealthCheckText(results));
+
+    // Exit with non-zero if there are critical failures
+    const hasCriticalFailures = Object.values(results.checks).some(
+      check => check.status === 'fail'
+    );
+
+    process.exit(hasCriticalFailures ? 1 : 0);
+  } catch (error) {
+    console.error(`${colors.red}Error running health checks: ${error.message}${colors.reset}`);
     process.exit(1);
   }
 }
