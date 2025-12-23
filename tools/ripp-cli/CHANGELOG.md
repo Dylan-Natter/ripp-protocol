@@ -5,6 +5,13 @@ All notable changes to the RIPP CLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://github.com/Dylan-Natter/ripp-protocol/compare/ripp-cli-v1.1.0...ripp-cli-v1.2.0) (2025-12-23)
+
+
+### Features
+
+* **cli:** enhance CLI description to include tooling capabilities ([8f97965](https://github.com/Dylan-Natter/ripp-protocol/commit/8f97965379bbb24287b8d69bb9d4e5af16bca1df))
+
 ## [1.1.0](https://github.com/Dylan-Natter/ripp-protocol/compare/ripp-cli-v1.0.1...ripp-cli-v1.1.0) (2025-12-23)
 
 

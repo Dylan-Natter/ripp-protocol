@@ -2,6 +2,13 @@
 
 All notable changes to the RIPP Protocol VS Code extension will be documented in this file.
 
+## [0.5.1](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.5.0...v0.5.1) (2025-12-23)
+
+
+### Bug Fixes
+
+* **vscode:** improve extension discoverability with enhanced metadata ([23b01ac](https://github.com/Dylan-Natter/ripp-protocol/commit/23b01ace0fc6adf8f98dd57773b3f01ed402dbf7))
+
 ## [0.5.0](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.4.2...v0.5.0) (2025-12-23)
 
 
