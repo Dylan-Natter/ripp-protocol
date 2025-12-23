@@ -60,7 +60,7 @@ jobs:
         run: npm ci
       
       - name: Install pkg (binary builder)
-        run: npm install -g pkg
+        run: npm install -g @yao-pkg/pkg
       
       - name: Create build directory
         run: mkdir -p build/binaries
@@ -68,7 +68,7 @@ jobs:
       - name: Build macOS ARM64 binary
         working-directory: tools/ripp-cli
         run: |
-          pkg . \
+          npx @yao-pkg/pkg . \
             --targets node20-macos-arm64 \
             --output ../../build/binaries/ripp-darwin-arm64
           
@@ -78,7 +78,7 @@ jobs:
       - name: Build macOS AMD64 binary
         working-directory: tools/ripp-cli
         run: |
-          pkg . \
+          npx @yao-pkg/pkg . \
             --targets node20-macos-x64 \
             --output ../../build/binaries/ripp-darwin-amd64
           
