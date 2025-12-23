@@ -7,7 +7,7 @@
     "ripp": "index.js"
   },
   "scripts": {
-    "test": "node test/checklist-parser.test.js && node test/metrics.test.js && node test/doctor.test.js"
+    "test": "node test/checklist-parser.test.js && node test/metrics.test.js && node test/doctor.test.js && node test/integration.test.js"
   },
   "keywords": [
     "ripp",
