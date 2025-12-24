@@ -188,34 +188,85 @@ function buildRippPacket(confirmed, options) {
     const section = block.section;
     const content = block.content;
 
-    switch (section) {
-      case 'purpose':
+    // Handle full-packet or purpose sections that contain multiple fields
+    if (section === 'purpose' || section === 'full-packet') {
+      // Check if content has nested sections (auto-approved full packet)
+      if (content.purpose) {
+        packet.purpose = content.purpose;
+      } else {
+        // Direct purpose content (from checklist)
         packet.purpose = content;
-        break;
-      case 'ux_flow':
-        packet.ux_flow = Array.isArray(content) ? content : [content];
-        break;
-      case 'data_contracts':
-        packet.data_contracts = content;
-        break;
-      case 'api_contracts':
-        packet.api_contracts = Array.isArray(content) ? content : [content];
-        break;
-      case 'permissions':
-        packet.permissions = Array.isArray(content) ? content : [content];
-        break;
-      case 'failure_modes':
-        packet.failure_modes = Array.isArray(content) ? content : [content];
-        break;
-      case 'audit_events':
-        packet.audit_events = Array.isArray(content) ? content : [content];
-        break;
-      case 'nfrs':
-        packet.nfrs = content;
-        break;
-      case 'acceptance_tests':
-        packet.acceptance_tests = Array.isArray(content) ? content : [content];
-        break;
+      }
+
+      if (content.ux_flow) {
+        packet.ux_flow = Array.isArray(content.ux_flow) ? content.ux_flow : [content.ux_flow];
+      }
+
+      if (content.data_contracts) {
+        packet.data_contracts = content.data_contracts;
+      }
+
+      if (content.api_contracts) {
+        packet.api_contracts = Array.isArray(content.api_contracts)
+          ? content.api_contracts
+          : [content.api_contracts];
+      }
+
+      if (content.permissions) {
+        packet.permissions = Array.isArray(content.permissions)
+          ? content.permissions
+          : [content.permissions];
+      }
+
+      if (content.failure_modes) {
+        packet.failure_modes = Array.isArray(content.failure_modes)
+          ? content.failure_modes
+          : [content.failure_modes];
+      }
+
+      if (content.audit_events) {
+        packet.audit_events = Array.isArray(content.audit_events)
+          ? content.audit_events
+          : [content.audit_events];
+      }
+
+      if (content.nfrs) {
+        packet.nfrs = content.nfrs;
+      }
+
+      if (content.acceptance_tests) {
+        packet.acceptance_tests = Array.isArray(content.acceptance_tests)
+          ? content.acceptance_tests
+          : [content.acceptance_tests];
+      }
+    } else {
+      // Individual section (from checklist with specific section type)
+      switch (section) {
+        case 'ux_flow':
+          packet.ux_flow = Array.isArray(content) ? content : [content];
+          break;
+        case 'data_contracts':
+          packet.data_contracts = content;
+          break;
+        case 'api_contracts':
+          packet.api_contracts = Array.isArray(content) ? content : [content];
+          break;
+        case 'permissions':
+          packet.permissions = Array.isArray(content) ? content : [content];
+          break;
+        case 'failure_modes':
+          packet.failure_modes = Array.isArray(content) ? content : [content];
+          break;
+        case 'audit_events':
+          packet.audit_events = Array.isArray(content) ? content : [content];
+          break;
+        case 'nfrs':
+          packet.nfrs = content;
+          break;
+        case 'acceptance_tests':
+          packet.acceptance_tests = Array.isArray(content) ? content : [content];
+          break;
+      }
     }
   });
 
