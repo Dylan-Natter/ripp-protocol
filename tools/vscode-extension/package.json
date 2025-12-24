@@ -276,7 +276,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package",
-    "dev": "npm run compile && npm run package && code --install-extension $(ls -t *.vsix | head -1) && echo '✓ Extension installed. Reload VS Code window (Ctrl+Shift+P → Reload Window)'",
+    "dev": "npm run compile && npm run package && node -e \"const fs=require('fs');const cp=require('child_process');const vsixFiles=fs.readdirSync('.').filter(f=>f.endsWith('.vsix'));if(!vsixFiles.length){console.error('No .vsix files found. Run \\\"npm run package\\\" first.');process.exit(1);}vsixFiles.sort((a,b)=>fs.statSync(b).mtimeMs-fs.statSync(a).mtimeMs);const latest=vsixFiles[0];const result=cp.spawnSync('code',['--install-extension',latest],{stdio:'inherit'});if(result.status!==0){process.exit(result.status||1);}console.log('✓ Extension installed. Reload VS Code window (Ctrl+Shift+P → Reload Window)');\"",
     "lint": "eslint src"
   },
   "devDependencies": {
