@@ -159,7 +159,7 @@ function validateConfirmedBlocks(confirmed) {
     const blockErrors = [];
     const section = block.section;
 
-    // Rule 1: Section must be a known RIPP section
+    // Rule 1: Section must be a known RIPP section or full-packet
     const knownSections = [
       'purpose',
       'ux_flow',
@@ -173,7 +173,8 @@ function validateConfirmedBlocks(confirmed) {
       'design_philosophy',
       'design_decisions',
       'constraints',
-      'success_criteria'
+      'success_criteria',
+      'full-packet' // Allow full packet candidates
     ];
 
     if (!knownSections.includes(section)) {
