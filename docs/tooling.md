@@ -13,6 +13,8 @@ Tools and integrations for working with RIPP packets.
 
 The official RIPP validator CLI validates packets against the JSON Schema and checks structural conventions.
 
+> **Note**: As of v1.2.1, the CLI bundles schema files internally for reliable global installation. No external schema dependencies required.
+
 ### Installation
 
 **Via npm (recommended):**
@@ -360,6 +362,49 @@ Packaged files include comprehensive metadata for traceability:
 - `source_files` - Array of source file names
 - `validation_status` - `valid`, `invalid`, or `unvalidated`
 - `validation_errors` - Count of errors (when status is `invalid`)
+
+---
+
+## Experimental: Intent Discovery Workflow
+
+> **⚠️ Experimental Feature**: The intent discovery workflow is in active development and requires AI capabilities to be enabled. Commands and behavior may change in future releases.
+
+The CLI includes experimental commands for AI-powered intent discovery and confirmation:
+
+### Intent Discovery Commands
+
+```bash
+# Build evidence pack from repository
+ripp evidence build
+
+# Discover candidate intent from evidence (requires AI)
+RIPP_AI_ENABLED=true ripp discover --target-level 2
+
+# Confirm candidates interactively
+ripp confirm --interactive
+
+# Generate markdown checklist for review
+ripp confirm --checklist
+
+# Build canonical RIPP artifacts from confirmed intent
+ripp build --from-checklist
+```
+
+### Workflow Overview
+
+1. **Evidence Collection**: Extract code, documentation, and project metadata
+2. **Intent Discovery**: AI analyzes evidence to generate candidate RIPP sections
+3. **Human Confirmation**: Review and approve candidates via interactive CLI or markdown checklist
+4. **Artifact Building**: Generate final RIPP packets from confirmed intent
+
+**Recent Improvements (v1.2.1)**:
+
+- Fixed checklist generation to properly extract content fields from candidates
+- Fixed section name resolution (using 'purpose' or 'full-packet' instead of 'unknown')
+- Added 'full-packet' support in checklist parser validation
+- Resolved empty YAML blocks in generated checklists
+
+For the latest status of these features, see the [CLI changelog](https://github.com/Dylan-Natter/ripp-protocol/blob/main/tools/ripp-cli/CHANGELOG.md).
 
 ---
 

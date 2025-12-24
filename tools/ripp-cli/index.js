@@ -46,7 +46,7 @@ function log(color, symbol, message) {
 }
 
 function loadSchema() {
-  const schemaPath = path.join(__dirname, '../../schema/ripp-1.0.schema.json');
+  const schemaPath = path.join(__dirname, 'schema/ripp-1.0.schema.json');
   try {
     return JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
   } catch (error) {
