@@ -1,12 +1,12 @@
 /**
  * Template-Based Intent Discovery
- * 
+ *
  * Intelligent fallback that works WITHOUT AI by:
  * 1. Analyzing evidence pack patterns
  * 2. Using heuristics and templates
  * 3. Generating reasonable starter candidates
  * 4. Allowing progressive enhancement with AI later
- * 
+ *
  * This ensures RIPP works out-of-the-box for everyone.
  */
 
@@ -19,7 +19,7 @@ const yaml = require('js-yaml');
  */
 async function templateDiscoverIntent(cwd, options = {}) {
   const evidencePath = path.join(cwd, '.ripp', 'evidence', 'evidence.index.json');
-  
+
   if (!fs.existsSync(evidencePath)) {
     throw new Error('Evidence pack not found. Run "ripp evidence build" first.');
   }
@@ -29,10 +29,10 @@ async function templateDiscoverIntent(cwd, options = {}) {
 
   // Analyze evidence patterns
   const analysis = analyzePatterns(evidencePack);
-  
+
   // Generate candidate using templates
   const candidate = generateFromTemplate(analysis, targetLevel, evidencePack);
-  
+
   // Build candidates structure
   const candidates = {
     version: '1.0',
@@ -62,24 +62,26 @@ async function templateDiscoverIntent(cwd, options = {}) {
  */
 function analyzePatterns(evidencePack) {
   const evidence = evidencePack.evidence;
-  
+
   return {
     // Technology detection
     hasAPI: evidence.routes && evidence.routes.length > 0,
     hasDatabase: evidence.schemas && evidence.schemas.length > 0,
     hasAuth: evidence.auth && evidence.auth.length > 0,
     hasWorkflows: evidence.workflows && evidence.workflows.length > 0,
-    
+
     // Counts
     routeCount: evidence.routes?.length || 0,
     schemaCount: evidence.schemas?.length || 0,
     dependencyCount: evidence.dependencies?.length || 0,
-    
+
     // Inferred patterns
     isWebApp: (evidence.routes?.length || 0) > 0,
     isLibrary: (evidence.routes?.length || 0) === 0 && evidence.dependencies?.length > 0,
-    isCLI: evidence.dependencies?.some(d => d.name.includes('commander') || d.name.includes('yargs')),
-    
+    isCLI: evidence.dependencies?.some(
+      d => d.name.includes('commander') || d.name.includes('yargs')
+    ),
+
     // Framework detection
     framework: detectFramework(evidence.dependencies || []),
     primaryLanguage: detectLanguage(evidencePack)
@@ -91,14 +93,14 @@ function analyzePatterns(evidencePack) {
  */
 function detectFramework(dependencies) {
   const depNames = dependencies.map(d => d.name.toLowerCase());
-  
+
   if (depNames.includes('express')) return 'Express.js';
   if (depNames.includes('fastapi')) return 'FastAPI';
   if (depNames.includes('flask')) return 'Flask';
   if (depNames.includes('next')) return 'Next.js';
   if (depNames.includes('react')) return 'React';
   if (depNames.includes('vue')) return 'Vue.js';
-  
+
   return 'unknown';
 }
 
@@ -150,7 +152,8 @@ function generatePurpose(analysis) {
   let problem, solution, value;
 
   if (analysis.isCLI) {
-    problem = 'Developers need automated tooling to streamline repetitive tasks and improve workflow efficiency.';
+    problem =
+      'Developers need automated tooling to streamline repetitive tasks and improve workflow efficiency.';
     solution = `This CLI tool provides commands for common operations, built with ${analysis.framework || 'modern tooling'}.`;
     value = 'Reduces manual effort and ensures consistent execution of development tasks.';
   } else if (analysis.isWebApp) {
@@ -294,7 +297,7 @@ function generateDataContracts(analysis, evidencePack) {
  */
 function generateAPIContracts(analysis, evidencePack) {
   const routes = evidencePack.evidence.routes || [];
-  
+
   return routes.slice(0, 5).map(route => ({
     endpoint: route.path || '/api/resource',
     method: route.method || 'GET',
@@ -329,7 +332,7 @@ function generateFailureModes(analysis) {
  */
 function extractEvidence(evidencePack) {
   const evidence = [];
-  
+
   // Add key files as evidence
   if (evidencePack.evidence.routes && evidencePack.evidence.routes.length > 0) {
     evidence.push({

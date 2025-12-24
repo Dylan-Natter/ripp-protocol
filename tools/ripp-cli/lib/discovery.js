@@ -20,7 +20,7 @@ async function discoverIntent(cwd, options = {}) {
 
   // Check if AI is enabled
   const aiCheck = checkAiEnabled(config);
-  
+
   // If AI not available, use template-based discovery
   if (!aiCheck.enabled) {
     console.log('ℹ AI not configured - using template-based discovery');
@@ -50,7 +50,7 @@ async function discoverIntent(cwd, options = {}) {
   // Infer intent with AI
   console.log('🤖 Using AI for world-class intent analysis...');
   console.log('');
-  
+
   const targetLevel = options.targetLevel || 1;
   const candidates = await provider.inferIntent(evidencePack, {
     targetLevel,

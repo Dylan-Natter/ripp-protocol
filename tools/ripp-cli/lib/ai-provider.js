@@ -1,6 +1,6 @@
 /**
  * RIPP AI Provider - World Class Intent and Functionality Analysis
- * 
+ *
  * Unified AI provider using GitHub Copilot / OpenAI for intent inference.
  * Single, streamlined flow for analyzing code evidence and generating
  * production-ready RIPP intent candidates.
@@ -112,15 +112,23 @@ Core Sections (Required):
 - ux_flow: Map complete user journey with triggers, actions, and results
 - data_contracts: Specify inputs/outputs with precise field definitions
 
-${targetLevel >= 2 ? `Advanced Sections (Level 2+):
+${
+  targetLevel >= 2
+    ? `Advanced Sections (Level 2+):
 - api_contracts: Document all endpoints with methods, params, responses
 - failure_modes: Identify error scenarios and recovery strategies
-- nfrs: Define performance, security, and reliability requirements` : ''}
+- nfrs: Define performance, security, and reliability requirements`
+    : ''
+}
 
-${targetLevel >= 3 ? `Expert Sections (Level 3):
+${
+  targetLevel >= 3
+    ? `Expert Sections (Level 3):
 - permissions: Role-based access controls (mark "unknown" if unclear)
 - audit_events: Compliance logging requirements
-- acceptance_tests: Testable success criteria` : ''}
+- acceptance_tests: Testable success criteria`
+    : ''
+}
 
 DELIVERABLE:
 Return ONLY valid JSON matching the intent-candidates schema. Focus on:

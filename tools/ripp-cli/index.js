@@ -1422,7 +1422,7 @@ async function handleGoCommand(args) {
     console.log(`${colors.blue}Step 1: Initialize${colors.reset}`);
     const rippDir = path.join(cwd, '.ripp');
     if (!fs.existsSync(rippDir)) {
-      const initResults = initRepository({ force: false });
+      initRepository({ force: false });
       console.log(`  ${colors.green}✓ Initialized .ripp directory${colors.reset}\n`);
     } else {
       console.log(`  ${colors.gray}✓ Already initialized${colors.reset}\n`);
@@ -1431,24 +1431,34 @@ async function handleGoCommand(args) {
     // Step 2: Build Evidence Pack
     console.log(`${colors.blue}Step 2: Build Evidence Pack${colors.reset}`);
     const evidenceResult = buildEvidencePack(cwd, config);
-    console.log(`  ${colors.green}✓ Evidence pack created (${evidenceResult.fileCount} files)${colors.reset}\n`);
+    console.log(
+      `  ${colors.green}✓ Evidence pack created (${evidenceResult.fileCount} files)${colors.reset}\n`
+    );
 
     // Step 3: Discover Intent
     console.log(`${colors.blue}Step 3: Discover Intent${colors.reset}`);
     const discoverResult = await discoverIntent(cwd, { ai: config.ai });
-    console.log(`  ${colors.green}✓ Found ${discoverResult.candidateCount} candidate(s)${colors.reset}\n`);
+    console.log(
+      `  ${colors.green}✓ Found ${discoverResult.candidateCount} candidate(s)${colors.reset}\n`
+    );
 
     // Step 4: Confirm Intent (auto-approve if flag set)
     console.log(`${colors.blue}Step 4: Confirm Intent${colors.reset}`);
     if (autoApprove) {
-      console.log(`  ${colors.gray}Auto-approving candidates ≥ ${(threshold * 100).toFixed(0)}%${colors.reset}`);
+      console.log(
+        `  ${colors.gray}Auto-approving candidates ≥ ${(threshold * 100).toFixed(0)}%${colors.reset}`
+      );
       const confirmResult = await confirmIntent(cwd, {
         autoApprove: true,
         approvalThreshold: threshold
       });
-      console.log(`  ${colors.green}✓ Confirmed ${confirmResult.confirmedCount} candidate(s)${colors.reset}\n`);
+      console.log(
+        `  ${colors.green}✓ Confirmed ${confirmResult.confirmedCount} candidate(s)${colors.reset}\n`
+      );
     } else {
-      throw new Error('Manual confirmation required. Use --auto-approve flag or run "ripp confirm" separately.');
+      throw new Error(
+        'Manual confirmation required. Use --auto-approve flag or run "ripp confirm" separately.'
+      );
     }
 
     // Step 5: Build Canonical Artifacts
