@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Schema files are now included in the npm package under `schema/` directory
   - Updated schema loading paths to use bundled schemas instead of parent directory
   - Fixes post-publish smoke test failures from version 1.2.0
+* **cli:** fix checklist generation and parsing bugs in `ripp confirm` command
+  - Fixed extraction of content fields (purpose, ux_flow, data_contracts, etc.) from candidates
+  - Use 'purpose' or 'full-packet' as section name instead of 'unknown'
+  - Add 'full-packet' to valid section types in checklist parser
+  - Fixes empty YAML blocks in generated checklists
+  - Fixes 'Unknown section type' error when building from checklist
 
 ## [1.2.0](https://github.com/Dylan-Natter/ripp-protocol/compare/ripp-cli-v1.1.0...ripp-cli-v1.2.0) (2025-12-23)
 

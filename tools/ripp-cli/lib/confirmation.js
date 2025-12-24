@@ -53,23 +53,69 @@ async function interactiveConfirm(cwd, candidates) {
     const candidate = candidates.candidates[i];
 
     console.log(`\n--- Candidate ${i + 1}/${candidates.candidates.length} ---`);
-    console.log(`Section: ${candidate.section || 'unknown'}`);
+    const sectionName = candidate.purpose?.problem ? 'purpose' : 'full-packet';
+    console.log(`Section: ${sectionName}`);
     console.log(`Confidence: ${(candidate.confidence * 100).toFixed(1)}%`);
     console.log(`Evidence: ${candidate.evidence.length} reference(s)`);
     console.log('\nContent:');
-    console.log(yaml.dump(candidate.content, { indent: 2 }));
+    // Build content object from candidate fields
+    const content = {};
+    const contentFields = [
+      'purpose',
+      'ux_flow',
+      'data_contracts',
+      'api_contracts',
+      'permissions',
+      'failure_modes',
+      'audit_events',
+      'nfrs',
+      'acceptance_tests',
+      'design_philosophy',
+      'design_decisions',
+      'constraints',
+      'success_criteria'
+    ];
+    contentFields.forEach(field => {
+      if (candidate[field]) {
+        content[field] = candidate[field];
+      }
+    });
+    console.log(yaml.dump(content, { indent: 2 }));
 
     const answer = await question(rl, '\nAccept this candidate? (y/n/e to edit/s to skip): ');
 
     if (answer.toLowerCase() === 'y') {
+      // Build content object from candidate fields
+      const content = {};
+      const contentFields = [
+        'purpose',
+        'ux_flow',
+        'data_contracts',
+        'api_contracts',
+        'permissions',
+        'failure_modes',
+        'audit_events',
+        'nfrs',
+        'acceptance_tests',
+        'design_philosophy',
+        'design_decisions',
+        'constraints',
+        'success_criteria'
+      ];
+      contentFields.forEach(field => {
+        if (candidate[field]) {
+          content[field] = candidate[field];
+        }
+      });
+
       confirmed.push({
-        section: candidate.section,
+        section: candidate.purpose?.problem ? 'purpose' : 'full-packet',
         source: 'confirmed',
         confirmed_at: new Date().toISOString(),
         confirmed_by: options.user || 'unknown',
         original_confidence: candidate.confidence,
         evidence: candidate.evidence,
-        content: candidate.content
+        content: content
       });
       console.log('✓ Accepted');
     } else if (answer.toLowerCase() === 'e') {
@@ -136,7 +182,10 @@ async function generateChecklistConfirm(cwd, candidates) {
   markdown += '---\n\n';
 
   candidates.candidates.forEach((candidate, index) => {
-    markdown += `## Candidate ${index + 1}: ${candidate.section || 'unknown'}\n\n`;
+    // Extract section name from purpose or use generic identifier
+    const sectionName = candidate.purpose?.problem ? 'purpose' : 'full-packet';
+
+    markdown += `## Candidate ${index + 1}: ${sectionName}\n\n`;
     markdown += `- **Confidence**: ${(candidate.confidence * 100).toFixed(1)}%\n`;
     markdown += `- **Evidence**: ${candidate.evidence.length} reference(s)\n\n`;
 
@@ -145,7 +194,29 @@ async function generateChecklistConfirm(cwd, candidates) {
 
     markdown += '### Content\n\n';
     markdown += '```yaml\n';
-    markdown += yaml.dump(candidate.content, { indent: 2 });
+    // Build content object from candidate fields (purpose, ux_flow, data_contracts, etc.)
+    const content = {};
+    const contentFields = [
+      'purpose',
+      'ux_flow',
+      'data_contracts',
+      'api_contracts',
+      'permissions',
+      'failure_modes',
+      'audit_events',
+      'nfrs',
+      'acceptance_tests',
+      'design_philosophy',
+      'design_decisions',
+      'constraints',
+      'success_criteria'
+    ];
+    contentFields.forEach(field => {
+      if (candidate[field]) {
+        content[field] = candidate[field];
+      }
+    });
+    markdown += yaml.dump(content, { indent: 2 });
     markdown += '```\n\n';
 
     markdown += '### Evidence References\n\n';
