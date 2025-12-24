@@ -3,14 +3,16 @@ const path = require('path');
 const yaml = require('js-yaml');
 const { createProvider } = require('./ai-provider');
 const { loadConfig, checkAiEnabled } = require('./config');
+const { templateDiscoverIntent } = require('./template-discovery');
 
 /**
  * RIPP Intent Discovery
- * AI-assisted candidate intent inference from evidence packs
+ * AI-powered analysis with intelligent template fallback for universal access
  */
 
 /**
  * Discover candidate intent from evidence pack
+ * Automatically falls back to template-based discovery if AI unavailable
  */
 async function discoverIntent(cwd, options = {}) {
   // Load configuration
@@ -18,8 +20,13 @@ async function discoverIntent(cwd, options = {}) {
 
   // Check if AI is enabled
   const aiCheck = checkAiEnabled(config);
+  
+  // If AI not available, use template-based discovery
   if (!aiCheck.enabled) {
-    throw new Error(`AI is not enabled: ${aiCheck.reason}`);
+    console.log('ℹ AI not configured - using template-based discovery');
+    console.log('  (Enable AI for world-class analysis with higher confidence)');
+    console.log('');
+    return await templateDiscoverIntent(cwd, options);
   }
 
   // Load evidence pack
@@ -34,10 +41,16 @@ async function discoverIntent(cwd, options = {}) {
   const provider = createProvider(config.ai);
 
   if (!provider.isConfigured()) {
-    throw new Error('AI provider is not properly configured. Check environment variables.');
+    console.log('ℹ AI provider not configured - using template-based discovery');
+    console.log('  (Set OPENAI_API_KEY for world-class AI analysis)');
+    console.log('');
+    return await templateDiscoverIntent(cwd, options);
   }
 
-  // Infer intent
+  // Infer intent with AI
+  console.log('🤖 Using AI for world-class intent analysis...');
+  console.log('');
+  
   const targetLevel = options.targetLevel || 1;
   const candidates = await provider.inferIntent(evidencePack, {
     targetLevel,

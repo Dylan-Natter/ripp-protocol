@@ -283,7 +283,7 @@ ${colors.green}Commands:${colors.reset}
 ${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
   ripp go                           Run full workflow: init → evidence → discover → build (auto)
   ripp evidence build               Build evidence pack from repository
-  ripp discover                     Infer candidate intent (requires AI enabled)
+  ripp discover                     Infer candidate intent (works with OR without AI)
   ripp confirm                      Confirm candidate intent (interactive)
   ripp build                        Build canonical RIPP artifacts from confirmed intent
   ripp metrics                      Display workflow analytics and health metrics
@@ -303,7 +303,7 @@ ${colors.green}Evidence Build Options:${colors.reset}
 
 ${colors.green}Discover Options:${colors.reset}
   --target-level <1|2|3>            Target RIPP level (default: 1)
-  (Requires: ai.enabled=true in config AND RIPP_AI_ENABLED=true)
+  (Works without AI using templates, or with AI for world-class analysis)
 
 ${colors.green}Confirm Options:${colors.reset}
   --interactive                     Interactive confirmation mode (default)
@@ -376,7 +376,8 @@ ${colors.blue}Intent Discovery Examples:${colors.reset}
   ripp go -y --skip-validation        Quick workflow without validation
   
   ripp evidence build
-  RIPP_AI_ENABLED=true ripp discover --target-level 2
+  ripp discover                       # Uses templates (no AI required)
+  RIPP_AI_ENABLED=true ripp discover  # Uses AI for world-class analysis
   ripp confirm --interactive
   ripp confirm --checklist
   ripp build --auto-approve
@@ -1243,25 +1244,18 @@ async function handleDiscoverCommand(args) {
   console.log(`${colors.blue}Discovering intent from evidence...${colors.reset}\n`);
 
   try {
-    // Check AI is enabled
+    // Check AI configuration (but don't block - fallback available)
     const config = loadConfig(cwd);
     const aiCheck = checkAiEnabled(config);
 
-    if (!aiCheck.enabled) {
-      console.error(`${colors.red}Error: AI is not enabled${colors.reset}`);
-      console.error(`  ${aiCheck.reason}`);
-      console.log('');
-      console.log(`${colors.blue}To enable World-Class Intent Analysis:${colors.reset}`);
-      console.log('  1. Set ai.enabled: true in .ripp/config.yaml');
-      console.log('  2. Set RIPP_AI_ENABLED=true environment variable');
-      console.log('  3. Set OPENAI_API_KEY environment variable');
-      console.log('');
-      process.exit(1);
+    if (aiCheck.enabled) {
+      console.log(`${colors.gray}AI Model: ${config.ai.model}${colors.reset}`);
+      console.log(`${colors.gray}Mode: World-Class AI Analysis${colors.reset}`);
+    } else {
+      console.log(`${colors.gray}Mode: Template-Based Discovery${colors.reset}`);
+      console.log(`${colors.gray}(Set OPENAI_API_KEY for AI-powered analysis)${colors.reset}`);
     }
-
-    console.log(`${colors.gray}AI Model: ${config.ai.model}${colors.reset}`);
     console.log(`${colors.gray}Target Level: ${options.targetLevel}${colors.reset}`);
-    console.log(`${colors.gray}Mode: World-Class Intent Analysis${colors.reset}`);
     console.log('');
 
     const result = await discoverIntent(cwd, options);
