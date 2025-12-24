@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dylan-natter.github.io/ripp-protocol/schema/ripp-config.schema.json",
+  "title": "RIPP Configuration Schema",
+  "description": "Configuration schema for RIPP vNext Intent Discovery Mode",
+  "type": "object",
+  "required": ["rippVersion"],
+  "properties": {
+    "rippVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "RIPP specification version (e.g., '1.0')"
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Master switch for AI features (disabled by default)"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["openai", "azure-openai", "ollama", "custom"],
+          "default": "openai",
+          "description": "AI provider to use for intent inference"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model identifier (e.g., 'gpt-4', 'gpt-3.5-turbo')"
+        },
+        "maxRetries": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3,
+          "description": "Maximum retries for AI inference with schema validation"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1000,
+          "description": "Request timeout in milliseconds"
+        },
+        "customEndpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "Custom API endpoint (for custom provider)"
+        }
+      },
+      "required": ["enabled"]
+    },
+    "evidencePack": {
+      "type": "object",
+      "properties": {
+        "includeGlobs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["src/**", "app/**", "api/**", "db/**", ".github/workflows/**"],
+          "description": "Glob patterns for files to include in evidence"
+        },
+        "excludeGlobs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["**/node_modules/**", "**/dist/**", "**/build/**", "**/*.lock", "**/.git/**"],
+          "description": "Glob patterns for files to exclude from evidence"
+        },
+        "maxFileSize": {
+          "type": "integer",
+          "minimum": 1024,
+          "default": 1048576,
+          "description": "Maximum file size in bytes (default: 1MB)"
+        },
+        "secretPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Custom regex patterns for secret detection"
+        }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "properties": {
+        "minConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5,
+          "description": "Minimum confidence threshold for AI-inferred intent"
+        },
+        "includeEvidence": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include evidence references in candidate intent"
+        }
+      }
+    }
+  }
+}

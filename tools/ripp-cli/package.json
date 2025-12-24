@@ -1,11 +1,18 @@
 {
   "name": "ripp-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Official CLI validator and tooling for Regenerative Intent Prompting Protocol (RIPP)",
   "main": "index.js",
   "bin": {
     "ripp": "index.js"
   },
+  "files": [
+    "index.js",
+    "lib/",
+    "schema/",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "test": "node test/checklist-parser.test.js && node test/metrics.test.js && node test/doctor.test.js && node test/package.test.js && node test/integration.test.js"
   },
