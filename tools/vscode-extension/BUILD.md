@@ -10,6 +10,27 @@ This guide covers how to build and package the RIPP Protocol VS Code extension f
 
 ## Quick Start
 
+### Development (Recommended)
+
+For active development with quick iteration:
+
+```bash
+# Navigate to extension directory
+cd tools/vscode-extension
+
+# Install dependencies
+npm install
+
+# Compile, package, and install in one command
+npm run dev
+
+# Then reload VS Code window (Ctrl+Shift+P → "Developer: Reload Window")
+```
+
+**Note:** After making code changes, always run `npm run dev` and reload the window to see changes.
+
+### Manual Build
+
 ```bash
 # Navigate to extension directory
 cd tools/vscode-extension
