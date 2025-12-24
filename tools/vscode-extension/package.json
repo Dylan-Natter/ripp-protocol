@@ -276,6 +276,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package",
+    "dev": "npm run compile && npm run package && code --install-extension $(ls -t *.vsix | head -1) && echo '✓ Extension installed. Reload VS Code window (Ctrl+Shift+P → Reload Window)'",
     "lint": "eslint src"
   },
   "devDependencies": {

@@ -55,6 +55,11 @@ export function activate(context: vscode.ExtensionContext) {
   outputChannel = vscode.window.createOutputChannel('RIPP');
   context.subscriptions.push(outputChannel);
 
+  // Log extension version for debugging
+  const extensionVersion = context.extension.packageJSON.version;
+  outputChannel.appendLine(`RIPP Extension v${extensionVersion} activated`);
+  outputChannel.appendLine(`Extension path: ${context.extensionPath}`);
+
   // Initialize services
   cliRunner = CliRunner.getInstance(outputChannel);
   configService = ConfigService.getInstance();
