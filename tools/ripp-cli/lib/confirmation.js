@@ -51,7 +51,7 @@ async function autoApproveConfirm(cwd, candidates, options = {}) {
 
   candidates.candidates.forEach((candidate, index) => {
     const sectionName = candidate.purpose?.problem ? 'purpose' : 'full-packet';
-    
+
     if (candidate.confidence >= threshold) {
       // Build content object from candidate fields
       const content = {};
@@ -86,7 +86,9 @@ async function autoApproveConfirm(cwd, candidates, options = {}) {
         content: content
       });
 
-      console.log(`  ✓ Candidate ${index + 1}: ${sectionName} (${(candidate.confidence * 100).toFixed(1)}%)`);
+      console.log(
+        `  ✓ Candidate ${index + 1}: ${sectionName} (${(candidate.confidence * 100).toFixed(1)}%)`
+      );
     } else {
       rejected.push({
         section: sectionName,
@@ -96,14 +98,18 @@ async function autoApproveConfirm(cwd, candidates, options = {}) {
         rejected_by: options.user || 'auto-approve',
         reason: `Below confidence threshold (${(candidate.confidence * 100).toFixed(1)}% < ${(threshold * 100).toFixed(0)}%)`
       });
-      console.log(`  ✗ Candidate ${index + 1}: ${sectionName} (${(candidate.confidence * 100).toFixed(1)}% - below threshold)`);
+      console.log(
+        `  ✗ Candidate ${index + 1}: ${sectionName} (${(candidate.confidence * 100).toFixed(1)}% - below threshold)`
+      );
     }
   });
 
   console.log('');
 
   if (confirmed.length === 0) {
-    throw new Error(`No candidates met the confidence threshold of ${(threshold * 100).toFixed(0)}%. Lower the threshold or run without --auto-approve to manually review.`);
+    throw new Error(
+      `No candidates met the confidence threshold of ${(threshold * 100).toFixed(0)}%. Lower the threshold or run without --auto-approve to manually review.`
+    );
   }
 
   // Save confirmed intent

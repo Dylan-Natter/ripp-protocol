@@ -197,37 +197,47 @@ function buildRippPacket(confirmed, options) {
         // Direct purpose content (from checklist)
         packet.purpose = content;
       }
-      
+
       if (content.ux_flow) {
         packet.ux_flow = Array.isArray(content.ux_flow) ? content.ux_flow : [content.ux_flow];
       }
-      
+
       if (content.data_contracts) {
         packet.data_contracts = content.data_contracts;
       }
-      
+
       if (content.api_contracts) {
-        packet.api_contracts = Array.isArray(content.api_contracts) ? content.api_contracts : [content.api_contracts];
+        packet.api_contracts = Array.isArray(content.api_contracts)
+          ? content.api_contracts
+          : [content.api_contracts];
       }
-      
+
       if (content.permissions) {
-        packet.permissions = Array.isArray(content.permissions) ? content.permissions : [content.permissions];
+        packet.permissions = Array.isArray(content.permissions)
+          ? content.permissions
+          : [content.permissions];
       }
-      
+
       if (content.failure_modes) {
-        packet.failure_modes = Array.isArray(content.failure_modes) ? content.failure_modes : [content.failure_modes];
+        packet.failure_modes = Array.isArray(content.failure_modes)
+          ? content.failure_modes
+          : [content.failure_modes];
       }
-      
+
       if (content.audit_events) {
-        packet.audit_events = Array.isArray(content.audit_events) ? content.audit_events : [content.audit_events];
+        packet.audit_events = Array.isArray(content.audit_events)
+          ? content.audit_events
+          : [content.audit_events];
       }
-      
+
       if (content.nfrs) {
         packet.nfrs = content.nfrs;
       }
-      
+
       if (content.acceptance_tests) {
-        packet.acceptance_tests = Array.isArray(content.acceptance_tests) ? content.acceptance_tests : [content.acceptance_tests];
+        packet.acceptance_tests = Array.isArray(content.acceptance_tests)
+          ? content.acceptance_tests
+          : [content.acceptance_tests];
       }
     } else {
       // Individual section (from checklist with specific section type)
