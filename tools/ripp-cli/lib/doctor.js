@@ -228,7 +228,7 @@ function checkSchema() {
         fix: null
       };
     }
-    
+
     // Fallback: check if we're in project root (for development)
     const projectRoot = path.resolve(__dirname, '../../..');
     const schemaPath = path.join(projectRoot, 'schema', 'ripp-1.0.schema.json');
