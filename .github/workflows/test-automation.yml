@@ -64,34 +64,34 @@ jobs:
     if: |
       github.event.inputs.test_scenario == 'full-pipeline-dry-run' ||
       github.event.inputs.test_scenario == 'release-please-only'
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
-      
+
       - name: Validate release-please config files
         run: |
           echo "# 🧪 Release-Please Configuration Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if config files exist
           if [ ! -f "release-please-config.json" ]; then
             echo "❌ release-please-config.json not found" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           echo "✅ release-please-config.json exists" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ ! -f ".release-please-manifest.json" ]; then
             echo "❌ .release-please-manifest.json not found" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           echo "✅ .release-please-manifest.json exists" >> $GITHUB_STEP_SUMMARY
-          
+
           # Validate JSON syntax
           if jq empty release-please-config.json 2>/dev/null; then
             echo "✅ release-please-config.json is valid JSON" >> $GITHUB_STEP_SUMMARY
@@ -99,73 +99,73 @@ jobs:
             echo "❌ release-please-config.json has invalid JSON syntax" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           if jq empty .release-please-manifest.json 2>/dev/null; then
             echo "✅ .release-please-manifest.json is valid JSON" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ .release-please-manifest.json has invalid JSON syntax" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-      
+
       - name: Verify package configurations
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Package Configurations" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check VS Code extension config
           VSCODE_CONFIG=$(jq -r '.packages."tools/vscode-extension"' release-please-config.json)
           if [ "$VSCODE_CONFIG" != "null" ]; then
             echo "✅ VS Code extension configured in release-please" >> $GITHUB_STEP_SUMMARY
-            
+
             VSCODE_TAG_FORMAT=$(jq -r '.packages."tools/vscode-extension"."include-component-in-tag"' release-please-config.json)
             echo "  - Tag format: include-component=$VSCODE_TAG_FORMAT" >> $GITHUB_STEP_SUMMARY
-            
+
             VSCODE_VERSION=$(jq -r '."tools/vscode-extension"' .release-please-manifest.json)
             echo "  - Current version: $VSCODE_VERSION" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ VS Code extension not configured" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Check ripp-cli config
           CLI_CONFIG=$(jq -r '.packages."tools/ripp-cli"' release-please-config.json)
           if [ "$CLI_CONFIG" != "null" ]; then
             echo "✅ ripp-cli configured in release-please" >> $GITHUB_STEP_SUMMARY
-            
+
             CLI_TAG_FORMAT=$(jq -r '.packages."tools/ripp-cli"."include-component-in-tag"' release-please-config.json)
             echo "  - Tag format: include-component=$CLI_TAG_FORMAT" >> $GITHUB_STEP_SUMMARY
-            
+
             CLI_VERSION=$(jq -r '."tools/ripp-cli"' .release-please-manifest.json)
             echo "  - Current version: $CLI_VERSION" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ ripp-cli not configured" >> $GITHUB_STEP_SUMMARY
           fi
-      
+
       - name: Verify workflow file
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Release-Please Workflow Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ ! -f ".github/workflows/release-please.yml" ]; then
             echo "❌ release-please.yml workflow not found" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           echo "✅ release-please.yml workflow exists" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check for required configuration
           if grep -q "googleapis/release-please-action@v4" .github/workflows/release-please.yml; then
             echo "✅ Uses release-please-action v4" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  Not using release-please-action v4" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if grep -q "config-file: release-please-config.json" .github/workflows/release-please.yml; then
             echo "✅ Config file reference found" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  Config file reference not found" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if grep -q "manifest-file: .release-please-manifest.json" .github/workflows/release-please.yml; then
             echo "✅ Manifest file reference found" >> $GITHUB_STEP_SUMMARY
           else
@@ -179,53 +179,53 @@ jobs:
     if: |
       github.event.inputs.test_scenario == 'full-pipeline-dry-run' ||
       github.event.inputs.test_scenario == 'vsix-build-only' ||
-      (github.event.inputs.test_scenario == 'version-consistency-check' && 
+      (github.event.inputs.test_scenario == 'version-consistency-check' &&
        (github.event.inputs.target_package == 'both' || github.event.inputs.target_package == 'vscode-extension'))
-    
+
     defaults:
       run:
         working-directory: tools/vscode-extension
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: tools/vscode-extension/package-lock.json
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Get version from package.json
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          
+
           PUBLISHER=$(node -p "require('./package.json').publisher")
           NAME=$(node -p "require('./package.json').name")
-          
+
           echo "publisher=$PUBLISHER" >> $GITHUB_OUTPUT
           echo "name=$NAME" >> $GITHUB_OUTPUT
-          
+
           echo "# 🧪 VS Code Extension Build Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Extension:** $PUBLISHER.$NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** $VERSION" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Validate version format
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Version Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
             echo "✅ Version format is Marketplace-compliant: $VERSION" >> $GITHUB_STEP_SUMMARY
           else
@@ -233,48 +233,48 @@ jobs:
             echo "Expected format: X.Y.Z or X.Y.Z.W (numeric only)" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-      
+
       - name: Compile TypeScript
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Build Steps" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           npm run compile
           echo "✅ TypeScript compilation successful" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Run lint
         run: |
           npm run lint
           echo "✅ Linting passed" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Create output directory
         run: mkdir -p dist
-      
+
       - name: Package VSIX
         run: |
           npx @vscode/vsce package --no-dependencies --out dist/
           echo "✅ VSIX packaging successful" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Verify VSIX package
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## VSIX Package Verification" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           VSIX_COUNT=$(ls -1 dist/*.vsix 2>/dev/null | wc -l)
           if [ "$VSIX_COUNT" -eq 0 ]; then
             echo "❌ No VSIX file was produced" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           VSIX_FILE=$(ls -1 dist/*.vsix | head -1)
           VSIX_BASENAME=$(basename "$VSIX_FILE")
           VSIX_SIZE=$(du -h "$VSIX_FILE" | cut -f1)
-          
+
           echo "✅ VSIX package created: \`$VSIX_BASENAME\`" >> $GITHUB_STEP_SUMMARY
           echo "**Size:** $VSIX_SIZE" >> $GITHUB_STEP_SUMMARY
-          
+
           # Verify filename format
           if echo "$VSIX_BASENAME" | grep -qE '\-[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?\.vsix$'; then
             echo "✅ VSIX filename is Marketplace-compliant" >> $GITHUB_STEP_SUMMARY
@@ -282,7 +282,7 @@ jobs:
             echo "❌ VSIX filename may not be Marketplace-compliant: $VSIX_BASENAME" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           # Verify package contents
           if unzip -t "$VSIX_FILE" > /dev/null 2>&1; then
             echo "✅ VSIX structure is valid (can be unzipped)" >> $GITHUB_STEP_SUMMARY
@@ -290,7 +290,7 @@ jobs:
             echo "❌ VSIX structure is invalid" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           # Check for manifest
           if unzip -l "$VSIX_FILE" | grep -q "extension/package.json"; then
             echo "✅ Extension manifest found in VSIX" >> $GITHUB_STEP_SUMMARY
@@ -298,18 +298,18 @@ jobs:
             echo "❌ Extension manifest not found in VSIX" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-      
+
       - name: Test dry-run publish
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Dry-Run Publish Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Note: This would normally require VSCE_PAT, but we're just testing the workflow structure
           echo "✅ Dry-run publish validation: VSIX package is ready for publishing" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** Actual marketplace publishing requires \`VSCE_PAT\` secret" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v6
         with:
@@ -324,91 +324,91 @@ jobs:
     if: |
       github.event.inputs.test_scenario == 'full-pipeline-dry-run' ||
       github.event.inputs.test_scenario == 'npm-package-only' ||
-      (github.event.inputs.test_scenario == 'version-consistency-check' && 
+      (github.event.inputs.test_scenario == 'version-consistency-check' &&
        (github.event.inputs.target_package == 'both' || github.event.inputs.target_package == 'ripp-cli'))
-    
+
     defaults:
       run:
         working-directory: tools/ripp-cli
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: tools/ripp-cli/package-lock.json
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Get package metadata
         id: metadata
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           HAS_BIN=$(node -p "!!require('./package.json').bin")
-          
+
           echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
           echo "has_bin=$HAS_BIN" >> $GITHUB_OUTPUT
-          
+
           echo "# 🧪 NPM Package Build Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Package:** $PACKAGE_NAME" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** $PACKAGE_VERSION" >> $GITHUB_STEP_SUMMARY
           echo "**Has binary:** $HAS_BIN" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Run tests
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Test Execution" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if npm test --if-present; then
             echo "✅ All tests passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Tests failed" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-      
+
       - name: Verify package contents
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Package Contents" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           npm pack --dry-run > /tmp/pack-output.txt 2>&1
-          
+
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat /tmp/pack-output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
+
           # Check for required files
           if grep -q "index.js" /tmp/pack-output.txt; then
             echo "✅ Main entry point (index.js) included" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  Main entry point (index.js) not found in package" >> $GITHUB_STEP_SUMMARY
           fi
-      
+
       - name: Test CLI binary
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## CLI Binary Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Test that the CLI can be invoked
           if node index.js --help > /tmp/help-output.txt 2>&1; then
             echo "✅ CLI help command works" >> $GITHUB_STEP_SUMMARY
-            
+
             # Check for expected commands
             if grep -q "validate" /tmp/help-output.txt; then
               echo "✅ 'validate' command found in help" >> $GITHUB_STEP_SUMMARY
             fi
-            
+
             if grep -q "lint" /tmp/help-output.txt; then
               echo "✅ 'lint' command found in help" >> $GITHUB_STEP_SUMMARY
             fi
@@ -417,17 +417,17 @@ jobs:
             cat /tmp/help-output.txt
             exit 1
           fi
-      
+
       - name: Test dry-run publish
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Dry-Run Publish Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Run npm publish dry-run
           if npm publish --dry-run > /tmp/publish-dry-run.txt 2>&1; then
             echo "✅ Dry-run publish validation passed" >> $GITHUB_STEP_SUMMARY
-            
+
             # Check for any warnings about sensitive files
             if grep -iE "(\.env|\.git|secret|token|password)" /tmp/publish-dry-run.txt; then
               echo "⚠️  Warning: Potential sensitive files detected in package" >> $GITHUB_STEP_SUMMARY
@@ -437,7 +437,7 @@ jobs:
             cat /tmp/publish-dry-run.txt
             exit 1
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** Actual npm publishing requires \`NPM_TOKEN\` secret" >> $GITHUB_STEP_SUMMARY
 
@@ -448,34 +448,34 @@ jobs:
     if: |
       github.event.inputs.test_scenario == 'full-pipeline-dry-run' ||
       github.event.inputs.test_scenario == 'npm-package-only'
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: tools/ripp-cli/package-lock.json
-      
+
       - name: Install dependencies
         working-directory: tools/ripp-cli
         run: npm ci
-      
+
       - name: Build test binary (ARM64)
         working-directory: tools/ripp-cli
         run: |
           echo "# 🧪 Binary Build Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           mkdir -p ../../build/binaries
-          
+
           npx @yao-pkg/pkg . \
             --targets node20-macos-arm64 \
             --output ../../build/binaries/ripp-darwin-arm64
-          
+
           if [ -f "../../build/binaries/ripp-darwin-arm64" ]; then
             FILE_SIZE=$(du -h ../../build/binaries/ripp-darwin-arm64 | cut -f1)
             echo "✅ ARM64 binary built successfully (Size: $FILE_SIZE)" >> $GITHUB_STEP_SUMMARY
@@ -483,16 +483,16 @@ jobs:
             echo "❌ ARM64 binary build failed" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-      
+
       - name: Test binary execution
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Binary Execution Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if ./build/binaries/ripp-darwin-arm64 --help > /tmp/binary-help.txt 2>&1; then
             echo "✅ Binary executes successfully" >> $GITHUB_STEP_SUMMARY
-            
+
             if grep -q "validate" /tmp/binary-help.txt; then
               echo "✅ Binary contains expected commands" >> $GITHUB_STEP_SUMMARY
             fi
@@ -501,7 +501,7 @@ jobs:
             cat /tmp/binary-help.txt
             exit 1
           fi
-      
+
       - name: Upload binary artifact
         uses: actions/upload-artifact@v6
         with:
@@ -516,56 +516,56 @@ jobs:
     if: |
       github.event.inputs.test_scenario == 'full-pipeline-dry-run' ||
       github.event.inputs.test_scenario == 'version-consistency-check'
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
-      
+
       - name: Check version consistency
         run: |
           echo "# 🧪 Version Consistency Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Get versions from release-please manifest
           VSCODE_MANIFEST_VERSION=$(jq -r '."tools/vscode-extension"' .release-please-manifest.json)
           CLI_MANIFEST_VERSION=$(jq -r '."tools/ripp-cli"' .release-please-manifest.json)
-          
+
           # Get versions from package.json files
           VSCODE_PACKAGE_VERSION=$(node -p "require('./tools/vscode-extension/package.json').version")
           CLI_PACKAGE_VERSION=$(node -p "require('./tools/ripp-cli/package.json').version")
-          
+
           echo "## VS Code Extension" >> $GITHUB_STEP_SUMMARY
           echo "- Manifest version: \`$VSCODE_MANIFEST_VERSION\`" >> $GITHUB_STEP_SUMMARY
           echo "- package.json version: \`$VSCODE_PACKAGE_VERSION\`" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "$VSCODE_MANIFEST_VERSION" = "$VSCODE_PACKAGE_VERSION" ]; then
             echo "✅ VS Code extension versions match" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ VS Code extension versions don't match" >> $GITHUB_STEP_SUMMARY
             VSCODE_MISMATCH=true
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## ripp-cli Package" >> $GITHUB_STEP_SUMMARY
           echo "- Manifest version: \`$CLI_MANIFEST_VERSION\`" >> $GITHUB_STEP_SUMMARY
           echo "- package.json version: \`$CLI_PACKAGE_VERSION\`" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "$CLI_MANIFEST_VERSION" = "$CLI_PACKAGE_VERSION" ]; then
             echo "✅ ripp-cli versions match" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ ripp-cli versions don't match" >> $GITHUB_STEP_SUMMARY
             CLI_MISMATCH=true
           fi
-          
+
           # Check package-lock.json versions
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Package Lock Versions" >> $GITHUB_STEP_SUMMARY
-          
+
           VSCODE_LOCK_VERSION=$(node -p "require('./tools/vscode-extension/package-lock.json').version" 2>/dev/null || echo "N/A")
           if [ "$VSCODE_LOCK_VERSION" != "N/A" ]; then
             echo "- VS Code extension package-lock.json: \`$VSCODE_LOCK_VERSION\`" >> $GITHUB_STEP_SUMMARY
@@ -575,14 +575,14 @@ jobs:
               echo "⚠️  VS Code extension package-lock.json doesn't match" >> $GITHUB_STEP_SUMMARY
             fi
           fi
-          
+
           # Exit with error if any mismatches
           if [ "$VSCODE_MISMATCH" = true ] || [ "$CLI_MISMATCH" = true ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "❌ Version consistency check failed" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ All versions are consistent" >> $GITHUB_STEP_SUMMARY
 
@@ -591,18 +591,18 @@ jobs:
     name: Test Workflow Integration
     runs-on: ubuntu-latest
     if: github.event.inputs.test_scenario == 'full-pipeline-dry-run'
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Check workflow files exist
         run: |
           echo "# 🧪 Workflow Integration Test" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Workflow Files" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           WORKFLOWS=(
             "release-please.yml"
             "vscode-extension-build.yml"
@@ -610,7 +610,7 @@ jobs:
             "npm-publish.yml"
             "build-binaries.yml"
           )
-          
+
           for workflow in "${WORKFLOWS[@]}"; do
             if [ -f ".github/workflows/$workflow" ]; then
               echo "✅ $workflow exists" >> $GITHUB_STEP_SUMMARY
@@ -618,88 +618,88 @@ jobs:
               echo "❌ $workflow not found" >> $GITHUB_STEP_SUMMARY
             fi
           done
-      
+
       - name: Verify workflow triggers
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Workflow Trigger Configuration" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check release-please triggers on main
           if grep -q "branches:" .github/workflows/release-please.yml && grep -q "- main" .github/workflows/release-please.yml; then
             echo "✅ release-please triggers on main branch" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  release-please may not trigger on main branch" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Check VSIX build triggers on tags
           if grep -q "tags:" .github/workflows/vscode-extension-build.yml; then
             echo "✅ VSIX build triggers on tags" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  VSIX build may not trigger on tags" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Check NPM publish triggers on release
           if grep -q "release:" .github/workflows/npm-publish.yml; then
             echo "✅ NPM publish triggers on release events" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  NPM publish may not trigger on release events" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Check binary build triggers on release
           if grep -q "release:" .github/workflows/build-binaries.yml; then
             echo "✅ Binary build triggers on release events" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  Binary build may not trigger on release events" >> $GITHUB_STEP_SUMMARY
           fi
-      
+
       - name: Check for required secrets
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Required Secrets Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "**Note:** This test cannot verify actual secret values, only documentation references." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check for secret references in workflows
           if grep -q "RELEASE_PAT" .github/workflows/release-please.yml; then
             echo "✅ RELEASE_PAT referenced in release-please.yml" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  RELEASE_PAT not found in release-please.yml" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if grep -q "NPM_TOKEN" .github/workflows/npm-publish.yml; then
             echo "✅ NPM_TOKEN referenced in npm-publish.yml" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  NPM_TOKEN not found in npm-publish.yml" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if grep -q "VSCE_PAT" .github/workflows/vscode-extension-publish.yml; then
             echo "✅ VSCE_PAT referenced in vscode-extension-publish.yml" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  VSCE_PAT not found in vscode-extension-publish.yml" >> $GITHUB_STEP_SUMMARY
           fi
-      
+
       - name: Check auto-publish safety
         run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Auto-Publish Safety Checks" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if workflows have ENABLE_AUTO_PUBLISH checks
           if grep -q "ENABLE_AUTO_PUBLISH" .github/workflows/npm-publish.yml; then
             echo "✅ NPM publish has ENABLE_AUTO_PUBLISH safety check" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  NPM publish may not have auto-publish safety check" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if grep -q "ENABLE_AUTO_PUBLISH" .github/workflows/vscode-extension-publish.yml; then
             echo "✅ VS Code publish has ENABLE_AUTO_PUBLISH safety check" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️  VS Code publish may not have auto-publish safety check" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if grep -q "ENABLE_AUTO_PUBLISH" .github/workflows/build-binaries.yml; then
             echo "✅ Binary build has ENABLE_AUTO_PUBLISH safety check" >> $GITHUB_STEP_SUMMARY
           else
@@ -710,7 +710,7 @@ jobs:
   generate-report:
     name: Generate Test Report
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - test-release-please
       - test-vsix-build
       - test-npm-package
@@ -718,11 +718,11 @@ jobs:
       - version-consistency
       - test-workflow-integration
     if: always()
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
       - name: Generate final report
         run: |
           echo "# 📊 Test Automation Report" >> $GITHUB_STEP_SUMMARY
@@ -733,10 +733,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check job statuses
           RELEASE_PLEASE_STATUS="${{ needs.test-release-please.result }}"
           VSIX_BUILD_STATUS="${{ needs.test-vsix-build.result }}"
@@ -744,7 +744,7 @@ jobs:
           BINARY_BUILD_STATUS="${{ needs.test-binary-build.result }}"
           VERSION_CHECK_STATUS="${{ needs.version-consistency.result }}"
           WORKFLOW_INTEGRATION_STATUS="${{ needs.test-workflow-integration.result }}"
-          
+
           # Function to display status
           display_status() {
             case $1 in
@@ -754,7 +754,7 @@ jobs:
               *) echo "⚠️  $1" ;;
             esac
           }
-          
+
           echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Release-Please Configuration | $(display_status $RELEASE_PLEASE_STATUS) |" >> $GITHUB_STEP_SUMMARY
@@ -763,11 +763,11 @@ jobs:
           echo "| Binary Build | $(display_status $BINARY_BUILD_STATUS) |" >> $GITHUB_STEP_SUMMARY
           echo "| Version Consistency | $(display_status $VERSION_CHECK_STATUS) |" >> $GITHUB_STEP_SUMMARY
           echo "| Workflow Integration | $(display_status $WORKFLOW_INTEGRATION_STATUS) |" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if all required tests passed
           ALL_PASSED=true
           if [ "$RELEASE_PLEASE_STATUS" = "failure" ] || [ "$VSIX_BUILD_STATUS" = "failure" ] || \
@@ -775,7 +775,7 @@ jobs:
              [ "$VERSION_CHECK_STATUS" = "failure" ] || [ "$WORKFLOW_INTEGRATION_STATUS" = "failure" ]; then
             ALL_PASSED=false
           fi
-          
+
           if [ "$ALL_PASSED" = true ]; then
             echo "## ✅ All Tests Passed!" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -785,7 +785,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Please review the individual job logs for details." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
