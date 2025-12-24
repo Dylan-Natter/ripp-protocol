@@ -35,6 +35,10 @@ const DEFAULT_CONFIG = {
   discovery: {
     minConfidence: 0.5,
     includeEvidence: true
+  },
+  workflow: {
+    autoApprove: false,
+    approvalThreshold: 0.75
   }
 };
 

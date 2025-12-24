@@ -25,13 +25,112 @@ async function confirmIntent(cwd, options = {}) {
     throw new Error('No candidates found in intent.candidates.yaml');
   }
 
+  // Auto-approve mode
+  if (options.autoApprove) {
+    return await autoApproveConfirm(cwd, candidates, options);
+  }
+
   // Interactive mode
   if (options.interactive !== false) {
-    return await interactiveConfirm(cwd, candidates);
+    return await interactiveConfirm(cwd, candidates, options);
   } else {
     // Generate markdown checklist mode
     return await generateChecklistConfirm(cwd, candidates);
   }
+}
+
+/**
+ * Auto-approve candidates above confidence threshold
+ */
+async function autoApproveConfirm(cwd, candidates, options = {}) {
+  const threshold = options.approvalThreshold || 0.75;
+  const confirmed = [];
+  const rejected = [];
+
+  console.log(`Auto-approving candidates with confidence ≥ ${(threshold * 100).toFixed(0)}%...\n`);
+
+  candidates.candidates.forEach((candidate, index) => {
+    const sectionName = candidate.purpose?.problem ? 'purpose' : 'full-packet';
+    
+    if (candidate.confidence >= threshold) {
+      // Build content object from candidate fields
+      const content = {};
+      const contentFields = [
+        'purpose',
+        'ux_flow',
+        'data_contracts',
+        'api_contracts',
+        'permissions',
+        'failure_modes',
+        'audit_events',
+        'nfrs',
+        'acceptance_tests',
+        'design_philosophy',
+        'design_decisions',
+        'constraints',
+        'success_criteria'
+      ];
+      contentFields.forEach(field => {
+        if (candidate[field]) {
+          content[field] = candidate[field];
+        }
+      });
+
+      confirmed.push({
+        section: sectionName,
+        source: 'confirmed',
+        confirmed_at: new Date().toISOString(),
+        confirmed_by: options.user || 'auto-approve',
+        original_confidence: candidate.confidence,
+        evidence: candidate.evidence,
+        content: content
+      });
+
+      console.log(`  ✓ Candidate ${index + 1}: ${sectionName} (${(candidate.confidence * 100).toFixed(1)}%)`);
+    } else {
+      rejected.push({
+        section: sectionName,
+        original_content: candidate,
+        original_confidence: candidate.confidence,
+        rejected_at: new Date().toISOString(),
+        rejected_by: options.user || 'auto-approve',
+        reason: `Below confidence threshold (${(candidate.confidence * 100).toFixed(1)}% < ${(threshold * 100).toFixed(0)}%)`
+      });
+      console.log(`  ✗ Candidate ${index + 1}: ${sectionName} (${(candidate.confidence * 100).toFixed(1)}% - below threshold)`);
+    }
+  });
+
+  console.log('');
+
+  if (confirmed.length === 0) {
+    throw new Error(`No candidates met the confidence threshold of ${(threshold * 100).toFixed(0)}%. Lower the threshold or run without --auto-approve to manually review.`);
+  }
+
+  // Save confirmed intent
+  const confirmedData = {
+    version: '1.0',
+    confirmed
+  };
+
+  const confirmedPath = path.join(cwd, '.ripp', 'intent.confirmed.yaml');
+  fs.writeFileSync(confirmedPath, yaml.dump(confirmedData, { indent: 2 }), 'utf8');
+
+  // Save rejected intent (optional)
+  if (rejected.length > 0) {
+    const rejectedData = {
+      version: '1.0',
+      rejected
+    };
+
+    const rejectedPath = path.join(cwd, '.ripp', 'intent.rejected.yaml');
+    fs.writeFileSync(rejectedPath, yaml.dump(rejectedData, { indent: 2 }), 'utf8');
+  }
+
+  return {
+    confirmedPath,
+    confirmedCount: confirmed.length,
+    rejectedCount: rejected.length
+  };
 }
 
 /**
@@ -249,6 +348,7 @@ function question(rl, prompt) {
 
 module.exports = {
   confirmIntent,
+  autoApproveConfirm,
   interactiveConfirm,
   generateChecklistConfirm
 };

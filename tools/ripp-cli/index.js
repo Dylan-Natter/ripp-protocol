@@ -281,6 +281,7 @@ ${colors.green}Commands:${colors.reset}
                                     Analyze code/schema and generate DRAFT RIPP packet
 
 ${colors.blue}vNext - Intent Discovery Mode:${colors.reset}
+  ripp go                           Run full workflow: init → evidence → discover → build (auto)
   ripp evidence build               Build evidence pack from repository
   ripp discover                     Infer candidate intent (requires AI enabled)
   ripp confirm                      Confirm candidate intent (interactive)
@@ -311,10 +312,15 @@ ${colors.green}Confirm Options:${colors.reset}
 
 ${colors.green}Build Options:${colors.reset}
   --from-checklist                  Build from intent.checklist.md (after manual review)
+  --auto-approve, -y                Auto-accept candidates above confidence threshold
   --packet-id <id>                  Packet ID for generated RIPP (default: discovered-intent)
   --title <title>                   Title for generated RIPP packet
   --output-name <file>              Output file name (default: handoff.ripp.yaml)
   --user <id>                       User identifier for confirmation tracking
+
+${colors.green}Go Options:${colors.reset}
+  --auto-approve, -y                Auto-accept candidates (required for non-interactive mode)
+  --skip-validation                 Skip validation step
 
 ${colors.green}Metrics Options:${colors.reset}
   --report                          Write metrics to .ripp/metrics.json
@@ -366,11 +372,14 @@ ${colors.green}Examples:${colors.reset}
   ripp analyze schema.json --output draft.ripp.yaml --packet-id my-api
 
 ${colors.blue}Intent Discovery Examples:${colors.reset}
+  ripp go --auto-approve              Run full workflow with auto-approval
+  ripp go -y --skip-validation        Quick workflow without validation
+  
   ripp evidence build
   RIPP_AI_ENABLED=true ripp discover --target-level 2
   ripp confirm --interactive
   ripp confirm --checklist
-  ripp build
+  ripp build --auto-approve
   ripp build --from-checklist
   ripp build --from-checklist --packet-id my-feature --title "My Feature"
 
@@ -586,6 +595,8 @@ async function main() {
     await handleConfirmCommand(args);
   } else if (command === 'build') {
     await handleBuildCommand(args);
+  } else if (command === 'go') {
+    await handleGoCommand(args);
   } else if (command === 'metrics') {
     await handleMetricsCommand(args);
   } else if (command === 'doctor') {
@@ -1329,7 +1340,8 @@ async function handleBuildCommand(args) {
     packetId: null,
     title: null,
     outputName: null,
-    fromChecklist: args.includes('--from-checklist')
+    fromChecklist: args.includes('--from-checklist'),
+    autoApprove: args.includes('--auto-approve') || args.includes('-y')
   };
 
   const packetIdIndex = args.indexOf('--packet-id');
@@ -1397,6 +1409,85 @@ async function handleBuildCommand(args) {
       console.log('  4. Run "ripp confirm --checklist" to regenerate checklist');
     }
     console.log('');
+    process.exit(1);
+  }
+}
+
+async function handleGoCommand(args) {
+  const cwd = process.cwd();
+  const autoApprove = args.includes('--auto-approve') || args.includes('-y');
+  const skipValidation = args.includes('--skip-validation');
+
+  console.log(`${colors.blue}🚀 Running full RIPP workflow...${colors.reset}\n`);
+
+  try {
+    const config = loadConfig(cwd);
+    const threshold = config.workflow?.approvalThreshold || 0.75;
+
+    // Step 1: Initialize (if not already done)
+    console.log(`${colors.blue}Step 1: Initialize${colors.reset}`);
+    const rippDir = path.join(cwd, '.ripp');
+    if (!fs.existsSync(rippDir)) {
+      const initResults = initRepository({ force: false });
+      console.log(`  ${colors.green}✓ Initialized .ripp directory${colors.reset}\n`);
+    } else {
+      console.log(`  ${colors.gray}✓ Already initialized${colors.reset}\n`);
+    }
+
+    // Step 2: Build Evidence Pack
+    console.log(`${colors.blue}Step 2: Build Evidence Pack${colors.reset}`);
+    const evidenceResult = buildEvidencePack(cwd, config);
+    console.log(`  ${colors.green}✓ Evidence pack created (${evidenceResult.fileCount} files)${colors.reset}\n`);
+
+    // Step 3: Discover Intent
+    console.log(`${colors.blue}Step 3: Discover Intent${colors.reset}`);
+    const discoverResult = await discoverIntent(cwd, { ai: config.ai });
+    console.log(`  ${colors.green}✓ Found ${discoverResult.candidateCount} candidate(s)${colors.reset}\n`);
+
+    // Step 4: Confirm Intent (auto-approve if flag set)
+    console.log(`${colors.blue}Step 4: Confirm Intent${colors.reset}`);
+    if (autoApprove) {
+      console.log(`  ${colors.gray}Auto-approving candidates ≥ ${(threshold * 100).toFixed(0)}%${colors.reset}`);
+      const confirmResult = await confirmIntent(cwd, {
+        autoApprove: true,
+        approvalThreshold: threshold
+      });
+      console.log(`  ${colors.green}✓ Confirmed ${confirmResult.confirmedCount} candidate(s)${colors.reset}\n`);
+    } else {
+      throw new Error('Manual confirmation required. Use --auto-approve flag or run "ripp confirm" separately.');
+    }
+
+    // Step 5: Build Canonical Artifacts
+    console.log(`${colors.blue}Step 5: Build Artifacts${colors.reset}`);
+    const buildResult = buildCanonicalArtifacts(cwd, {});
+    console.log(`  ${colors.green}✓ RIPP packet created${colors.reset}\n`);
+
+    // Step 6: Validate (unless skipped)
+    if (!skipValidation) {
+      console.log(`${colors.blue}Step 6: Validate${colors.reset}`);
+      const { validatePackets } = require('./lib/validate');
+      const validateResult = validatePackets(cwd, { rippFiles: [buildResult.packetPath] });
+      if (validateResult.allValid) {
+        console.log(`  ${colors.green}✓ Validation passed${colors.reset}\n`);
+      } else {
+        console.log(`  ${colors.yellow}⚠ Validation warnings (non-fatal)${colors.reset}\n`);
+      }
+    }
+
+    // Summary
+    console.log(`${colors.green}✨ RIPP workflow complete!${colors.reset}\n`);
+    console.log(`${colors.gray}Artifacts:${colors.reset}`);
+    console.log(`  ${colors.gray}Packet: ${buildResult.packetPath}${colors.reset}`);
+    console.log(`  ${colors.gray}Handoff: ${buildResult.markdownPath}${colors.reset}`);
+    console.log('');
+    console.log(`${colors.blue}Next steps:${colors.reset}`);
+    console.log(`  ${colors.gray}• Review artifacts in .ripp/${colors.reset}`);
+    console.log(`  ${colors.gray}• Run "ripp package" to create handoff.zip${colors.reset}`);
+    console.log('');
+
+    process.exit(0);
+  } catch (error) {
+    console.error(`\n${colors.red}✗ Workflow failed: ${error.message}${colors.reset}\n`);
     process.exit(1);
   }
 }
