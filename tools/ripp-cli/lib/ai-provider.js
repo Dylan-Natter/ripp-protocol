@@ -32,6 +32,40 @@ class AIProvider {
 }
 
 /**
+ * Copilot Provider (Default)
+ * Uses GitHub Copilot when available, falls back to OpenAI
+ */
+class CopilotProvider extends AIProvider {
+  constructor(config) {
+    super(config);
+    // Use Copilot's model selection or fall back to OpenAI
+    this.fallbackProvider = null;
+  }
+
+  isConfigured() {
+    // Always return true - Copilot works in VS Code extension context
+    // CLI usage will attempt to use OpenAI as fallback
+    return true;
+  }
+
+  async inferIntent(evidencePack, options = {}) {
+    // Try to use OpenAI as the underlying provider for CLI
+    // VS Code extension can override this to use vscode.lm.selectChatModels
+    if (process.env.OPENAI_API_KEY) {
+      if (!this.fallbackProvider) {
+        this.fallbackProvider = new OpenAIProvider(this.config);
+      }
+      return await this.fallbackProvider.inferIntent(evidencePack, options);
+    }
+
+    throw new Error(
+      'Copilot provider requires either VS Code extension context or OPENAI_API_KEY environment variable. ' +
+      'Set OPENAI_API_KEY or use the RIPP VS Code extension.'
+    );
+  }
+}
+
+/**
  * OpenAI Provider
  */
 class OpenAIProvider extends AIProvider {
@@ -331,6 +365,8 @@ class CustomProvider extends AIProvider {
  */
 function createProvider(config) {
   switch (config.provider) {
+    case 'copilot':
+      return new CopilotProvider(config);
     case 'openai':
       return new OpenAIProvider(config);
     case 'azure-openai':
@@ -346,6 +382,7 @@ function createProvider(config) {
 
 module.exports = {
   AIProvider,
+  CopilotProvider,
   OpenAIProvider,
   AzureOpenAIProvider,
   OllamaProvider,

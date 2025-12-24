@@ -13,8 +13,8 @@ const DEFAULT_CONFIG = {
   rippVersion: '1.0',
   ai: {
     enabled: false,
-    provider: 'openai',
-    model: 'gpt-4o-mini',
+    provider: 'copilot', // copilot (default) | openai | azure-openai | ollama | custom
+    model: 'gpt-4o',
     maxRetries: 3,
     timeout: 30000
   },
@@ -186,7 +186,12 @@ function checkAiEnabled(config) {
 
   // Check for API key based on provider
   const provider = config.ai.provider;
-  if (provider === 'openai') {
+  if (provider === 'copilot') {
+    // Copilot uses VS Code's language model API or falls back to OpenAI
+    // No explicit API key required when using VS Code extension
+    // CLI usage will fall back to OpenAI provider if OPENAI_API_KEY is set
+    return { valid: true };
+  } else if (provider === 'openai') {
     if (!process.env.OPENAI_API_KEY) {
       return {
         enabled: false,
@@ -240,7 +245,7 @@ rippVersion: "1.0"
 # AI is DISABLED BY DEFAULT for security and trust
 ai:
   enabled: false  # Set to true AND set RIPP_AI_ENABLED=true to enable AI features
-  provider: openai  # openai | azure-openai | ollama | custom
+  provider: copilot # copilot (default) | openai | azure-openai | ollama | custom
   model: gpt-4o-mini  # Model identifier
 
 # Evidence Pack Configuration

@@ -8,8 +8,8 @@ rippVersion: '1.0'
 # AI is DISABLED BY DEFAULT for security and trust
 ai:
   enabled: true # Set to true AND set RIPP_AI_ENABLED=true to enable AI features
-  provider: openai # openai | azure-openai | ollama | custom
-  model: gpt-4o-mini # Model identifier
+  provider: copilot # copilot (default, uses GitHub Copilot) | openai | azure-openai | ollama | custom
+  model: gpt-4o # Model identifier (gpt-4o, gpt-4o-mini, etc.)
 
 # Evidence Pack Configuration
 evidencePack:

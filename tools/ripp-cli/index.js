@@ -1254,7 +1254,7 @@ async function handleDiscoverCommand(args) {
       console.log(`${colors.blue}To enable AI:${colors.reset}`);
       console.log('  1. Set ai.enabled: true in .ripp/config.yaml');
       console.log('  2. Set RIPP_AI_ENABLED=true environment variable');
-      console.log('  3. Set provider API key (e.g., OPENAI_API_KEY)');
+      console.log('  3. Configure provider (default: copilot) or set OPENAI_API_KEY for CLI usage');
       console.log('');
       process.exit(1);
     }
