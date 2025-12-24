@@ -13,6 +13,8 @@ Tools and integrations for working with RIPP packets.
 
 The official RIPP validator CLI validates packets against the JSON Schema and checks structural conventions.
 
+> **Note**: As of v1.2.1, the CLI bundles schema files internally for reliable global installation. No external schema dependencies required.
+
 ### Installation
 
 **Via npm (recommended):**

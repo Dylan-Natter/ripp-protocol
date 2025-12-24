@@ -5,6 +5,15 @@ All notable changes to the RIPP CLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] (2025-12-24)
+
+### Bug Fixes
+
+* **cli:** bundle schema files in npm package to fix validation when installed globally ([ed94409](https://github.com/Dylan-Natter/ripp-protocol/commit/ed94409))
+  - Schema files are now included in the npm package under `schema/` directory
+  - Updated schema loading paths to use bundled schemas instead of parent directory
+  - Fixes post-publish smoke test failures from version 1.2.0
+
 ## [1.2.0](https://github.com/Dylan-Natter/ripp-protocol/compare/ripp-cli-v1.1.0...ripp-cli-v1.2.0) (2025-12-23)
 
 
