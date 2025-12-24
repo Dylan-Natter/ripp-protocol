@@ -37,6 +37,7 @@ npm link
 | `ripp lint`     | Check best practices                       | ✅ Yes                    |
 | `ripp package`  | Package RIPP packet into handoff artifact  | ✅ Yes (creates new file) |
 | `ripp analyze`  | Generate DRAFT packet from code/schemas    | ✅ Yes (creates new file) |
+| `ripp go`       | Run full workflow: discover → build (auto) | ✅ Yes (creates new file) |
 | `ripp evidence` | Build evidence pack from repository        | ✅ Yes (creates new file) |
 | `ripp discover` | AI-assisted intent discovery (optional)    | ✅ Yes (creates new file) |
 | `ripp confirm`  | Confirm candidate intent (human-in-loop)   | ✅ Yes (creates new file) |
@@ -672,6 +673,145 @@ purpose:
 
 - `0` — Analysis successful, draft created
 - `1` — Analysis failed (invalid input, file write error)
+
+---
+
+## `ripp go`
+
+**vNext Feature** — Run full workflow: init → evidence → discover → build (auto).
+
+### Purpose
+
+Provides a streamlined, one-command workflow that automatically runs the complete intent discovery pipeline. Designed for quick iteration and CI/CD integration.
+
+### What It Does
+
+- ✅ Ensures RIPP is initialized (runs `init` if needed)
+- ✅ Builds evidence pack from repository
+- ✅ Discovers candidate intent (with AI or template fallback)
+- ✅ Auto-approves high-confidence candidates (when `--auto-approve` flag is used)
+- ✅ Builds canonical RIPP artifacts
+- ✅ Optionally validates generated packets
+
+### What It Never Does
+
+- ❌ Modifies source code files (only creates RIPP artifacts)
+- ❌ Commits changes to git
+- ❌ Requires AI (falls back to template-based discovery)
+
+### Usage
+
+```bash
+# Run full workflow with auto-approval (recommended for CI/CD)
+ripp go --auto-approve
+
+# Short form
+ripp go -y
+
+# Skip validation step
+ripp go --auto-approve --skip-validation
+```
+
+### Options
+
+| Option               | Description                            | Default |
+| -------------------- | -------------------------------------- | ------- |
+| `--auto-approve, -y` | Auto-accept high-confidence candidates | `false` |
+| `--skip-validation`  | Skip validation step                   | `false` |
+
+### Workflow Steps
+
+The `ripp go` command executes these steps in sequence:
+
+1. **Initialize** — Ensures `.ripp/` directory and config exist
+2. **Evidence Build** — Scans repository for high-signal facts
+3. **Discovery** — Infers intent using AI or templates
+4. **Build** — Auto-approves and compiles RIPP artifacts
+5. **Validate** — Verifies generated packets (unless `--skip-validation`)
+
+### AI vs Template Fallback
+
+- **With AI enabled**: Uses configured AI provider for world-class analysis
+- **Without AI**: Automatically falls back to template-based discovery
+  - Framework detection (Express, FastAPI, React, etc.)
+  - Project type inference
+  - Pattern matching for common intents
+  - Lower confidence scores (0.65 vs 0.92+ for AI)
+
+### Auto-Approval Behavior
+
+When `--auto-approve` is used:
+
+- Candidates with confidence ≥ 0.85 are automatically accepted
+- Lower-confidence candidates are skipped (not built)
+- Full provenance metadata is preserved
+- No interactive prompts required
+
+### Example Output
+
+```
+Running RIPP workflow...
+
+✓ Initialization complete
+  Config: .ripp/config.yaml
+
+✓ Evidence pack built successfully
+  Index: .ripp/evidence/evidence.index.json
+  Files: 45
+  Size: 125.3 KB
+
+✓ Intent discovery complete
+  Provider: template (AI not enabled)
+  Candidates: 3
+  Avg Confidence: 0.68
+
+✓ Auto-approval complete
+  Accepted: 2 (confidence ≥ 0.85)
+  Skipped: 1 (low confidence)
+
+✓ Build complete
+  RIPP Packet: .ripp/handoff.ripp.yaml
+  Handoff MD: .ripp/handoff.ripp.md
+  Level: 1
+
+✓ Validation passed
+  No errors found
+
+Workflow complete! 🎉
+```
+
+### Exit Codes
+
+- `0` — Workflow completed successfully
+- `1` — Workflow failed at any step
+
+### CI/CD Integration
+
+Recommended GitHub Actions usage:
+
+```yaml
+- name: Generate RIPP Artifacts
+  run: npx ripp-cli go --auto-approve
+  env:
+    RIPP_AI_ENABLED: false # Template mode, no API keys needed
+```
+
+Or with AI enabled:
+
+```yaml
+- name: Generate RIPP Artifacts
+  run: npx ripp-cli go --auto-approve
+  env:
+    RIPP_AI_ENABLED: true
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+```
+
+### Use Cases
+
+- **Quick prototyping**: Generate RIPP artifacts without manual steps
+- **CI/CD pipelines**: Automated artifact generation on pull requests
+- **Template-based discovery**: Zero-friction onboarding without AI setup
+- **Incremental development**: Regenerate artifacts as code evolves
 
 ---
 
@@ -1392,6 +1532,7 @@ It finds all `*.ripp.yaml` and `*.ripp.json` files in the repository.
 | `ripp lint`     | `0`     | `1` (errors, or warnings with `--strict`) |
 | `ripp package`  | `0`     | `1` (validation or packaging error)       |
 | `ripp analyze`  | `0`     | `1` (analysis failure)                    |
+| `ripp go`       | `0`     | `1` (workflow failed at any step)         |
 | `ripp evidence` | `0`     | `1` (build failed)                        |
 | `ripp discover` | `0`     | `1` (AI not enabled, discovery failed)    |
 | `ripp confirm`  | `0`     | `1` (confirmation failed)                 |
