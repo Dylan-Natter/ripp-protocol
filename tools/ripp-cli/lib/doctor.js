@@ -219,6 +219,17 @@ function checkConfirmedIntent(cwd) {
  */
 function checkSchema() {
   try {
+    // First check bundled schema (always available when CLI is installed)
+    const bundledSchemaPath = path.join(__dirname, '../schema', 'ripp-1.0.schema.json');
+    if (fs.existsSync(bundledSchemaPath)) {
+      return {
+        status: 'pass',
+        message: 'RIPP schema accessible',
+        fix: null
+      };
+    }
+    
+    // Fallback: check if we're in project root (for development)
     const projectRoot = path.resolve(__dirname, '../../..');
     const schemaPath = path.join(projectRoot, 'schema', 'ripp-1.0.schema.json');
     if (fs.existsSync(schemaPath)) {
