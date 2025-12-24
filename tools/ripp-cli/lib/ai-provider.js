@@ -1,76 +1,18 @@
 /**
- * RIPP AI Provider Interface
- * Pluggable architecture for AI-assisted intent inference
+ * RIPP AI Provider - World Class Intent and Functionality Analysis
+ * 
+ * Unified AI provider using GitHub Copilot / OpenAI for intent inference.
+ * Single, streamlined flow for analyzing code evidence and generating
+ * production-ready RIPP intent candidates.
  */
 
 /**
- * Base AI Provider class
- * All providers must implement this interface
+ * Copilot AI Provider
+ * Primary implementation for world-class intent discovery and analysis.
  */
-class AIProvider {
+class CopilotProvider {
   constructor(config) {
     this.config = config;
-  }
-
-  /**
-   * Infer intent from evidence pack
-   * @param {Object} evidencePack - Evidence pack index
-   * @param {Object} options - Additional options
-   * @returns {Promise<Object>} Candidate intent with confidence scores
-   */
-  async inferIntent(evidencePack, options) {
-    throw new Error('inferIntent() must be implemented by subclass');
-  }
-
-  /**
-   * Validate that the provider is properly configured
-   * @returns {boolean} True if configured correctly
-   */
-  isConfigured() {
-    throw new Error('isConfigured() must be implemented by subclass');
-  }
-}
-
-/**
- * Copilot Provider (Default)
- * Uses GitHub Copilot when available, falls back to OpenAI
- */
-class CopilotProvider extends AIProvider {
-  constructor(config) {
-    super(config);
-    // Use Copilot's model selection or fall back to OpenAI
-    this.fallbackProvider = null;
-  }
-
-  isConfigured() {
-    // Always return true - Copilot works in VS Code extension context
-    // CLI usage will attempt to use OpenAI as fallback
-    return true;
-  }
-
-  async inferIntent(evidencePack, options = {}) {
-    // Try to use OpenAI as the underlying provider for CLI
-    // VS Code extension can override this to use vscode.lm.selectChatModels
-    if (process.env.OPENAI_API_KEY) {
-      if (!this.fallbackProvider) {
-        this.fallbackProvider = new OpenAIProvider(this.config);
-      }
-      return await this.fallbackProvider.inferIntent(evidencePack, options);
-    }
-
-    throw new Error(
-      'Copilot provider requires either VS Code extension context or OPENAI_API_KEY environment variable. ' +
-      'Set OPENAI_API_KEY or use the RIPP VS Code extension.'
-    );
-  }
-}
-
-/**
- * OpenAI Provider
- */
-class OpenAIProvider extends AIProvider {
-  constructor(config) {
-    super(config);
     this.apiKey = process.env.OPENAI_API_KEY;
   }
 
@@ -113,50 +55,81 @@ class OpenAIProvider extends AIProvider {
     const targetLevel = options.targetLevel || 1;
 
     return {
-      system: `You are a RIPP (Regenerative Intent Prompting Protocol) intent inference assistant.
+      system: `You are a RIPP (Regenerative Intent Prompting Protocol) World-Class Intent Analysis Engine.
 
-Your task is to analyze code evidence and infer candidate RIPP sections with confidence scores.
+Your mission: Generate production-ready intent candidates with exceptional accuracy and insight.
 
-CRITICAL RULES:
-1. Every candidate MUST have:
+WORLD-CLASS ANALYSIS STANDARDS:
+1. Every candidate MUST include:
    - source: "inferred"
-   - confidence: 0.0-1.0 (be conservative)
-   - evidence: array of {file, line, snippet} references
+   - confidence: 0.0-1.0 (be rigorous - only high scores for clear evidence)
+   - evidence: detailed {file, line, snippet} references showing WHY you're confident
    - requires_human_confirmation: true
 
-2. NEVER infer:
-   - Permissions (mark as "unknown" - security critical)
-   - Tenancy (mark as "unknown" - security critical)
-   - Audit requirements (mark as "unknown" - compliance critical)
+2. SECURITY-CRITICAL SECTIONS (NEVER guess):
+   - Permissions: Mark as "unknown" - requires security review
+   - Tenancy: Mark as "unknown" - multi-tenant implications
+   - Audit requirements: Mark as "unknown" - compliance critical
 
-3. Be conservative with confidence:
-   - 0.9-1.0: Direct evidence in code
-   - 0.7-0.9: Strong patterns
-   - 0.5-0.7: Reasonable inference
-   - 0.0-0.5: Weak or uncertain
+3. CONFIDENCE CALIBRATION (be conservative):
+   - 0.95-1.0: Direct, explicit code evidence (function names, clear implementations)
+   - 0.85-0.95: Strong patterns with multiple corroborating signals
+   - 0.75-0.85: Clear inference from structure and conventions
+   - 0.60-0.75: Reasonable deduction, some ambiguity
+   - Below 0.60: Too uncertain - don't include
 
-4. Output MUST be valid JSON matching the intent-candidates schema.`,
+4. EVIDENCE QUALITY:
+   - Include specific code snippets that support your analysis
+   - Reference actual file paths and line numbers
+   - Explain the reasoning behind each inference
+   - Cross-reference multiple evidence sources when possible
 
-      user: `Analyze this evidence pack and generate Level ${targetLevel} RIPP candidate intent:
+5. BUSINESS VALUE FOCUS:
+   - Purpose: Articulate the REAL problem being solved (not just technical description)
+   - Solution: Describe HOW the system solves it (architecture, approach)
+   - Value: Specify CONCRETE value delivered (user outcomes, business impact)
 
-Evidence Summary:
-- Dependencies: ${evidencePack.evidence.dependencies.length}
-- Routes: ${evidencePack.evidence.routes.length}
-- Schemas: ${evidencePack.evidence.schemas.length}
-- Auth Signals: ${evidencePack.evidence.auth.length}
-- Workflows: ${evidencePack.evidence.workflows.length}
+6. OUTPUT FORMAT:
+   - Valid JSON matching intent-candidates schema
+   - No markdown, no explanations outside the JSON
+   - Structured for automated processing and validation`,
 
-Evidence Details:
+      user: `Analyze this codebase evidence and generate Level ${targetLevel} RIPP candidate intent with world-class precision:
+
+EVIDENCE SUMMARY:
+- Dependencies: ${evidencePack.evidence.dependencies.length} packages
+- Routes/Endpoints: ${evidencePack.evidence.routes.length} identified
+- Data Schemas: ${evidencePack.evidence.schemas.length} structures
+- Auth Signals: ${evidencePack.evidence.auth.length} security indicators
+- Workflows: ${evidencePack.evidence.workflows.length} business processes
+
+DETAILED EVIDENCE:
 ${JSON.stringify(evidencePack.evidence, null, 2)}
 
-Generate candidates for these sections:
-- purpose (problem, solution, value)
-- ux_flow (user interaction steps)
-- data_contracts (inputs, outputs)
-${targetLevel >= 2 ? '- api_contracts (endpoints, methods)' : ''}
-${targetLevel >= 2 ? '- failure_modes (error scenarios)' : ''}
+ANALYSIS TARGETS (Level ${targetLevel}):
+Core Sections (Required):
+- purpose: Define problem, solution, and business value with clarity
+- ux_flow: Map complete user journey with triggers, actions, and results
+- data_contracts: Specify inputs/outputs with precise field definitions
 
-Return ONLY valid JSON matching the schema. No markdown, no explanations.`,
+${targetLevel >= 2 ? `Advanced Sections (Level 2+):
+- api_contracts: Document all endpoints with methods, params, responses
+- failure_modes: Identify error scenarios and recovery strategies
+- nfrs: Define performance, security, and reliability requirements` : ''}
+
+${targetLevel >= 3 ? `Expert Sections (Level 3):
+- permissions: Role-based access controls (mark "unknown" if unclear)
+- audit_events: Compliance logging requirements
+- acceptance_tests: Testable success criteria` : ''}
+
+DELIVERABLE:
+Return ONLY valid JSON matching the intent-candidates schema. Focus on:
+1. High-confidence analysis backed by concrete evidence
+2. Business-value orientation (not just technical description)
+3. Production-ready candidates suitable for immediate review
+4. Clear reasoning traceable to specific code artifacts
+
+NO markdown formatting. NO explanatory text. PURE JSON output.`,
 
       feedback: null
     };
@@ -305,87 +278,13 @@ Return ONLY valid JSON matching the schema. No markdown, no explanations.`,
 }
 
 /**
- * Azure OpenAI Provider
- */
-class AzureOpenAIProvider extends OpenAIProvider {
-  constructor(config) {
-    super(config);
-    this.apiKey = process.env.AZURE_OPENAI_API_KEY;
-    this.endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-  }
-
-  isConfigured() {
-    return !!this.apiKey && !!this.endpoint;
-  }
-
-  async makeRequest(prompt, options) {
-    // Similar to OpenAI but with Azure-specific endpoint
-    throw new Error('Azure OpenAI provider not yet implemented');
-  }
-}
-
-/**
- * Ollama Provider (local)
- */
-class OllamaProvider extends AIProvider {
-  constructor(config) {
-    super(config);
-    this.endpoint = config.customEndpoint || 'http://localhost:11434';
-  }
-
-  isConfigured() {
-    return !!this.endpoint;
-  }
-
-  async inferIntent(evidencePack, options = {}) {
-    throw new Error('Ollama provider not yet implemented');
-  }
-}
-
-/**
- * Custom Provider
- */
-class CustomProvider extends AIProvider {
-  constructor(config) {
-    super(config);
-    this.endpoint = config.customEndpoint;
-  }
-
-  isConfigured() {
-    return !!this.endpoint;
-  }
-
-  async inferIntent(evidencePack, options = {}) {
-    throw new Error('Custom provider not yet implemented');
-  }
-}
-
-/**
- * Provider Factory
+ * Provider Factory - Creates Copilot AI provider instance
  */
 function createProvider(config) {
-  switch (config.provider) {
-    case 'copilot':
-      return new CopilotProvider(config);
-    case 'openai':
-      return new OpenAIProvider(config);
-    case 'azure-openai':
-      return new AzureOpenAIProvider(config);
-    case 'ollama':
-      return new OllamaProvider(config);
-    case 'custom':
-      return new CustomProvider(config);
-    default:
-      throw new Error(`Unknown AI provider: ${config.provider}`);
-  }
+  return new CopilotProvider(config);
 }
 
 module.exports = {
-  AIProvider,
   CopilotProvider,
-  OpenAIProvider,
-  AzureOpenAIProvider,
-  OllamaProvider,
-  CustomProvider,
   createProvider
 };

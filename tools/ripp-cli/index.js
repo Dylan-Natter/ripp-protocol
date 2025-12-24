@@ -1251,17 +1251,17 @@ async function handleDiscoverCommand(args) {
       console.error(`${colors.red}Error: AI is not enabled${colors.reset}`);
       console.error(`  ${aiCheck.reason}`);
       console.log('');
-      console.log(`${colors.blue}To enable AI:${colors.reset}`);
+      console.log(`${colors.blue}To enable World-Class Intent Analysis:${colors.reset}`);
       console.log('  1. Set ai.enabled: true in .ripp/config.yaml');
       console.log('  2. Set RIPP_AI_ENABLED=true environment variable');
-      console.log('  3. Configure provider (default: copilot) or set OPENAI_API_KEY for CLI usage');
+      console.log('  3. Set OPENAI_API_KEY environment variable');
       console.log('');
       process.exit(1);
     }
 
-    console.log(`${colors.gray}AI Provider: ${config.ai.provider}${colors.reset}`);
-    console.log(`${colors.gray}Model: ${config.ai.model}${colors.reset}`);
+    console.log(`${colors.gray}AI Model: ${config.ai.model}${colors.reset}`);
     console.log(`${colors.gray}Target Level: ${options.targetLevel}${colors.reset}`);
+    console.log(`${colors.gray}Mode: World-Class Intent Analysis${colors.reset}`);
     console.log('');
 
     const result = await discoverIntent(cwd, options);
@@ -1272,7 +1272,7 @@ async function handleDiscoverCommand(args) {
     console.log('');
 
     console.log(`${colors.yellow}⚠ IMPORTANT:${colors.reset}`);
-    console.log('  All candidates are INFERRED and require human confirmation.');
+    console.log('  All candidates are AI-INFERRED and require human confirmation.');
     console.log('  Run "ripp confirm" to review and approve candidates.');
     console.log('');
 

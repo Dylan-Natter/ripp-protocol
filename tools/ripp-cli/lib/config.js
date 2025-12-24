@@ -13,7 +13,6 @@ const DEFAULT_CONFIG = {
   rippVersion: '1.0',
   ai: {
     enabled: false,
-    provider: 'copilot', // copilot (default) | openai | azure-openai | ollama | custom
     model: 'gpt-4o',
     maxRetries: 3,
     timeout: 30000
@@ -184,37 +183,15 @@ function checkAiEnabled(config) {
     };
   }
 
-  // Check for API key based on provider
-  const provider = config.ai.provider;
-  if (provider === 'copilot') {
-    // Copilot uses VS Code's language model API or falls back to OpenAI
-    // No explicit API key required when using VS Code extension
-    // CLI usage will fall back to OpenAI provider if OPENAI_API_KEY is set
-    return { valid: true };
-  } else if (provider === 'openai') {
-    if (!process.env.OPENAI_API_KEY) {
-      return {
-        enabled: false,
-        reason: 'OPENAI_API_KEY environment variable is not set'
-      };
-    }
-  } else if (provider === 'azure-openai') {
-    if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
-      return {
-        enabled: false,
-        reason: 'AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT environment variables are required'
-      };
-    }
-  } else if (provider === 'custom') {
-    if (!config.ai.customEndpoint) {
-      return {
-        enabled: false,
-        reason: 'Custom provider requires customEndpoint in config'
-      };
-    }
+  // Validate API key for OpenAI usage
+  if (!process.env.OPENAI_API_KEY) {
+    return {
+      enabled: false,
+      reason: 'OPENAI_API_KEY environment variable is not set'
+    };
   }
 
-  return { enabled: true, reason: '' };
+  return { enabled: true, valid: true };
 }
 
 /**
@@ -245,8 +222,9 @@ rippVersion: "1.0"
 # AI is DISABLED BY DEFAULT for security and trust
 ai:
   enabled: false  # Set to true AND set RIPP_AI_ENABLED=true to enable AI features
-  provider: copilot # copilot (default) | openai | azure-openai | ollama | custom
-  model: gpt-4o-mini  # Model identifier
+  model: gpt-4o  # AI model for intent analysis (gpt-4o, gpt-4o-mini, etc.)
+  maxRetries: 3  # Retry attempts for AI inference
+  timeout: 30000  # Request timeout in milliseconds
 
 # Evidence Pack Configuration
 evidencePack:
