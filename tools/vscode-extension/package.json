@@ -2,7 +2,7 @@
   "name": "ripp-protocol",
   "displayName": "RIPP Protocol",
   "description": "World-class VS Code companion for RIPP™ with 5-step guided workflow, AI integration, seamless CLI orchestration, and comprehensive validation.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "publisher": "RIPP",
   "license": "MIT",
   "engines": {
