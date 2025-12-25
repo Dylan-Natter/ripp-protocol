@@ -15,7 +15,7 @@ The release process has experienced issues due to manual version bumps that bypa
 **Status:** ⚠️ **Partially Fixed**
 
 - **Current version in code:** 1.2.1 (main branch, `tools/ripp-cli/package.json`)
-- **Latest GitHub Release:** ripp-cli-v1.2.0  
+- **Latest GitHub Release:** ripp-cli-v1.2.0
 - **Published on npm:** 1.2.1 ✓
 - **Release-please manifest:** Was 1.2.0, now fixed to 1.2.1
 
@@ -23,6 +23,7 @@ The release process has experienced issues due to manual version bumps that bypa
 Version 1.2.1 was manually bumped and published to npm to fix schema bundling issues (commit ed94409), bypassing the release-please process. No GitHub Release was created for v1.2.1.
 
 **What Happened:**
+
 1. Version 1.2.0 was published to npm on Dec 23
 2. Post-publish smoke tests failed (missing schema files)
 3. Automatic rollback triggered (issue #199) - unpublished v1.2.0
@@ -47,11 +48,13 @@ Version 0.5.2 was manually bumped in code with fixes for development workflow an
 **Status:** ✅ **FIXED**
 
 The `.release-please-manifest.json` file was out of sync with actual package versions:
+
 - CLI: manifest showed 1.2.0, but code has 1.2.1
 - VS Code: manifest showed 0.5.2 (correct)
 
 **Fix Applied:**  
 Updated `.release-please-manifest.json` to reflect current versions:
+
 ```json
 {
   "tools/vscode-extension": "0.5.2",
@@ -64,11 +67,13 @@ Updated `.release-please-manifest.json` to reflect current versions:
 **Status:** ✅ **Verified Working**
 
 All publishing workflows correctly check for `ENABLE_AUTO_PUBLISH` repository variable:
+
 - `npm-publish.yml` - publishes CLI to npm
 - `vscode-extension-publish.yml` - publishes extension to VS Code Marketplace
 - `build-binaries.yml` - builds platform binaries
 
 **Workflow Trigger Logic:**
+
 ```yaml
 if: |
   (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'ripp-cli-v') && vars.ENABLE_AUTO_PUBLISH == 'true') ||
@@ -90,19 +95,21 @@ Updated `.release-please-manifest.json` to match current package versions.
 #### For ripp-cli v1.2.1:
 
 Create a GitHub Release with:
+
 - **Tag:** `ripp-cli-v1.2.1`
 - **Title:** `ripp-cli: v1.2.1`
 - **Body:**
+
 ```markdown
 ## [1.2.1] (2025-12-24)
 
 ### Bug Fixes
 
-* **cli:** bundle schema files in npm package to fix validation when installed globally ([ed94409](https://github.com/Dylan-Natter/ripp-protocol/commit/ed94409))
+- **cli:** bundle schema files in npm package to fix validation when installed globally ([ed94409](https://github.com/Dylan-Natter/ripp-protocol/commit/ed94409))
   - Schema files are now included in the npm package under `schema/` directory
   - Updated schema loading paths to use bundled schemas instead of parent directory
   - Fixes post-publish smoke test failures from version 1.2.0
-* **cli:** fix checklist generation and parsing bugs in `ripp confirm` command
+- **cli:** fix checklist generation and parsing bugs in `ripp confirm` command
   - Fixed extraction of content fields (purpose, ux_flow, data_contracts, etc.) from candidates
   - Use 'purpose' or 'full-packet' as section name instead of 'unknown'
   - Add 'full-packet' to valid section types in checklist parser
@@ -115,16 +122,18 @@ Create a GitHub Release with:
 #### For VS Code Extension v0.5.2:
 
 Create a GitHub Release with:
+
 - **Tag:** `v0.5.2`
 - **Title:** `v0.5.2`
 - **Body:**
+
 ```markdown
 ## [0.5.2](https://github.com/Dylan-Natter/ripp-protocol/compare/v0.5.1...v0.5.2) (2025-12-24)
 
 ### Bug Fixes
 
-* **vscode:** improve development workflow and debugging ([141377e](https://github.com/Dylan-Natter/ripp-protocol/commit/141377e9ac2c5c14ca67b088a7ff46ffb754094f))
-* **vscode:** improve development workflow and debugging ([668d6ed](https://github.com/Dylan-Natter/ripp-protocol/commit/668d6ed5b1a4fb8ead28be5d7bf2cb5889ffef81))
+- **vscode:** improve development workflow and debugging ([141377e](https://github.com/Dylan-Natter/ripp-protocol/commit/141377e9ac2c5c14ca67b088a7ff46ffb754094f))
+- **vscode:** improve development workflow and debugging ([668d6ed](https://github.com/Dylan-Natter/ripp-protocol/commit/668d6ed5b1a4fb8ead28be5d7bf2cb5889ffef81))
 ```
 
 ### Fix 3: Enable Auto-Publishing (Optional)
@@ -139,11 +148,13 @@ To enable automatic publishing when releases are created:
    - **Value:** `true`
 
 **When enabled:**
+
 - Creating a release with tag `ripp-cli-v*` will automatically publish to npm
 - Creating a release with tag `v*` (not starting with `ripp-cli-v`) will automatically publish to VS Code Marketplace
 - Binary builds will automatically trigger for CLI releases
 
 **When disabled or unset:**
+
 - All publishing requires manual workflow dispatch
 - Provides additional safety for production environments
 
@@ -183,6 +194,7 @@ ripp --version
 ### 3. Test Manual Workflow Triggers
 
 **Test npm publish (dry run):**
+
 ```bash
 # Go to Actions → Publish NPM Package → Run workflow
 # Set: dry_run=true, package_path=tools/ripp-cli
@@ -190,6 +202,7 @@ ripp --version
 ```
 
 **Test VS Code extension build:**
+
 ```bash
 # Go to Actions → Publish to VS Code Marketplace → Run workflow
 # Set: publish=false
@@ -228,6 +241,7 @@ If you must bypass release-please (like the 1.2.1 schema fix):
 ### 4. Pre-Release Checklist
 
 Before creating a release:
+
 - [ ] All tests pass
 - [ ] Version matches across package.json and manifest
 - [ ] CHANGELOG.md is updated
@@ -237,6 +251,7 @@ Before creating a release:
 ### 5. Post-Release Verification
 
 After a release is created:
+
 - [ ] GitHub Release exists with correct tag
 - [ ] Package published to npm/marketplace (if auto-publish enabled)
 - [ ] Version matches on all platforms
@@ -246,18 +261,21 @@ After a release is created:
 ## Related Workflows
 
 ### Release-Please Workflow
+
 - **File:** `.github/workflows/release-please.yml`
 - **Triggers:** On push to main
 - **Purpose:** Creates/updates Release PRs based on conventional commits
 
-### NPM Publish Workflow  
+### NPM Publish Workflow
+
 - **File:** `.github/workflows/npm-publish.yml`
-- **Triggers:** 
+- **Triggers:**
   - Manual (workflow_dispatch)
   - Automatic on release (if ENABLE_AUTO_PUBLISH=true and tag starts with `ripp-cli-v`)
 - **Purpose:** Publishes CLI to npm registry
 
 ### VS Code Extension Publish Workflow
+
 - **File:** `.github/workflows/vscode-extension-publish.yml`
 - **Triggers:**
   - Manual (workflow_dispatch)
@@ -265,6 +283,7 @@ After a release is created:
 - **Purpose:** Publishes extension to VS Code Marketplace
 
 ### Build Binaries Workflow
+
 - **File:** `.github/workflows/build-binaries.yml`
 - **Triggers:**
   - Manual (workflow_dispatch)
