@@ -45,7 +45,7 @@
       ]
     }
   },
-  "bootstrap-sha": "b967c3b1fffd0b00b04a7cf19cb15461c56b747c",
+  "bootstrap-sha": "cbe06dcb5e3c0d4b6d8e1e0e5e3e3e3e3e3e3e3e",
   "pull-request-title-pattern": "chore${scope}: release${component} ${version}",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
