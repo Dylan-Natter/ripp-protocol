@@ -42,10 +42,15 @@ async function discoverIntent(cwd, options = {}) {
 
   if (!provider.isConfigured()) {
     console.log('ℹ AI provider not configured - using template-based discovery');
-    console.log('  (Set OPENAI_API_KEY for world-class AI analysis)');
+    console.log('  (Install GitHub CLI and login, or set OPENAI_API_KEY for AI analysis)');
     console.log('');
     return await templateDiscoverIntent(cwd, options);
   }
+
+  // Show which provider is being used
+  const providerName = provider.useGitHubModels ? 'GitHub Copilot (Models)' : 'OpenAI';
+  console.log(`🤖 Using ${providerName} for world-class intent analysis...`);
+  console.log('');
 
   // Infer intent with AI
   console.log('🤖 Using AI for world-class intent analysis...');

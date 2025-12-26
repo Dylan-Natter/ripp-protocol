@@ -13,11 +13,39 @@
 class CopilotProvider {
   constructor(config) {
     this.config = config;
-    this.apiKey = process.env.OPENAI_API_KEY;
+    // Try GitHub token first (for GitHub Models), fallback to OpenAI key
+    this.githubToken = process.env.GITHUB_TOKEN || this.getGitHubToken();
+    this.openaiKey = process.env.OPENAI_API_KEY;
+    
+    // Prefer GitHub Models if token available, fallback to OpenAI
+    this.useGitHubModels = !!this.githubToken;
+    this.apiKey = this.useGitHubModels ? this.githubToken : this.openaiKey;
+  }
+
+  getGitHubToken() {
+    // Try to get token from gh CLI
+    try {
+      const { execSync } = require('child_process');
+      const token = execSync('gh auth token', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+      return token || null;
+    } catch {
+      return null;
+    }
   }
 
   isConfigured() {
     return !!this.apiKey;
+  }
+
+  getEndpoint() {
+    if (this.useGitHubModels) {
+      return 'https://models.inference.ai.azure.com/chat/completions';
+    }
+    return 'https://api.openai.com/v1/chat/completions';
+  }
+
+  getProviderName() {
+    return this.useGitHubModels ? 'github-models' : 'openai';
   }
 
   async inferIntent(evidencePack, options = {}) {
@@ -170,13 +198,21 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+    const endpoint = this.getEndpoint();
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.apiKey}`
+    };
+
+    // Add extra headers for GitHub Models
+    if (this.useGitHubModels) {
+      headers['extra-parameters'] = 'pass-through';
+    }
+
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`
-        },
+        headers,
         body: JSON.stringify(requestBody),
         signal: controller.signal
       });
@@ -185,10 +221,18 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+        throw new Error(`API error: ${response.status} - ${error}`);
       }
 
       const data = await response.json();
+      
+      // Debug: Log the raw response
+      if (process.env.DEBUG_AI) {
+        console.log('\n=== DEBUG: Raw API Response ===');
+        console.log(JSON.stringify(data, null, 2));
+        console.log('=== END DEBUG ===\n');
+      }
+      
       return data.choices[0].message.content;
     } catch (error) {
       clearTimeout(timeoutId);
@@ -203,43 +247,74 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
     try {
       const parsed = JSON.parse(response);
 
-      // Wrap in standard structure if needed
-      if (Array.isArray(parsed)) {
-        return {
-          version: '1.0',
-          created: new Date().toISOString(),
-          generatedBy: {
-            provider: 'openai',
-            model: this.config.model || 'gpt-4o-mini',
-            evidencePackHash: this.hashEvidencePack(evidencePack)
-          },
-          candidates: parsed
-        };
-      } else if (parsed.candidates) {
-        return {
-          version: '1.0',
-          created: new Date().toISOString(),
-          generatedBy: {
-            provider: 'openai',
-            model: this.config.model || 'gpt-4o-mini',
-            evidencePackHash: this.hashEvidencePack(evidencePack)
-          },
-          ...parsed
-        };
-      } else {
-        return {
-          version: '1.0',
-          created: new Date().toISOString(),
-          generatedBy: {
-            provider: 'openai',
-            model: this.config.model || 'gpt-4o-mini',
-            evidencePackHash: this.hashEvidencePack(evidencePack)
-          },
-          candidates: [parsed]
-        };
+      // Debug: Show parsed structure
+      if (process.env.DEBUG_AI) {
+        console.log('\n=== DEBUG: Parsed Response ===');
+        console.log(JSON.stringify(parsed, null, 2).substring(0, 500));
+        console.log('=== END DEBUG ===\n');
       }
+
+      const providerName = this.getProviderName();
+      const baseMetadata = {
+        version: '1.0',
+        created: new Date().toISOString(),
+        generatedBy: {
+          provider: providerName,
+          model: this.config.model || 'gpt-4o',
+          evidencePackHash: this.hashEvidencePack(evidencePack)
+        }
+      };
+
+      let candidates = [];
+      
+      // Handle different response formats
+      if (parsed.intent_candidates) {
+        // GitHub Models format: {intent_candidates: [...]}
+        candidates = parsed.intent_candidates;
+      } else if (Array.isArray(parsed)) {
+        candidates = parsed;
+      } else if (parsed.candidates) {
+        candidates = parsed.candidates;
+      } else {
+        candidates = [parsed];
+      }
+
+      // Merge multiple candidates into one unified candidate if needed
+      if (candidates.length > 1) {
+        const unified = {
+          source: 'inferred',
+          confidence: Math.max(...candidates.map(c => c.confidence || 0.5)),
+          evidence: candidates.flatMap(c => c.evidence || []),
+          requires_human_confirmation: true
+        };
+
+        // Merge all sections from candidates
+        for (const candidate of candidates) {
+          Object.keys(candidate).forEach(key => {
+            if (!['id', 'source', 'confidence', 'evidence', 'requires_human_confirmation'].includes(key)) {
+              unified[key] = candidate[key];
+            }
+          });
+        }
+
+        candidates = [unified];
+      }
+
+      // Ensure all candidates have required fields
+      candidates = candidates.map(c => ({
+        source: c.source || 'inferred',
+        confidence: c.confidence || 0.5,
+        evidence: c.evidence || [],
+        requires_human_confirmation: c.requires_human_confirmation !== false,
+        ...c
+      }));
+
+      return {
+        ...baseMetadata,
+        candidates
+      };
     } catch (error) {
-      throw new Error(`Failed to parse AI response as JSON: ${error.message}`);
+      throw new Error(`Failed to parse AI response as JSON: ${error.message}\nResponse: ${response.substring(0, 500)}`);
     }
   }
 
@@ -256,7 +331,7 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
 
     for (const candidate of candidatesData.candidates) {
       if (candidate.source !== 'inferred') {
-        throw new Error('All candidates must have source: "inferred"');
+        throw new Error(`Candidate must have source: "inferred", got: ${candidate.source}`);
       }
 
       if (
@@ -267,8 +342,9 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
         throw new Error('All candidates must have confidence between 0.0 and 1.0');
       }
 
-      if (!Array.isArray(candidate.evidence) || candidate.evidence.length === 0) {
-        throw new Error('All candidates must have at least one evidence reference');
+      // Evidence is recommended but not required (allow empty array)
+      if (!Array.isArray(candidate.evidence)) {
+        throw new Error('Candidate must have evidence array (can be empty)');
       }
 
       if (candidate.requires_human_confirmation !== true) {

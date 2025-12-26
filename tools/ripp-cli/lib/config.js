@@ -126,15 +126,13 @@ function applyEnvOverrides(config) {
 
   // AI configuration (only if enabled in repo)
   if (result.ai.enabled) {
-    // RIPP_AI_ENABLED must also be true
+    // RIPP_AI_ENABLED can explicitly disable, but if not set, auto-enable with GitHub/OpenAI tokens
     const aiEnabledEnv = process.env.RIPP_AI_ENABLED;
-    if (aiEnabledEnv !== undefined) {
-      const enabled = aiEnabledEnv.toLowerCase() === 'true';
-      if (!enabled) {
-        // Env var explicitly disables AI
-        result.ai.enabled = false;
-      }
+    if (aiEnabledEnv !== undefined && aiEnabledEnv.toLowerCase() !== 'true') {
+      // Env var explicitly disables AI
+      result.ai.enabled = false;
     }
+    // If RIPP_AI_ENABLED not set, leave enabled as-is (will check for tokens in checkAiEnabled)
 
     // Other AI settings (only if AI is enabled)
     if (result.ai.enabled) {
@@ -174,24 +172,41 @@ function checkAiEnabled(config) {
     };
   }
 
-  // Check for runtime env var
+  // Check for runtime env var (optional if GitHub token or OpenAI key present)
   const aiEnabledEnv = process.env.RIPP_AI_ENABLED;
-  if (aiEnabledEnv === undefined || aiEnabledEnv.toLowerCase() !== 'true') {
+  const hasGitHubToken = !!process.env.GITHUB_TOKEN || canGetGitHubToken();
+  const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+
+  // If explicitly disabled via env var, respect that
+  if (aiEnabledEnv !== undefined && aiEnabledEnv.toLowerCase() !== 'true') {
     return {
       enabled: false,
-      reason: 'AI is enabled in config but RIPP_AI_ENABLED env var is not set to "true"'
+      reason: 'AI explicitly disabled via RIPP_AI_ENABLED env var'
     };
   }
 
-  // Validate API key for OpenAI usage
-  if (!process.env.OPENAI_API_KEY) {
-    return {
-      enabled: false,
-      reason: 'OPENAI_API_KEY environment variable is not set'
-    };
+  // Auto-enable if GitHub Copilot or OpenAI is available
+  if (hasGitHubToken || hasOpenAIKey) {
+    return { enabled: true, valid: true };
   }
 
-  return { enabled: true, valid: true };
+  return {
+    enabled: false,
+    reason: 'No AI provider available (install gh CLI and login, or set OPENAI_API_KEY)'
+  };
+}
+
+/**
+ * Check if GitHub token is available via gh CLI
+ */
+function canGetGitHubToken() {
+  try {
+    const { execSync } = require('child_process');
+    execSync('gh auth token', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**

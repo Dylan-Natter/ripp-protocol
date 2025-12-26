@@ -1469,12 +1469,16 @@ async function handleGoCommand(args) {
     // Step 6: Validate (unless skipped)
     if (!skipValidation) {
       console.log(`${colors.blue}Step 6: Validate${colors.reset}`);
-      const { validatePackets } = require('./lib/validate');
-      const validateResult = validatePackets(cwd, { rippFiles: [buildResult.packetPath] });
-      if (validateResult.allValid) {
-        console.log(`  ${colors.green}✓ Validation passed${colors.reset}\n`);
-      } else {
-        console.log(`  ${colors.yellow}⚠ Validation warnings (non-fatal)${colors.reset}\n`);
+      try {
+        const packetContent = yaml.load(fs.readFileSync(buildResult.packetPath, 'utf8'));
+        const result = validatePacket(packetContent, schema, buildResult.packetPath, {});
+        if (result.valid) {
+          console.log(`  ${colors.green}✓ Validation passed${colors.reset}\n`);
+        } else {
+          console.log(`  ${colors.yellow}⚠ Validation warnings (non-fatal)${colors.reset}\n`);
+        }
+      } catch (error) {
+        console.log(`  ${colors.yellow}⚠ Validation error (continuing): ${error.message}${colors.reset}\n`);
       }
     }
 
