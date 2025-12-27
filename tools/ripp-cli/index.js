@@ -1479,7 +1479,9 @@ async function handleGoCommand(args) {
           console.log(`  ${colors.yellow}⚠ Validation warnings (non-fatal)${colors.reset}\n`);
         }
       } catch (error) {
-        console.log(`  ${colors.yellow}⚠ Validation error (continuing): ${error.message}${colors.reset}\n`);
+        console.log(
+          `  ${colors.yellow}⚠ Validation error (continuing): ${error.message}${colors.reset}\n`
+        );
       }
     }
 
