@@ -5,6 +5,19 @@ All notable changes to the RIPP CLI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/Dylan-Natter/ripp-protocol/compare/ripp-cli-v1.2.1...ripp-cli-v1.3.0) (2025-12-27)
+
+
+### Features
+
+* **ai:** add GitHub Copilot auto-detection and Models API support ([74ea285](https://github.com/Dylan-Natter/ripp-protocol/commit/74ea285256f99da099072191b11e9fb1eb27a486))
+
+
+### Bug Fixes
+
+* **cli:** load schema before validation in go command ([61c5c3e](https://github.com/Dylan-Natter/ripp-protocol/commit/61c5c3e5bba4f7ed8c8beeff348efda304ae8120))
+* sync ripp-cli package-lock.json version to 1.2.1 ([e9f2f6c](https://github.com/Dylan-Natter/ripp-protocol/commit/e9f2f6ceac9be5e027a7f6d1073b7888f88edddb))
+
 ## [1.2.1] (2025-12-24)
 
 ### Bug Fixes

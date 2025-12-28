@@ -16,7 +16,7 @@ class CopilotProvider {
     // Try GitHub token first (for GitHub Models), fallback to OpenAI key
     this.githubToken = process.env.GITHUB_TOKEN || this.getGitHubToken();
     this.openaiKey = process.env.OPENAI_API_KEY;
-    
+
     // Prefer GitHub Models if token available, fallback to OpenAI
     this.useGitHubModels = !!this.githubToken;
     this.apiKey = this.useGitHubModels ? this.githubToken : this.openaiKey;
@@ -26,7 +26,10 @@ class CopilotProvider {
     // Try to get token from gh CLI
     try {
       const { execSync } = require('child_process');
-      const token = execSync('gh auth token', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+      const token = execSync('gh auth token', {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'ignore']
+      }).trim();
       return token || null;
     } catch {
       return null;
@@ -225,14 +228,14 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
       }
 
       const data = await response.json();
-      
+
       // Debug: Log the raw response
       if (process.env.DEBUG_AI) {
         console.log('\n=== DEBUG: Raw API Response ===');
         console.log(JSON.stringify(data, null, 2));
         console.log('=== END DEBUG ===\n');
       }
-      
+
       return data.choices[0].message.content;
     } catch (error) {
       clearTimeout(timeoutId);
@@ -266,7 +269,7 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
       };
 
       let candidates = [];
-      
+
       // Handle different response formats
       if (parsed.intent_candidates) {
         // GitHub Models format: {intent_candidates: [...]}
@@ -291,7 +294,11 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
         // Merge all sections from candidates
         for (const candidate of candidates) {
           Object.keys(candidate).forEach(key => {
-            if (!['id', 'source', 'confidence', 'evidence', 'requires_human_confirmation'].includes(key)) {
+            if (
+              !['id', 'source', 'confidence', 'evidence', 'requires_human_confirmation'].includes(
+                key
+              )
+            ) {
               unified[key] = candidate[key];
             }
           });
@@ -314,7 +321,9 @@ NO markdown formatting. NO explanatory text. PURE JSON output.`,
         candidates
       };
     } catch (error) {
-      throw new Error(`Failed to parse AI response as JSON: ${error.message}\nResponse: ${response.substring(0, 500)}`);
+      throw new Error(
+        `Failed to parse AI response as JSON: ${error.message}\nResponse: ${response.substring(0, 500)}`
+      );
     }
   }
 
