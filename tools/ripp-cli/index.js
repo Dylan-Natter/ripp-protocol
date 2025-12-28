@@ -1470,6 +1470,7 @@ async function handleGoCommand(args) {
     if (!skipValidation) {
       console.log(`${colors.blue}Step 6: Validate${colors.reset}`);
       try {
+        const schema = loadSchema();
         const packetContent = yaml.load(fs.readFileSync(buildResult.packetPath, 'utf8'));
         const result = validatePacket(packetContent, schema, buildResult.packetPath, {});
         if (result.valid) {
@@ -1478,7 +1479,9 @@ async function handleGoCommand(args) {
           console.log(`  ${colors.yellow}⚠ Validation warnings (non-fatal)${colors.reset}\n`);
         }
       } catch (error) {
-        console.log(`  ${colors.yellow}⚠ Validation error (continuing): ${error.message}${colors.reset}\n`);
+        console.log(
+          `  ${colors.yellow}⚠ Validation error (continuing): ${error.message}${colors.reset}\n`
+        );
       }
     }
 
